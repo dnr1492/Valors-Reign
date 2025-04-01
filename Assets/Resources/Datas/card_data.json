@@ -1,0 +1,17 @@
+{
+    "cardDatas": [
+        {
+            "id": 0,
+            "name": "",
+            "tier": "",
+            "cost": 0,
+            "hp": 0,
+            "mp": 0,
+            "race": "",
+            "job": "",
+            "attackRange": 0,
+            "attackDirection": 0,
+            "skills": []
+        }
+    ]
+}
