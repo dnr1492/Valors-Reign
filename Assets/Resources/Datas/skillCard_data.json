@@ -1,0 +1,34 @@
+{
+    "skillCardDatas": [
+        {
+            "id": 1000,
+            "name": "Skill Test 1",
+            "mpConsum": 0,
+            "rank": 1
+        },
+        {
+            "id": 1001,
+            "name": "Skill Test 1",
+            "mpConsum": 0,
+            "rank": 2
+        },
+        {
+            "id": 1002,
+            "name": "Skill Test 2",
+            "mpConsum": 0,
+            "rank": 1
+        },
+        {
+            "id": 1003,
+            "name": "Skill Test 2",
+            "mpConsum": 0,
+            "rank": 2
+        },
+        {
+            "id": 1004,
+            "name": "Skill Test 3",
+            "mpConsum": 0,
+            "rank": 1
+        }
+    ]
+}

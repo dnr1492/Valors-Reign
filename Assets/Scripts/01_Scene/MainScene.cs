@@ -7,8 +7,7 @@ public class MainScene : MonoBehaviour
     private void Awake()
     {
         DataManager.GetInstance().LoadGamePlayData();
-        DataManager.GetInstance().LoadCardData();
-        DataManager.GetInstance().LoadSkillData();
-        DataManager.GetInstance().LoadSkillRankData();
+        DataManager.GetInstance().LoadCharacterCardData();
+        DataManager.GetInstance().LoadSkillCardData();
     }
 }

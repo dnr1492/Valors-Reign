@@ -1,0 +1,84 @@
+{
+    "characterCardDatas": [
+        {
+            "id": 0,
+            "name": "Test 1",
+            "tier": "Low",
+            "cost": 1,
+            "hp": 0,
+            "mp": 0,
+            "race": "",
+            "job": "",
+            "attackRange": 0,
+            "attackDirection": 0,
+            "skills": [
+                1000,
+                1001
+            ]
+        },
+        {
+            "id": 1,
+            "name": "Test 2",
+            "tier": "Middle",
+            "cost": 1,
+            "hp": 0,
+            "mp": 0,
+            "race": "",
+            "job": "",
+            "attackRange": 0,
+            "attackDirection": 0,
+            "skills": [
+                1000,
+                1001
+            ]
+        },
+        {
+            "id": 2,
+            "name": "Test 3",
+            "tier": "Low",
+            "cost": 1,
+            "hp": 0,
+            "mp": 0,
+            "race": "",
+            "job": "",
+            "attackRange": 0,
+            "attackDirection": 0,
+            "skills": [
+                1002,
+                1003
+            ]
+        },
+        {
+            "id": 3,
+            "name": "Test 4",
+            "tier": "Middle",
+            "cost": 1,
+            "hp": 0,
+            "mp": 0,
+            "race": "",
+            "job": "",
+            "attackRange": 0,
+            "attackDirection": 0,
+            "skills": [
+                1002,
+                1003
+            ]
+        },
+        {
+            "id": 4,
+            "name": "Test 5",
+            "tier": "High",
+            "cost": 2,
+            "hp": 0,
+            "mp": 0,
+            "race": "",
+            "job": "",
+            "attackRange": 0,
+            "attackDirection": 0,
+            "skills": [
+                1000,
+                1003
+            ]
+        }
+    ]
+}
