@@ -1,10 +1,9 @@
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class CardController : MonoBehaviour
 {
+    //캐릭터 카드 -> 스킬 카드 - 스킬 랭크 카드
     private List<SkillCardData> deck = new List<SkillCardData>();  //스킬 덱
 
     //[SerializeField] GameObject cardPrefab;
@@ -80,6 +79,8 @@ public class CardController : MonoBehaviour
     //    cardGo.SetActive(true);  // 패에 있는 카드는 활성화
     //}
 
+    // ===== 추후 캐릭터 카드 선택 로직 구현 필요 - 현재는 임시 ===== //
+    // ===== 추후 캐릭터 카드 선택 로직 구현 필요 - 현재는 임시 ===== //
     // ===== 추후 캐릭터 카드 선택 로직 구현 필요 - 현재는 임시 ===== //
     private List<CharacterCardData> TempSelectCard()
     {

@@ -5,10 +5,11 @@ using UnityEngine.UI;
 
 public class Card : MonoBehaviour
 {
-    [SerializeField] Text cardName;
+    [SerializeField] GameObject front, back;
+    [SerializeField] Text skillCardName;
 
-    public void SetCardData(SkillCardData cardData)
+    public void SetCardData(SkillCardData skillCardData)
     {
-        cardName.text = cardData.name;
+        skillCardName.text = skillCardData.name;
     }
 }
