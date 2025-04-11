@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
-using UnityEditor.U2D.Animation;
 using UnityEngine;
 
 public class ToolManager : MonoBehaviour
@@ -27,7 +26,13 @@ public class ToolManager : MonoBehaviour
     private static void GenerateGamePlayData()
     {
         GamePlayData gamePlayData = new GamePlayData {
-            maxCost = 10
+            maxCost = 10,
+            maxLeaderCount = 1,
+            maxHighTierCount = 2,
+            maxMiddleTierCount = 3,
+            maxLowTierCount = 5,
+            limitMiddle = 2,
+            limitLow = 3,
         };
 
         LoadDataFromJSON(gamePlayData, "gamePlay_data.json");
@@ -44,11 +49,11 @@ public class ToolManager : MonoBehaviour
         };
 
         // ===== 임시 데이터 =====
-        list.characterCardDatas.Add(new CharacterCardData { id = 0, name = "Test 1", skills = new List<int> { 1000, 1001 }, cost = 1, tier = "Low" });
-        list.characterCardDatas.Add(new CharacterCardData { id = 1, name = "Test 2", skills = new List<int> { 1000, 1001 }, cost = 1, tier = "Middle" });
-        list.characterCardDatas.Add(new CharacterCardData { id = 2, name = "Test 3", skills = new List<int> { 1002, 1003 }, cost = 1, tier = "Low" });
-        list.characterCardDatas.Add(new CharacterCardData { id = 3, name = "Test 4", skills = new List<int> { 1002, 1003 }, cost = 1, tier = "Middle" });
-        list.characterCardDatas.Add(new CharacterCardData { id = 4, name = "Test 5", skills = new List<int> { 1000, 1003 }, cost = 2, tier = "High" });
+        list.characterCardDatas.Add(new CharacterCardData { id = 0, name = "Test 1", skills = new List<int> { 1000, 1001 }, cost = 2, tier = "Low" });
+        list.characterCardDatas.Add(new CharacterCardData { id = 1, name = "Test 2", skills = new List<int> { 1000, 1001 }, cost = 3, tier = "Middle" });
+        list.characterCardDatas.Add(new CharacterCardData { id = 2, name = "Test 3", skills = new List<int> { 1002, 1003 }, cost = 2, tier = "Low" });
+        list.characterCardDatas.Add(new CharacterCardData { id = 3, name = "Test 4", skills = new List<int> { 1002, 1003 }, cost = 3, tier = "Middle" });
+        list.characterCardDatas.Add(new CharacterCardData { id = 4, name = "Test 5", skills = new List<int> { 1000, 1003 }, cost = 4, tier = "High" });
 
         LoadDataFromJSON(list, "characterCard_data.json");
     }
@@ -80,6 +85,12 @@ public class ToolManager : MonoBehaviour
 public class GamePlayData
 {
     public int maxCost;
+    public int maxLeaderCount;
+    public int maxHighTierCount;
+    public int maxMiddleTierCount;
+    public int maxLowTierCount;
+    public int limitMiddle;
+    public int limitLow;
 }
 #endregion
 

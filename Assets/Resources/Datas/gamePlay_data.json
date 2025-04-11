@@ -1,3 +1,9 @@
 {
-    "maxCost": 10
+    "maxCost": 10,
+    "maxLeaderCount": 1,
+    "maxHighTierCount": 2,
+    "maxMiddleTierCount": 3,
+    "maxLowTierCount": 5,
+    "limitMiddle": 2,
+    "limitLow": 3
 }

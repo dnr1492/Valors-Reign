@@ -15,16 +15,16 @@ public class DataManager
         return instance;
     }
 
-    public GamePlayData _gamePlayData;
+    public GamePlayData gamePlayData;
     public Dictionary<int, CharacterCardData> dicCharacterCardData = new Dictionary<int, CharacterCardData>();
     public Dictionary<int, SkillCardData> dicSkillCardData = new Dictionary<int, SkillCardData>();
 
     public void LoadGamePlayData()
     {
-        _gamePlayData = new GamePlayData();
+        gamePlayData = new GamePlayData();
         string json = Resources.Load<TextAsset>("Datas/gamePlay_data").text;
-        var gamePlayData = JsonConvert.DeserializeObject<GamePlayData>(json);
-        _gamePlayData = gamePlayData;
+        var tempGamePlayData = JsonConvert.DeserializeObject<GamePlayData>(json);
+        gamePlayData = tempGamePlayData;
     }
 
     public void LoadCharacterCardData()

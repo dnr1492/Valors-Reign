@@ -6,6 +6,7 @@ using UnityEngine;
 public class Phase1 : PhaseController
 {
     [SerializeField] TextMeshProUGUI txtTimer, txtTurnCount;
+    private float turnTimer = 30;
 
     private void Start()
     {
@@ -14,7 +15,7 @@ public class Phase1 : PhaseController
 
     private void OnEnable()
     {
-        StartCoroutine(Timer(txtTimer, 60));
+        StartCoroutine(Timer(txtTimer, turnTimer));
         IncreaseTurnCount(txtTurnCount);
     }
 }
