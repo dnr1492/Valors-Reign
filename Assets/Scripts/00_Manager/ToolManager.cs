@@ -5,7 +5,7 @@ using System.IO;
 using UnityEditor;
 using UnityEngine;
 
-public class ToolManager : MonoBehaviour
+public class ToolManager
 {
     private static void LoadDataFromJSON<T>(T data, string fileName)
     {
