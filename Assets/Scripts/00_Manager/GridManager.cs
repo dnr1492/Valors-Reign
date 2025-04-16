@@ -14,10 +14,13 @@ public class GridManager
         return instance;
     }
 
-    private int rows = 8;  //행 (가로)
-    private int columns = 9;  //열 (세로)
-    private float hexWidth = 102f;  //육각형의 가로 크기, 해당 프리팹의 기본 크기 100
-    private float hexHeight = 88.5f;  //육각형의 세로 크기 (정육각형 기준으로 √3/2 * 너비), 해당 프리팹의 기본 크기 88
+    private float hexWidth = 72f;  //육각형의 가로 크기, 해당 프리팹의 기본 크기 70
+    private float hexHeight = 60.5f;  //육각형의 세로 크기 (정육각형 기준으로 √3/2 * 너비), 해당 프리팹의 기본 크기 60
+
+    private readonly int rows = 8;  //행 (가로)
+    private readonly int columns = 9;  //열 (세로)
+    private readonly float widthGridOffset = 0.75f;
+    private readonly float heightGridOffset = 2;
 
     private readonly Dictionary<(int col, int row), string> txtMap = new()
     {
@@ -69,9 +72,18 @@ public class GridManager
 
     private void Resize(RectTransform mainRt)
     {
-        Vector3 scale = mainRt.localScale;
-        hexWidth = hexWidth * scale.x;
-        hexHeight = hexHeight * scale.y;
-        Debug.Log($"Scale: {scale}, Hex Size: {hexWidth} x {hexHeight}");
+        float availableWidth = mainRt.rect.width;
+        float availableHeight = mainRt.rect.height;
+
+        //홀수열 보정: 실제 전체 격자 높이
+        float totalGridWidth = (columns - 1) * hexWidth * widthGridOffset + hexWidth;
+        float totalGridHeight = rows * hexHeight + hexHeight * heightGridOffset;
+
+        float scaleX = availableWidth / totalGridWidth;
+        float scaleY = availableHeight / totalGridHeight;
+        float scaleFactor = Mathf.Min(scaleX, scaleY);
+
+        hexWidth = hexWidth * scaleFactor;
+        hexHeight = hexHeight * scaleFactor;
     }
 }
