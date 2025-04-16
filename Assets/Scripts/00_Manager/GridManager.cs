@@ -19,6 +19,7 @@ public class GridManager
 
     private readonly int rows = 8;  //행 (가로)
     private readonly int columns = 9;  //열 (세로)
+
     private readonly float widthGridOffset = 0.75f;
     private readonly float heightGridOffset = 2;
 
