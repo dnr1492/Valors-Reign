@@ -13,6 +13,10 @@ public class UIMain : MonoBehaviour
 
     private void Awake()
     {
+        DataManager.GetInstance().LoadGamePlayData();
+        DataManager.GetInstance().LoadCharacterCardData();
+        DataManager.GetInstance().LoadSkillCardData();
+
         BackendManager.GetInstance().InitBackend();
     }
 

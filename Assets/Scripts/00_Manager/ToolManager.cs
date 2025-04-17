@@ -49,11 +49,11 @@ public class ToolManager
         };
 
         // ===== 임시 데이터 =====
-        list.characterCardDatas.Add(new CharacterCardData { id = 0, name = "Test 1", skills = new List<int> { 1000, 1001 }, cost = 2, tier = "Low" });
-        list.characterCardDatas.Add(new CharacterCardData { id = 1, name = "Test 2", skills = new List<int> { 1000, 1001 }, cost = 3, tier = "Middle" });
-        list.characterCardDatas.Add(new CharacterCardData { id = 2, name = "Test 3", skills = new List<int> { 1002, 1003 }, cost = 2, tier = "Low" });
-        list.characterCardDatas.Add(new CharacterCardData { id = 3, name = "Test 4", skills = new List<int> { 1002, 1003 }, cost = 3, tier = "Middle" });
-        list.characterCardDatas.Add(new CharacterCardData { id = 4, name = "Test 5", skills = new List<int> { 1000, 1003 }, cost = 4, tier = "High" });
+        list.characterCardDatas.Add(new CharacterCardData { id = 0, name = "Test 1", skills = new List<int> { 1000, 1001 }, cost = 2, tier = "Low", job = "Dealer" });
+        list.characterCardDatas.Add(new CharacterCardData { id = 1, name = "Test 2", skills = new List<int> { 1000, 1001 }, cost = 3, tier = "Middle", job = "Tanker" });
+        list.characterCardDatas.Add(new CharacterCardData { id = 2, name = "Test 3", skills = new List<int> { 1002, 1003 }, cost = 2, tier = "Low", job = "Tanker" });
+        list.characterCardDatas.Add(new CharacterCardData { id = 3, name = "Test 4", skills = new List<int> { 1002, 1003 }, cost = 3, tier = "Middle", job = "Supporter" });
+        list.characterCardDatas.Add(new CharacterCardData { id = 4, name = "Test 5", skills = new List<int> { 1000, 1003 }, cost = 4, tier = "High", job = "Supporter" });
 
         LoadDataFromJSON(list, "characterCard_data.json");
     }
