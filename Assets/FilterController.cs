@@ -7,8 +7,8 @@ public class FilterController : MonoBehaviour
 {
     [SerializeField] FilterButton[] arrFilterButton;
 
-    private HashSet<string> selectedJob = new();  //D, T, S
-    private HashSet<string> selectedTier = new();  //C, H, M, L
+    private HashSet<string> selectedJobKey = new();  //D, T, S
+    private HashSet<string> selectedTierKey = new();  //C, H, M, L
 
     private void Awake()
     {
@@ -29,31 +29,31 @@ public class FilterController : MonoBehaviour
 
         if (isJob)
         {
-            if (selectedJob.Contains(key)) selectedJob.Clear();
+            if (selectedJobKey.Contains(key)) selectedJobKey.Clear();
             else {
-                selectedJob.Clear();
-                selectedJob.Add(key);
+                selectedJobKey.Clear();
+                selectedJobKey.Add(key);
             }
         }
         else if (isTier)
         {
-            if (selectedTier.Contains(key)) selectedTier.Clear();
+            if (selectedTierKey.Contains(key)) selectedTierKey.Clear();
             else {
-                selectedTier.Clear();
-                selectedTier.Add(key);
+                selectedTierKey.Clear();
+                selectedTierKey.Add(key);
             }
         }
 
-        //직업/티어 버튼 상태만 업데이트
+        //직업, 티어 버튼 상태만 업데이트
         foreach (var btn in arrFilterButton)
         {
             key = btn.FilterKey;
             if (key.Length == 1)
             {
                 //직업 필터
-                if (key is "D" or "T" or "S") btn.SetSelected(selectedJob.Contains(key));
+                if (key is "D" or "T" or "S") btn.SetSelected(selectedJobKey.Contains(key));
                 //티어 필터
-                else if (key is "C" or "H" or "M" or "L") btn.SetSelected(selectedTier.Contains(key));
+                else if (key is "C" or "H" or "M" or "L") btn.SetSelected(selectedTierKey.Contains(key));
             }
         }
 
@@ -71,29 +71,58 @@ public class FilterController : MonoBehaviour
             string tier = splitKey[0];
             string job = splitKey[1];
 
-            if (selectedJob.Count > 0 && selectedTier.Count > 0) btn.SetSelected(selectedJob.Contains(job) && selectedTier.Contains(tier));
-            else if (selectedJob.Count > 0) btn.SetSelected(selectedJob.Contains(job));
-            else if (selectedTier.Count > 0) btn.SetSelected(selectedTier.Contains(tier));
+            if (selectedJobKey.Count > 0 && selectedTierKey.Count > 0) btn.SetSelected(selectedJobKey.Contains(job) && selectedTierKey.Contains(tier));
+            else if (selectedJobKey.Count > 0) btn.SetSelected(selectedJobKey.Contains(job));
+            else if (selectedTierKey.Count > 0) btn.SetSelected(selectedTierKey.Contains(tier));
             else btn.SetSelected(false);
         }
 
-        ApplyFilter();
+        ApplyCharacterFilter();
     }
 
-    private void ApplyFilter()
+    private void ApplyCharacterFilter()
     {
-        //var allCharacterCards = DataManager.GetInstance().dicCharacterCardData;
+        var allCharacterCards = DataManager.GetInstance().dicCharacterCardData;
 
-        //var result = allCharacterCards.Where(ch =>
-        //    (selectedJob.Count == 0 || selectedJob.Contains(ch.Value.job.Substring(0, 1).ToUpper())) &&
-        //    (selectedTier.Count == 0 || selectedTier.Contains(ch.Value.tier.Substring(0, 1).ToUpper()))
-        //).ToList();
+        //필터 조건에 맞는 캐릭터 리스트 추출
+        var filtered = allCharacterCards.Where(ch =>
+        {
+            var job = ch.Value.job;
+            var tier = ch.Value.tier;
 
-        //foreach (var filterButton in arrFilterButton)
-        //{
-        //    string key = filterButton.FilterKey;
-        //    bool matched = result.Any(ch => ch.Key.ToString() == key);
-        //    filterButton.SetSelected(matched);
-        //}
+            bool isValidJob = !string.IsNullOrEmpty(job);
+            bool isValidTier = !string.IsNullOrEmpty(tier);
+
+            string jobKey = isValidJob ? job.Substring(0, 1).ToUpper() : null;
+            string tierKey = isValidTier ? tier.Substring(0, 1).ToUpper() : null;
+
+            //티어, 직업
+            return (selectedTierKey.Count == 0 || (tierKey != null && selectedTierKey.Contains(tierKey))) &&
+                   (selectedJobKey.Count == 0 || (jobKey != null && selectedJobKey.Contains(jobKey)));
+        }).ToList();
+
+        //디버그 로그로 이름 출력
+        foreach (var ch in filtered) {
+            Debug.Log($"Matched Character - ID: {ch.Value.tier}{ch.Value.job}, Name: {ch.Value.name}");
+        }
+
+        // ============================================== 구현 중 =============================================== //
+        //ID를 문자열로 변환해서 빠른 조회용 Set
+        var resultSet = filtered.Select(ch => ch.Key.ToString()).ToHashSet();
+        var dicCharacterCards = DataManager.GetInstance().dicCharacterCardData;
+        foreach (var kvp in dicCharacterCards)
+        {
+            string characterKey = kvp.Key.ToString();
+
+            //필터 결과에 포함되지 않으면 continue
+            if (!resultSet.Contains(characterKey)) continue;
+
+            CharacterCardData cardData = kvp.Value;
+            //여기서 해당 카드 UI를 가져와서 업데이트 (활성화, 데이터 바인딩 등)
+            Debug.Log($"캐릭터 이름: {cardData.name}");
+            //예시: 카드 UI 활성화
+            //characterCardUIMap[characterKey].SetActive(true);
+            //characterCardUIMap[characterKey].Setup(cardData); 등등
+        }
     }
 }
