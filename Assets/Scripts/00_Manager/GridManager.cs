@@ -15,14 +15,11 @@ public class GridManager
         return instance;
     }
 
-    private float hexWidth = 72f;  //육각형의 가로 크기, 해당 프리팹의 기본 크기 70
-    private float hexHeight = 60.5f;  //육각형의 세로 크기 (정육각형 기준으로 √3/2 * 너비), 해당 프리팹의 기본 크기 60
+    private float hexWidth;  //육각형의 가로 크기, 해당 프리팹의 기본 크기 70
+    private float hexHeight;  //육각형의 세로 크기 (정육각형 기준으로 √3/2 * 너비), 해당 프리팹의 기본 크기 60
 
     private readonly int rows = 8;  //행 (가로)
     private readonly int columns = 9;  //열 (세로)
-
-    private readonly float widthGridOffset = 0.75f;
-    private readonly float heightGridOffset = 2;
 
     private readonly Dictionary<(int col, int row), string> txtMap = new()
     {
@@ -50,6 +47,9 @@ public class GridManager
             gridHeight / 2f - hexHeight / 2f
         );
 
+        List<RectTransform> hexTransforms = new List<RectTransform>();
+
+        //그리드를 생성하면서 RectTransform을 리스트에 저장
         for (int col = 0; col < columns; col++)
         {
             int maxRow = rows - ((col % 2 == 1) ? 1 : 0);
@@ -58,6 +58,8 @@ public class GridManager
             {
                 GameObject hex = Object.Instantiate(hexPrefab, parant);
                 RectTransform rt = hex.GetComponent<RectTransform>();
+                hexTransforms.Add(rt);
+
                 var widthScaleOffset = 2 * battleFieldRt.localScale.x;
                 var heightScaleOffset = 0.25f * battleFieldRt.localScale.y;
                 rt.sizeDelta = new Vector2(hexWidth - widthScaleOffset, hexHeight - heightScaleOffset);
@@ -75,6 +77,8 @@ public class GridManager
                 }
             }
         }
+
+        FitHexGrid(hexTransforms, parant);
     }
 
     private void ResizeHexGrid(RectTransform battleFieldRt)
@@ -98,5 +102,20 @@ public class GridManager
         //최종 적용 hex 크기
         hexWidth = baseHexWidth * scaleFactor;
         hexHeight = baseHexHeight * scaleFactor;
+    }
+
+    private void FitHexGrid(List<RectTransform> hexTransforms, RectTransform parant)
+    {
+        //모든 Hex 오브젝트의 중앙값을 구하기
+        Vector2 totalCenter = Vector2.zero;
+        foreach (var rt in hexTransforms) totalCenter += rt.anchoredPosition;
+        totalCenter /= hexTransforms.Count;
+
+        //부모 RectTransform의 중앙에 맞추기
+        Vector2 parentCenter = parant.rect.center;
+        Vector2 offset = parentCenter - totalCenter;
+
+        //그리드의 각 위치를 중앙에 맞게 조정
+        foreach (var rt in hexTransforms) rt.anchoredPosition += offset;
     }
 }
