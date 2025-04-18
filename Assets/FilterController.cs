@@ -6,9 +6,16 @@ using UnityEngine.UI;
 public class FilterController : MonoBehaviour
 {
     [SerializeField] FilterButton[] arrFilterButton;
-
-    private HashSet<string> selectedJobKey = new();  //D, T, S
+    private HashSet<string> selectedJobKey = new();   //D, T, S
     private HashSet<string> selectedTierKey = new();  //C, H, M, L
+
+    [SerializeField] GridLayoutGroup gridLayoutGroup;
+    private int columns = 4;
+    private int rows = 5;
+    private float paddingLeft = 30f;    //셀 왼쪽 여백
+    private float paddingRight = 30f;   //셀 오른쪽 여백
+    private float paddingTop = 30f;     //셀 위쪽 여백
+    private float paddingBottom = 30f;  //셀 아래쪽 여백
 
     private void Awake()
     {
@@ -18,6 +25,11 @@ public class FilterController : MonoBehaviour
             var filterBtn = arrFilterButton[i];
             if (btn != null) btn.onClick.AddListener(() => OnClickFilter(filterBtn));
         }
+    }
+
+    private void Start()
+    {
+        ResizeFilterButtonCellSize();
     }
 
     private void OnClickFilter(FilterButton filterButton)
@@ -107,6 +119,8 @@ public class FilterController : MonoBehaviour
         }
 
         // ============================================== 구현 중 =============================================== //
+        // ============================================== 구현 중 =============================================== //
+        // ============================================== 구현 중 =============================================== //
         //ID를 문자열로 변환해서 빠른 조회용 Set
         var resultSet = filtered.Select(ch => ch.Key.ToString()).ToHashSet();
         var dicCharacterCards = DataManager.GetInstance().dicCharacterCardData;
@@ -124,5 +138,20 @@ public class FilterController : MonoBehaviour
             //characterCardUIMap[characterKey].SetActive(true);
             //characterCardUIMap[characterKey].Setup(cardData); 등등
         }
+    }
+
+    private void ResizeFilterButtonCellSize()
+    {
+        var grid = gridLayoutGroup;
+        var rect = grid.GetComponent<RectTransform>().rect;
+
+        float availableWidth = rect.width - paddingLeft - paddingRight;
+        float availableHeight = rect.height - paddingTop - paddingBottom;
+
+        float cellWidth = availableWidth / columns;
+        float cellHeight = availableHeight / rows;
+
+        grid.cellSize = new Vector2(cellWidth, cellHeight);  //셀 크기 설정
+        grid.padding = new RectOffset((int)paddingLeft, (int)paddingRight, (int)paddingTop, (int)paddingBottom);  //셀 여백 설정
     }
 }

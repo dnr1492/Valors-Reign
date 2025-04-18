@@ -50,9 +50,9 @@ public class GridManager
             {
                 GameObject hex = Object.Instantiate(hexPrefab, parant);
                 RectTransform rt = hex.GetComponent<RectTransform>();
-                var widthOffset = 2 * mainRt.localScale.x;
-                var heightOffset = 0.25f * mainRt.localScale.y;
-                rt.sizeDelta = new Vector2(hexWidth - widthOffset, hexHeight - heightOffset);
+                var widthScaleOffset = 2 * mainRt.localScale.x;
+                var heightScaleOffset = 0.25f * mainRt.localScale.y;
+                rt.sizeDelta = new Vector2(hexWidth - widthScaleOffset, hexHeight - heightScaleOffset);
 
                 float x = col * hexWidth * 0.75f + 4;
                 float y = row * hexHeight + ((col % 2 == 1) ? hexHeight / 2f : 0f) + 1;
@@ -76,7 +76,6 @@ public class GridManager
         float availableWidth = mainRt.rect.width;
         float availableHeight = mainRt.rect.height;
 
-        //홀수열 보정: 실제 전체 격자 높이
         float totalGridWidth = (columns - 1) * hexWidth * widthGridOffset + hexWidth;
         float totalGridHeight = rows * hexHeight + hexHeight * heightGridOffset;
 
