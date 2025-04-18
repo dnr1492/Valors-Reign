@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public class GridManager
@@ -37,33 +38,38 @@ public class GridManager
         { (0, 7), "H" }, { (0, 6), "L" },
     };
 
-    public void CreateHexGrid(RectTransform mainRt, GameObject hexPrefab, RectTransform parant)
+    public void CreateHexGrid(RectTransform battleFieldRt, GameObject hexPrefab, RectTransform parant)
     {
-        Resize(mainRt);
+        ResizeHexGrid(battleFieldRt);
+
+        float gridWidth = (columns - 1) * hexWidth * 0.75f + hexWidth;
+        float gridHeight = rows * hexHeight + (columns > 1 ? hexHeight / 2f : 0);
+
+        Vector2 startOffset = new Vector2(
+            -gridWidth / 2f + hexWidth / 2f,
+            gridHeight / 2f - hexHeight / 2f
+        );
 
         for (int col = 0; col < columns; col++)
         {
-            //홀수 열은 하나 줄인다
             int maxRow = rows - ((col % 2 == 1) ? 1 : 0);
 
             for (int row = 0; row < maxRow; row++)
             {
                 GameObject hex = Object.Instantiate(hexPrefab, parant);
                 RectTransform rt = hex.GetComponent<RectTransform>();
-                var widthScaleOffset = 2 * mainRt.localScale.x;
-                var heightScaleOffset = 0.25f * mainRt.localScale.y;
+                var widthScaleOffset = 2 * battleFieldRt.localScale.x;
+                var heightScaleOffset = 0.25f * battleFieldRt.localScale.y;
                 rt.sizeDelta = new Vector2(hexWidth - widthScaleOffset, hexHeight - heightScaleOffset);
 
-                float x = col * hexWidth * 0.75f + 4;
-                float y = row * hexHeight + ((col % 2 == 1) ? hexHeight / 2f : 0f) + 1;
+                float x = col * hexWidth * 0.75f;
+                float y = row * hexHeight + ((col % 2 == 1) ? hexHeight / 2f : 0f);
 
-                //UI y축은 아래로 내려야 하므로 부호 반대
-                rt.anchoredPosition = new Vector2(x, -y);
+                rt.anchoredPosition = new Vector2(x + startOffset.x, -(y - startOffset.y));
 
-                //텍스트 입력
                 if (txtMap.TryGetValue((col, row), out string textValue))
                 {
-                    var textComponent = hex.GetComponentInChildren<TMPro.TextMeshProUGUI>();
+                    var textComponent = hex.GetComponentInChildren<TextMeshProUGUI>();
                     if (textComponent != null) textComponent.text = textValue;
                     Debug.Log($"열 {col}, 행 {row} : {textValue}");
                 }
@@ -71,19 +77,26 @@ public class GridManager
         }
     }
 
-    private void Resize(RectTransform mainRt)
+    private void ResizeHexGrid(RectTransform battleFieldRt)
     {
-        float availableWidth = mainRt.rect.width;
-        float availableHeight = mainRt.rect.height;
+        float availableWidth = battleFieldRt.rect.width;
+        float availableHeight = battleFieldRt.rect.height;
 
-        float totalGridWidth = (columns - 1) * hexWidth * widthGridOffset + hexWidth;
-        float totalGridHeight = rows * hexHeight + hexHeight * heightGridOffset;
+        //기준 hex 크기 (임의 초기값)
+        float baseHexWidth = 72f;
+        float baseHexHeight = baseHexWidth * Mathf.Sqrt(3) / 2f;  //정육각형 기준 비율
 
-        float scaleX = availableWidth / totalGridWidth;
-        float scaleY = availableHeight / totalGridHeight;
-        float scaleFactor = Mathf.Min(scaleX, scaleY);
+        //Grid 전체 너비/높이를 초기 크기로 계산
+        float rawTotalWidth = (columns - 1) * baseHexWidth * 0.75f + baseHexWidth;
+        float rawTotalHeight = rows * baseHexHeight + (columns > 1 ? baseHexHeight / 2f : 0);
 
-        hexWidth = hexWidth * scaleFactor;
-        hexHeight = hexHeight * scaleFactor;
+        //실제 크기에 맞게 스케일 조정
+        float scaleX = availableWidth / rawTotalWidth;
+        float scaleY = availableHeight / rawTotalHeight;
+        float scaleFactor = Mathf.Min(scaleX, scaleY);  //너무 커지지 않도록 작은 값 선택
+
+        //최종 적용 hex 크기
+        hexWidth = baseHexWidth * scaleFactor;
+        hexHeight = baseHexHeight * scaleFactor;
     }
 }

@@ -873,11 +873,11 @@ RectTransform:
   m_Father: {fileID: 1367411538}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 105, y: 95}
-  m_Pivot: {x: 0, y: 1}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &215964300
 GameObject:
   m_ObjectHideFlags: 0
@@ -6074,7 +6074,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1382224286}
-  - component: {fileID: 1382224287}
   m_Layer: 0
   m_Name: MainScene
   m_TagString: Untagged
@@ -6099,18 +6098,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1382224287
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1382224285}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 778219de42fc321418479a186ddea733, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &1404388004
 GameObject:
   m_ObjectHideFlags: 0
@@ -7604,8 +7591,8 @@ MonoBehaviour:
   deckGenerator: {fileID: 0}
   createDeckPhase1: {fileID: 0}
   createDeckPhase2: {fileID: 0}
-  mainRt: {fileID: 1791612815}
-  parantRt: {fileID: 208534456}
+  hexParantRt: {fileID: 208534456}
+  battleFieldRt: {fileID: 1367411538}
   hexPrefab: {fileID: 138201516482705832, guid: d5e3f1ef6ac85824583b859df46c1975, type: 3}
 --- !u!1 &1804915518
 GameObject:
