@@ -56,15 +56,15 @@ public class CardController : MonoBehaviour
         var dataManager = DataManager.GetInstance();
         var cardData = dataManager.dicCharacterCardData[cardID];
         var tier = cardData.tier;
-        int cost = cardData.cost;
+        int cost = (int)tier;
 
         //현재 선택 수 확인
         int currentCardCount = selectedCharacterCardCounts.TryGetValue(cardID, out var cardCount) ? cardCount : 0;
-        int currentTierCount = characterCardTierCurrentCounts[tier];
-        int maxTierCount = characterCardTierMaxCounts[tier];
+        int currentTierCount = characterCardTierCurrentCounts[tier.ToString()];
+        int maxTierCount = characterCardTierMaxCounts[tier.ToString()];
 
         //중복 선택 제한 체크
-        switch (System.Enum.Parse<CharacterTierAndCost>(tier))
+        switch (System.Enum.Parse<CharacterTierAndCost>(tier.ToString()))
         {
             case CharacterTierAndCost.Low:
                 if (currentCardCount >= dataManager.gamePlayData.limitLow) return false;
@@ -86,7 +86,7 @@ public class CardController : MonoBehaviour
         //캐릭터 선택 처리
         if (currentCardCount == 0) selectedCharacterCardIDs.Add(cardID);
         selectedCharacterCardCounts[cardID] = currentCardCount + 1;
-        characterCardTierCurrentCounts[tier]++;
+        characterCardTierCurrentCounts[tier.ToString()]++;
         curTotalCost += cost;
 
         return true;
@@ -101,7 +101,7 @@ public class CardController : MonoBehaviour
 
         var cardData = DataManager.GetInstance().dicCharacterCardData[cardID];
         var tier = cardData.tier;
-        int cost = cardData.cost;
+        int cost = (int)tier;
 
         //개수 감소
         if (--count == 0) {
@@ -112,7 +112,7 @@ public class CardController : MonoBehaviour
             selectedCharacterCardCounts[cardID] = count;
         }
 
-        characterCardTierCurrentCounts[tier]--;
+        characterCardTierCurrentCounts[tier.ToString()]--;
         curTotalCost -= cost;
 
         return true;

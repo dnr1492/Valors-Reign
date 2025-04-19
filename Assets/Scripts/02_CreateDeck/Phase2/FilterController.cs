@@ -102,11 +102,11 @@ public class FilterController : MonoBehaviour
             var job = ch.Value.job;
             var tier = ch.Value.tier;
 
-            bool isValidJob = !string.IsNullOrEmpty(job);
-            bool isValidTier = !string.IsNullOrEmpty(tier);
+            bool isValidJob = !string.IsNullOrEmpty(job.ToString());
+            bool isValidTier = !string.IsNullOrEmpty(tier.ToString());
 
-            string jobKey = isValidJob ? job.Substring(0, 1).ToUpper() : null;
-            string tierKey = isValidTier ? tier.Substring(0, 1).ToUpper() : null;
+            string jobKey = isValidJob ? job.ToString().Substring(0, 1).ToUpper() : null;
+            string tierKey = isValidTier ? tier.ToString().Substring(0, 1).ToUpper() : null;
 
             //티어, 직업
             return (selectedTierKey.Count == 0 || (tierKey != null && selectedTierKey.Contains(tierKey))) &&
