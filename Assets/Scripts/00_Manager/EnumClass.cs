@@ -5,6 +5,6 @@ public class EnumClass
     public enum CharacterJob { Dealer, Tanker, Supporter }
     public enum State { None = -1, Front, Back }
     public enum CardType { None = -1, CharacterCard, SkillCard }
-    public enum SkillCardType { None = -1, Move, Attack, Buff }
+    public enum SkillCardType { None = -1, Move, Attack, Buff, Debuff, Trap }  // ===== 추후 수정 요망 ===== //
     public enum SkillCardRankAndMpConsum { None = -1, Rank1 = 1, Rank2 = 2, Rank3 = 3 }
 }
