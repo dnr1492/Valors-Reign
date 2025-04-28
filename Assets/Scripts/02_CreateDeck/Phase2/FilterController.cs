@@ -156,6 +156,9 @@ public class FilterController : MonoBehaviour
         grid.padding = new RectOffset((int)paddingLeft, (int)paddingRight, (int)paddingTop, (int)paddingBottom);  //셀 여백 설정
     }
 
+    // ============================================== 구현 중 =============================================== //
+    // ============================================== 구현 중 =============================================== //
+    // ============================================== 구현 중 =============================================== //
     private void ResizeContent()
     {
         int itemCount = gridLayoutGroup.GetComponent<RectTransform>().childCount;
