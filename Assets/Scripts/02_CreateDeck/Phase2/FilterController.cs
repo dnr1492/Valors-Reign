@@ -17,6 +17,8 @@ public class FilterController : MonoBehaviour
     private float paddingTop = 30f;     //셀 위쪽 여백
     private float paddingBottom = 30f;  //셀 아래쪽 여백
 
+    [SerializeField] RectTransform contentRt;
+
     private void Awake()
     {
         for (int i = 0; i < arrFilterButton.Length; i++)
@@ -30,6 +32,7 @@ public class FilterController : MonoBehaviour
     private void Start()
     {
         ResizeFilterButtonCellSize();
+        ResizeContent();
     }
 
     private void OnClickFilter(FilterButton filterButton)
@@ -134,9 +137,7 @@ public class FilterController : MonoBehaviour
             CharacterCardData cardData = kvp.Value;
             //여기서 해당 카드 UI를 가져와서 업데이트 (활성화, 데이터 바인딩 등)
             Debug.Log($"캐릭터 이름: {cardData.name}");
-            //예시: 카드 UI 활성화
-            //characterCardUIMap[characterKey].SetActive(true);
-            //characterCardUIMap[characterKey].Setup(cardData); 등등
+            
         }
     }
 
@@ -153,5 +154,24 @@ public class FilterController : MonoBehaviour
 
         grid.cellSize = new Vector2(cellWidth, cellHeight);  //셀 크기 설정
         grid.padding = new RectOffset((int)paddingLeft, (int)paddingRight, (int)paddingTop, (int)paddingBottom);  //셀 여백 설정
+    }
+
+    private void ResizeContent()
+    {
+        int itemCount = gridLayoutGroup.GetComponent<RectTransform>().childCount;
+
+        int columnCount = gridLayoutGroup.constraintCount;
+        int rowCount = Mathf.CeilToInt((float)itemCount / columnCount);
+
+        float cellHeight = gridLayoutGroup.cellSize.y;
+        float spacingY = gridLayoutGroup.spacing.y;
+        float paddingTop = gridLayoutGroup.padding.top;
+        float paddingBottom = gridLayoutGroup.padding.bottom;
+
+        float totalHeight = paddingTop + paddingBottom + (cellHeight * rowCount) + (spacingY * (rowCount - 1));
+
+        Vector2 sizeDelta = contentRt.sizeDelta;
+        sizeDelta.y = totalHeight;
+        contentRt.sizeDelta = sizeDelta;
     }
 }
