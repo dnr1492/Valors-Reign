@@ -23,7 +23,7 @@ public class CardController : MonoBehaviour
 
     private void Start()
     {
-        var gamePlayData = DataManager.GetInstance().gamePlayData;
+        var gamePlayData = DataManager.Instance.gamePlayData;
         maxCost = gamePlayData.maxCost;
         curTotalCost = 0;
 
@@ -53,7 +53,7 @@ public class CardController : MonoBehaviour
     #region (Toggle) 캐릭터 카드 선택
     public bool SelectCharacterCard(int cardID)
     {
-        var dataManager = DataManager.GetInstance();
+        var dataManager = DataManager.Instance;
         var cardData = dataManager.dicCharacterCardData[cardID];
         var tier = cardData.tier;
         int cost = (int)tier;
@@ -99,7 +99,7 @@ public class CardController : MonoBehaviour
         if (!selectedCharacterCardCounts.TryGetValue(cardID, out var count) || count <= 0)
             return false;
 
-        var cardData = DataManager.GetInstance().dicCharacterCardData[cardID];
+        var cardData = DataManager.Instance.dicCharacterCardData[cardID];
         var tier = cardData.tier;
         int cost = (int)tier;
 
@@ -124,7 +124,7 @@ public class CardController : MonoBehaviour
     {
         var selectedCharacterCards = GetSelectedCharacterCard();
 
-        var allSkillCardData = DataManager.GetInstance().dicSkillCardData;
+        var allSkillCardData = DataManager.Instance.dicSkillCardData;
         List<SkillCardData> skillCardDeck = new List<SkillCardData>();
 
         foreach (var characterCard in selectedCharacterCards) {
@@ -143,7 +143,7 @@ public class CardController : MonoBehaviour
 
     private List<CharacterCardData> GetSelectedCharacterCard()
     {
-        var allCards = DataManager.GetInstance().dicCharacterCardData;
+        var allCards = DataManager.Instance.dicCharacterCardData;
         List<CharacterCardData> selectedCharacterCards = new List<CharacterCardData>();
 
         foreach (var cardID in selectedCharacterCardCounts.Keys) {

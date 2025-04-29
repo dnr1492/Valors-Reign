@@ -17,9 +17,12 @@ public class FilterController : MonoBehaviour
     private float paddingTop = 30f;     //셀 위쪽 여백
     private float paddingBottom = 30f;  //셀 아래쪽 여백
 
-    [SerializeField] RectTransform contentRt;
-
     private void Awake()
+    {
+        ControllerRegister.Register(this);
+    }
+
+    private void Start()
     {
         for (int i = 0; i < arrFilterButton.Length; i++)
         {
@@ -27,31 +30,26 @@ public class FilterController : MonoBehaviour
             var filterBtn = arrFilterButton[i];
             if (btn != null) btn.onClick.AddListener(() => OnClickFilter(filterBtn));
         }
-    }
 
-    private void Start()
-    {
+        Active(DataManager.Instance.dicCharacterCardData);
+
         ResizeFilterButtonCellSize();
-        ResizeContent();
     }
 
     private void OnClickFilter(FilterButton filterButton)
     {
         string key = filterButton.FilterKey;
-
         bool isJob = key is "D" or "T" or "S";
         bool isTier = key is "C" or "H" or "M" or "L";
 
-        if (isJob)
-        {
+        if (isJob) {
             if (selectedJobKey.Contains(key)) selectedJobKey.Clear();
             else {
                 selectedJobKey.Clear();
                 selectedJobKey.Add(key);
             }
         }
-        else if (isTier)
-        {
+        else if (isTier) {
             if (selectedTierKey.Contains(key)) selectedTierKey.Clear();
             else {
                 selectedTierKey.Clear();
@@ -60,8 +58,7 @@ public class FilterController : MonoBehaviour
         }
 
         //직업, 티어 버튼 상태만 업데이트
-        foreach (var btn in arrFilterButton)
-        {
+        foreach (var btn in arrFilterButton) {
             key = btn.FilterKey;
             if (key.Length == 1)
             {
@@ -73,8 +70,7 @@ public class FilterController : MonoBehaviour
         }
 
         //모든 필터 버튼만 따로 처리
-        foreach (var btn in arrFilterButton)
-        {
+        foreach (var btn in arrFilterButton) {
             if (!btn.FilterKey.Contains("/")) continue;
 
             string[] splitKey = btn.FilterKey.Split('/');
@@ -97,48 +93,32 @@ public class FilterController : MonoBehaviour
 
     private void ApplyCharacterFilter()
     {
-        var allCharacterCards = DataManager.GetInstance().dicCharacterCardData;
+        var allCharacterCards = DataManager.Instance.dicCharacterCardData;
 
         //필터 조건에 맞는 캐릭터 리스트 추출
-        var filtered = allCharacterCards.Where(ch =>
-        {
-            var job = ch.Value.job;
-            var tier = ch.Value.tier;
+        List<KeyValuePair<int, CharacterCardData>> filtered;
 
-            bool isValidJob = !string.IsNullOrEmpty(job.ToString());
-            bool isValidTier = !string.IsNullOrEmpty(tier.ToString());
+        //전체
+        if (selectedJobKey.Count == 0 && selectedTierKey.Count == 0) filtered = allCharacterCards.ToList();
+        //특정
+        else {
+            filtered = allCharacterCards.Where(ch =>
+            {
+                var job = ch.Value.job;
+                var tier = ch.Value.tier;
 
-            string jobKey = isValidJob ? job.ToString().Substring(0, 1).ToUpper() : null;
-            string tierKey = isValidTier ? tier.ToString().Substring(0, 1).ToUpper() : null;
+                bool isValidJob = !string.IsNullOrEmpty(job.ToString());
+                bool isValidTier = !string.IsNullOrEmpty(tier.ToString());
 
-            //티어, 직업
-            return (selectedTierKey.Count == 0 || (tierKey != null && selectedTierKey.Contains(tierKey))) &&
-                   (selectedJobKey.Count == 0 || (jobKey != null && selectedJobKey.Contains(jobKey)));
-        }).ToList();
+                string jobKey = isValidJob ? job.ToString().Substring(0, 1).ToUpper() : null;
+                string tierKey = isValidTier ? tier.ToString().Substring(0, 1).ToUpper() : null;
 
-        //디버그 로그로 이름 출력
-        foreach (var ch in filtered) {
-            Debug.Log($"Matched Character - ID: {ch.Value.tier}{ch.Value.job}, Name: {ch.Value.name}");
+                return (selectedTierKey.Count == 0 || (tierKey != null && selectedTierKey.Contains(tierKey))) &&
+                       (selectedJobKey.Count == 0 || (jobKey != null && selectedJobKey.Contains(jobKey)));
+            }).ToList();
         }
 
-        // ============================================== 구현 중 =============================================== //
-        // ============================================== 구현 중 =============================================== //
-        // ============================================== 구현 중 =============================================== //
-        //ID를 문자열로 변환해서 빠른 조회용 Set
-        var resultSet = filtered.Select(ch => ch.Key.ToString()).ToHashSet();
-        var dicCharacterCards = DataManager.GetInstance().dicCharacterCardData;
-        foreach (var kvp in dicCharacterCards)
-        {
-            string characterKey = kvp.Key.ToString();
-
-            //필터 결과에 포함되지 않으면 continue
-            if (!resultSet.Contains(characterKey)) continue;
-
-            CharacterCardData cardData = kvp.Value;
-            //여기서 해당 카드 UI를 가져와서 업데이트 (활성화, 데이터 바인딩 등)
-            Debug.Log($"캐릭터 이름: {cardData.name}");
-            
-        }
+        Active(filtered.ToDictionary(pair => pair.Key, pair => pair.Value));
     }
 
     private void ResizeFilterButtonCellSize()
@@ -156,25 +136,22 @@ public class FilterController : MonoBehaviour
         grid.padding = new RectOffset((int)paddingLeft, (int)paddingRight, (int)paddingTop, (int)paddingBottom);  //셀 여백 설정
     }
 
-    // ============================================== 구현 중 =============================================== //
-    // ============================================== 구현 중 =============================================== //
-    // ============================================== 구현 중 =============================================== //
-    private void ResizeContent()
+    private void Active(Dictionary<int, CharacterCardData> targetCharacterCard)
     {
-        int itemCount = gridLayoutGroup.GetComponent<RectTransform>().childCount;
+        var arrCharacterToken = ControllerRegister.Get<CharacterTokenController>().GetAllCharacterToken();
+        var dicCharacterEnlargeSprite = SpriteManager.Instance.dicCharacterEnlargeSprite;
+        int tokenIndex = 0;
 
-        int columnCount = gridLayoutGroup.constraintCount;
-        int rowCount = Mathf.CeilToInt((float)itemCount / columnCount);
+        //모든 캐릭터 토큰 비활성화
+        foreach (var token in arrCharacterToken) token.gameObject.SetActive(false);
 
-        float cellHeight = gridLayoutGroup.cellSize.y;
-        float spacingY = gridLayoutGroup.spacing.y;
-        float paddingTop = gridLayoutGroup.padding.top;
-        float paddingBottom = gridLayoutGroup.padding.bottom;
-
-        float totalHeight = paddingTop + paddingBottom + (cellHeight * rowCount) + (spacingY * (rowCount - 1));
-
-        Vector2 sizeDelta = contentRt.sizeDelta;
-        sizeDelta.y = totalHeight;
-        contentRt.sizeDelta = sizeDelta;
+        //해당 캐릭터 토큰 활성화
+        foreach (var kvp in targetCharacterCard)
+        {
+            var cardData = kvp.Value;
+            var key = $"{cardData.race}_{cardData.job}_{cardData.tier}_{cardData.name}";
+            arrCharacterToken[tokenIndex].Init(dicCharacterEnlargeSprite[key]);
+            tokenIndex++;
+        }
     }
 }

@@ -4,19 +4,16 @@ using UnityEngine;
 using BackEnd;
 using System;
 
-public class BackendManager
+public class BackendManager : Singleton<BackendManager>
 {
-    private static BackendManager instance = null;
-
-    private BackendManager() { }
-
-    public static BackendManager GetInstance()
+    protected override void Awake()
     {
-        if (instance == null) instance = new BackendManager();
-        return instance;
+        base.Awake();
+
+        InitBackend();
     }
 
-    public void InitBackend()
+    private void InitBackend()
     {
         //뒤끝 서버에 연결
         var bro = Backend.Initialize();

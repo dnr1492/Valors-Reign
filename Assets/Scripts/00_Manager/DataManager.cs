@@ -3,23 +3,22 @@ using System.Collections.Generic;
 using UnityEngine;
 using Newtonsoft.Json;
 
-public class DataManager
+public class DataManager : Singleton<DataManager>
 {
-    private static DataManager instance = null;
-
-    private DataManager() { }
-
-    public static DataManager GetInstance()
+    protected override void Awake()
     {
-        if (instance == null) instance = new DataManager();
-        return instance;
+        base.Awake();
+
+        LoadGamePlayData();
+        LoadCharacterCardData();
+        LoadSkillCardData();
     }
 
     public GamePlayData gamePlayData;
     public Dictionary<int, CharacterCardData> dicCharacterCardData = new Dictionary<int, CharacterCardData>();
     public Dictionary<int, SkillCardData> dicSkillCardData = new Dictionary<int, SkillCardData>();
 
-    public void LoadGamePlayData()
+    private void LoadGamePlayData()
     {
         gamePlayData = new GamePlayData();
         string json = Resources.Load<TextAsset>("Datas/gamePlay_data").text;
@@ -27,7 +26,7 @@ public class DataManager
         gamePlayData = tempGamePlayData;
     }
 
-    public void LoadCharacterCardData()
+    private void LoadCharacterCardData()
     {
         dicCharacterCardData = new Dictionary<int, CharacterCardData>();
         string json = Resources.Load<TextAsset>("Datas/characterCard_data").text;
@@ -40,7 +39,7 @@ public class DataManager
         }
     }
 
-    public void LoadSkillCardData()
+    private void LoadSkillCardData()
     {
         dicSkillCardData = new Dictionary<int, SkillCardData>();
         string json = Resources.Load<TextAsset>("Datas/skillCard_data").text;

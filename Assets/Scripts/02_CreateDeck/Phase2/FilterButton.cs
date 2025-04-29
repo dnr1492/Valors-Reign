@@ -11,9 +11,8 @@ public class FilterButton : MonoBehaviour
     public bool IsSelected() => isSelected;
 
     private Image img;
-    private Color typeColor, jobAndTierColor;
 
-    private void Awake()
+    private void Start()
     {
         filterKey = transform.name.Split("_")[1];
         Debug.Log($"filterKey: {filterKey}");

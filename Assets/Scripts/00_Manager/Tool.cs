@@ -6,7 +6,7 @@ using UnityEditor;
 using UnityEngine;
 using static EnumClass;
 
-public class ToolManager
+public class Tool
 {
     private static void LoadDataFromJSON<T>(T data, string fileName)
     {
@@ -50,11 +50,11 @@ public class ToolManager
         };
 
         // ===== 임시 데이터 =====
-        list.characterCardDatas.Add(new CharacterCardData { id = 0, name = "Test 1", skills = new List<int> { 1000, 1001 }, tier = CharacterTierAndCost.Low, race = CharacterRace.Primordial, job = CharacterJob.Dealer });
-        list.characterCardDatas.Add(new CharacterCardData { id = 1, name = "Test 2", skills = new List<int> { 1000, 1001 }, tier = CharacterTierAndCost.Middle, race = CharacterRace.Primordial, job = CharacterJob.Tanker });
-        list.characterCardDatas.Add(new CharacterCardData { id = 2, name = "Test 3", skills = new List<int> { 1002, 1003 }, tier = CharacterTierAndCost.Low, race = CharacterRace.Primordial, job = CharacterJob.Tanker });
-        list.characterCardDatas.Add(new CharacterCardData { id = 3, name = "Test 4", skills = new List<int> { 1002, 1003 }, tier = CharacterTierAndCost.Middle, race = CharacterRace.Primordial, job = CharacterJob.Supporter });
-        list.characterCardDatas.Add(new CharacterCardData { id = 4, name = "Test 5", skills = new List<int> { 1000, 1003 }, tier = CharacterTierAndCost.High, race = CharacterRace.Primordial, job = CharacterJob.Supporter });
+        list.characterCardDatas.Add(new CharacterCardData { id = 0, name = "그림자 속 암살자", skills = new List<int> { 1000, 1001 }, tier = CharacterTierAndCost.Leader, race = CharacterRace.Primordial, job = CharacterJob.Dealer });
+        list.characterCardDatas.Add(new CharacterCardData { id = 1, name = "하얀 검사", skills = new List<int> { 1000, 1001 }, tier = CharacterTierAndCost.Leader, race = CharacterRace.Primordial, job = CharacterJob.Dealer });
+        list.characterCardDatas.Add(new CharacterCardData { id = 2, name = "그림자 속 수호자", skills = new List<int> { 1002, 1003 }, tier = CharacterTierAndCost.Leader, race = CharacterRace.Primordial, job = CharacterJob.Tanker });
+        list.characterCardDatas.Add(new CharacterCardData { id = 3, name = "어설픈 방패병", skills = new List<int> { 1002, 1003 }, tier = CharacterTierAndCost.Leader, race = CharacterRace.Primordial, job = CharacterJob.Tanker });
+        list.characterCardDatas.Add(new CharacterCardData { id = 4, name = "최전선의 창병", skills = new List<int> { 1000, 1003 }, tier = CharacterTierAndCost.Leader, race = CharacterRace.Primordial, job = CharacterJob.Tanker });
 
         LoadDataFromJSON(list, "characterCard_data.json");
     }

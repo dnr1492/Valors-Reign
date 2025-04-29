@@ -3,18 +3,8 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
-public class GridManager
+public class GridManager : Singleton<GridManager>
 {
-    private static GridManager instance = null;
-
-    private GridManager() { }
-
-    public static GridManager GetInstance()
-    {
-        if (instance == null) instance = new GridManager();
-        return instance;
-    }
-
     private float hexWidth;  //육각형의 가로 크기, 해당 프리팹의 기본 크기 70
     private float hexHeight;  //육각형의 세로 크기 (정육각형 기준으로 √3/2 * 너비), 해당 프리팹의 기본 크기 60
 
