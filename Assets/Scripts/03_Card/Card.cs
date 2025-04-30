@@ -3,14 +3,12 @@ using static EnumClass;
 
 public class Card : MonoBehaviour
 {
-    private SkillCardData _skillCardData;
-    private CharacterCardData _characterCardData;
     private State curState;
     private CardType curCardType;
 
     [SerializeField] GameObject front, back;
 
-    public void InitCardData(object cardData, State state, CardType cardType)
+    public void InitCardData(Sprite sprite, object cardData, State state, CardType cardType)
     {
         curState = state;
         curCardType = cardType;
@@ -18,10 +16,12 @@ public class Card : MonoBehaviour
         switch (cardType)
         {
             case CardType.SkillCard:
-                _skillCardData = cardData as SkillCardData;
+                var skillCardData = cardData as SkillCardData;
+                SetSkillCard(skillCardData);
                 break;
             case CardType.CharacterCard:
-                _characterCardData = cardData as CharacterCardData;
+                var characterCardData = cardData as CharacterCardData;
+                SetCharacterCard(sprite, characterCardData);
                 break;
             default:
                 Debug.Log("Not Card Type");
@@ -38,4 +38,8 @@ public class Card : MonoBehaviour
         front.SetActive(newState == State.Front);
         back.SetActive(newState == State.Back);
     }
+
+    protected virtual void SetCharacterCard(Sprite sprite, CharacterCardData cardData) { }
+
+    protected virtual void SetSkillCard(SkillCardData cardData) { }
 }

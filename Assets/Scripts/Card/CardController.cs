@@ -7,6 +7,7 @@ public class CardController : MonoBehaviour
     // 1) 총 코스트 제한
     // 2) 티어별 선택 수 제한
     // 3) Low 티어는 동일 카드 최대 3장까지, Middle 티어는 동일 카드 최대 2장까지 중복 허용 및 그 외에는 중복 제한
+
     [Header("Character Card")]
     private int maxCost;  //최대 Cost
     private int curTotalCost;  //현재 Cost
@@ -45,7 +46,7 @@ public class CardController : MonoBehaviour
 
     //// ===== 최초 캐릭터 선택을 위해서 모든 캐릭터 카드 데이터를 가지고 표출할 지 어떻게 할 지는 UI 정해지면 구현하기 ===== //
     //// ===== *** Leader는 무조건 1개 *** ===== //
-    //// ===== *** 캐릭터 카드는 토큰 형식의 5각형으로서 필드에 셋팅 *** ===== //
+    //// ===== *** 캐릭터 카드는 토큰 형식의 육각형으로서 필드에 셋팅 *** ===== //
     //private void CreateCharacterCard()
     //{
     //}
@@ -192,7 +193,7 @@ public class CardController : MonoBehaviour
     {
         GameObject cardGo = Instantiate(skillCardPrefab, skillCardParant);
         Card cardScript = cardGo.GetComponent<Card>();
-        cardScript.InitCardData(card, State.Front, CardType.SkillCard);
+        //cardScript.InitCardData(card, State.Front, CardType.SkillCard);
 
         //패에 카드 배치 (UI 처리)
         handCards.Add(cardGo);

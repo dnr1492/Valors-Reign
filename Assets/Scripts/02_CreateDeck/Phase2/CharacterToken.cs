@@ -7,7 +7,7 @@ public class CharacterToken : MonoBehaviour
 {
     [SerializeField] Image imgCharacter;
     [SerializeField] Button btn;
-    [SerializeField] GameObject characterCardPrefab;
+    [SerializeField] Card characterCard;
 
     private void Start()
     {
@@ -22,8 +22,8 @@ public class CharacterToken : MonoBehaviour
 
         btn.onClick.RemoveAllListeners();
         btn.onClick.AddListener(() => {
-            //var characterCard = Instantiate(characterCardPrefab, transform);
             Debug.Log($"OnClick Event: {cardData.name}의 정보 표출");
+            characterCard.InitCardData(sprite, cardData, EnumClass.State.Front, EnumClass.CardType.CharacterCard);
         });
     }
 }
