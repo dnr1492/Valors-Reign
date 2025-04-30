@@ -149,8 +149,8 @@ public class FilterController : MonoBehaviour
         foreach (var kvp in targetCharacterCard)
         {
             var cardData = kvp.Value;
-            var key = $"{cardData.race}_{cardData.job}_{cardData.tier}_{cardData.name}";
-            arrCharacterToken[tokenIndex].Init(dicCharacterEnlargeSprite[key]);
+            var spriteKey = $"{cardData.race}_{cardData.job}_{cardData.tier}_{cardData.name}";
+            arrCharacterToken[tokenIndex].Init(dicCharacterEnlargeSprite[spriteKey], cardData);
             tokenIndex++;
         }
     }
