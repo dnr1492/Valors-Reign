@@ -19,7 +19,7 @@ public class CharacterCard : Card
         foreach (var txt in txtNames) txt.gameObject.SetActive(false);
 
         txtName.text = cardData.name;
-        txtTierAndJob.text = cardData.tier + " / " + cardData.job;
+        txtTierAndJob.text = cardData.tier.ToString()[0] + " / " + cardData.job.ToString()[0];
         txtHp.text = cardData.hp.ToString();
         txtMp.text = cardData.mp.ToString();
 

@@ -8,6 +8,9 @@ public class CharacterToken : MonoBehaviour
     [SerializeField] Image imgCharacter;
     [SerializeField] Button btn;
     [SerializeField] Card characterCard;
+    [SerializeField] CustomBackground cb;
+
+    private bool isSelect = false;
 
     private void Start()
     {
@@ -24,6 +27,7 @@ public class CharacterToken : MonoBehaviour
         btn.onClick.AddListener(() => {
             Debug.Log($"OnClick Event: {cardData.name}의 정보 표출");
             characterCard.InitCardData(sprite, cardData, EnumClass.State.Front, EnumClass.CardType.CharacterCard);
+            cb.SetSelect(isSelect = !isSelect);
         });
     }
 }
