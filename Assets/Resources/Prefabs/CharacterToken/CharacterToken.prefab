@@ -520,7 +520,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   imgCharacter: {fileID: 8150746959058954375}
   btn: {fileID: 514970420263629481}
-  characterCard: {fileID: 0}
   cb: {fileID: 181309467}
 --- !u!1 &8150746960089942685
 GameObject:

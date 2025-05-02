@@ -9,6 +9,8 @@ public class CharacterTokenController : MonoBehaviour
     [SerializeField] GridLayoutGroup gridLayoutGroup;
     [SerializeField] RectTransform contentRt;
 
+    private CharacterToken[] arrAllCharacterToken;
+
     private readonly int columnCount = 4;
     private readonly float aspectRatio = 1.136f;  //100(넓이)/88(높이)
     private readonly float safeMarginRatio = 0.97f;  //여유를 위해 97%만 사용
@@ -39,7 +41,21 @@ public class CharacterTokenController : MonoBehaviour
 
     public CharacterToken[] GetAllCharacterToken()
     {
-        var characterTokens = gridLayoutGroup.GetComponentsInChildren<CharacterToken>(true);
-        return characterTokens;
+        if (arrAllCharacterToken == null) arrAllCharacterToken = gridLayoutGroup.GetComponentsInChildren<CharacterToken>(true);
+        return arrAllCharacterToken;
+    }
+
+    public void OnTokenClicked(CharacterToken clickedToken, EnumClass.CharacterTierAndCost curTier)
+    {
+        //리더인 경우
+        if (curTier == EnumClass.CharacterTierAndCost.Leader) {
+            foreach (var token in arrAllCharacterToken) {
+                //해당 캐릭터 토큰을 제외하고 다른 리더 선택 해제
+                if (token != clickedToken) token.Deselect();
+            }
+        }
+
+        //캐릭터 토큰 활성화
+        clickedToken.Select();
     }
 }

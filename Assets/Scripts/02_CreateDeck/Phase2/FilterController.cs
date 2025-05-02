@@ -24,14 +24,14 @@ public class FilterController : MonoBehaviour
 
     private void Start()
     {
+        SetCharacterToken();
+
         for (int i = 0; i < arrFilterButton.Length; i++)
         {
             var btn = arrFilterButton[i].GetComponent<Button>();
             var filterBtn = arrFilterButton[i];
             if (btn != null) btn.onClick.AddListener(() => OnClickFilter(filterBtn));
         }
-
-        Active(DataManager.Instance.dicCharacterCardData);
 
         ResizeFilterButtonCellSize();
     }
@@ -93,16 +93,16 @@ public class FilterController : MonoBehaviour
 
     private void ApplyCharacterFilter()
     {
-        var allCharacterCards = DataManager.Instance.dicCharacterCardData;
+        var allCharacterCardDatas = DataManager.Instance.dicCharacterCardData;
 
         //필터 조건에 맞는 캐릭터 리스트 추출
         List<KeyValuePair<int, CharacterCardData>> filtered;
 
         //전체
-        if (selectedJobKey.Count == 0 && selectedTierKey.Count == 0) filtered = allCharacterCards.ToList();
+        if (selectedJobKey.Count == 0 && selectedTierKey.Count == 0) filtered = allCharacterCardDatas.ToList();
         //특정
         else {
-            filtered = allCharacterCards.Where(ch =>
+            filtered = allCharacterCardDatas.Where(ch =>
             {
                 var job = ch.Value.job;
                 var tier = ch.Value.tier;
@@ -118,7 +118,7 @@ public class FilterController : MonoBehaviour
             }).ToList();
         }
 
-        Active(filtered.ToDictionary(pair => pair.Key, pair => pair.Value));
+        FindCharacterToken(filtered.ToDictionary(pair => pair.Key, pair => pair.Value));
     }
 
     private void ResizeFilterButtonCellSize()
@@ -136,8 +136,9 @@ public class FilterController : MonoBehaviour
         grid.padding = new RectOffset((int)paddingLeft, (int)paddingRight, (int)paddingTop, (int)paddingBottom);  //셀 여백 설정
     }
 
-    private void Active(Dictionary<int, CharacterCardData> targetCharacterCard)
+    private void SetCharacterToken()
     {
+        var allCharacterCardDatas = DataManager.Instance.dicCharacterCardData;
         var arrCharacterToken = ControllerRegister.Get<CharacterTokenController>().GetAllCharacterToken();
         var dicCharacterEnlargeSprite = SpriteManager.Instance.dicCharacterEnlargeSprite;
         int tokenIndex = 0;
@@ -145,13 +146,30 @@ public class FilterController : MonoBehaviour
         //모든 캐릭터 토큰 비활성화
         foreach (var token in arrCharacterToken) token.gameObject.SetActive(false);
 
-        //해당 캐릭터 토큰 활성화
-        foreach (var kvp in targetCharacterCard)
+        //모든 캐릭터 토큰 데이터 설정
+        foreach (var characterCardData in allCharacterCardDatas)
         {
-            var cardData = kvp.Value;
-            var spriteKey = $"{cardData.race}_{cardData.job}_{cardData.tier}_{cardData.name}";
-            arrCharacterToken[tokenIndex].Init(dicCharacterEnlargeSprite[spriteKey], cardData);
+            var spriteKey = $"{characterCardData.Value.race}_{characterCardData.Value.job}_{characterCardData.Value.tier}_{characterCardData.Value.name}";
+            arrCharacterToken[tokenIndex].Init(dicCharacterEnlargeSprite[spriteKey], characterCardData.Value);
             tokenIndex++;
+        }
+    }
+
+    private void FindCharacterToken(Dictionary<int, CharacterCardData> targetCharacterCardData)
+    {
+        var arrCharacterToken = ControllerRegister.Get<CharacterTokenController>().GetAllCharacterToken();
+
+        //모든 캐릭터 토큰 비활성화
+        foreach (var token in arrCharacterToken) token.gameObject.SetActive(false);
+
+        //해당 Filter에 해당하는 캐릭터 토큰의 key와 모든 캐릭터 토근의 key 비교
+        foreach (var key in targetCharacterCardData.Keys) {
+            foreach (var token in arrCharacterToken) {
+                if (token.Key == key) {
+                    token.gameObject.SetActive(true);
+                    break;
+                }
+            }
         }
     }
 }
