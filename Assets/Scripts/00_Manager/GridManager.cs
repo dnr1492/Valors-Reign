@@ -18,7 +18,7 @@ public class GridManager : Singleton<GridManager>
         { (7, 6), "M" },
         { (6, 7), "H" }, { (6, 6), "L" },
         { (5, 6), "M" },
-        { (4, 7), "R" }, { (4, 6), "L" },
+        { (4, 7), "C" }, { (4, 6), "L" },
         { (3, 6), "M" },
         { (2, 7), "H" }, { (2, 6), "L" },
         { (1, 6), "M" },
@@ -107,5 +107,18 @@ public class GridManager : Singleton<GridManager>
 
         //그리드의 각 위치를 중앙에 맞게 조정
         foreach (var rt in hexTransforms) rt.anchoredPosition += offset;
+    }
+
+    // ===================================================================================================== // 
+    // ===================================================================================================== // 
+    // ===================================================================================================== // 
+    public void DisplayCharacterTokenOnBattlefield(CharacterToken characterToken)
+    {
+        foreach (var map in txtMap) {
+            if (map.Value[0] == characterToken.Tier.ToString()[0]) {
+                Debug.Log($"key: {map.Key} value: {map.Value[0]}");
+                break;
+            }
+        }
     }
 }

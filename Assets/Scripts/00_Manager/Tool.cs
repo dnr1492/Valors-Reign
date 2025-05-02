@@ -50,11 +50,11 @@ public class Tool
         };
 
         // ===== 임시 데이터 =====
-        list.characterCardDatas.Add(new CharacterCardData { id = 0, name = "그림자 속 암살자", skills = new List<int> { 1000, 1001 }, tier = CharacterTierAndCost.Leader, race = CharacterRace.Primordial, job = CharacterJob.Dealer });
-        list.characterCardDatas.Add(new CharacterCardData { id = 1, name = "하얀 검사", skills = new List<int> { 1000, 1001 }, tier = CharacterTierAndCost.Leader, race = CharacterRace.Primordial, job = CharacterJob.Dealer });
-        list.characterCardDatas.Add(new CharacterCardData { id = 2, name = "그림자 속 수호자", skills = new List<int> { 1002, 1003 }, tier = CharacterTierAndCost.Leader, race = CharacterRace.Primordial, job = CharacterJob.Tanker });
-        list.characterCardDatas.Add(new CharacterCardData { id = 3, name = "어설픈 방패병", skills = new List<int> { 1002, 1003 }, tier = CharacterTierAndCost.Leader, race = CharacterRace.Primordial, job = CharacterJob.Tanker });
-        list.characterCardDatas.Add(new CharacterCardData { id = 4, name = "최전선의 창병", skills = new List<int> { 1000, 1003 }, tier = CharacterTierAndCost.Leader, race = CharacterRace.Primordial, job = CharacterJob.Tanker });
+        list.characterCardDatas.Add(new CharacterCardData { id = 0, name = "그림자 속 암살자", skills = new List<int> { 1000, 1001 }, tier = CharacterTierAndCost.Captain, race = CharacterRace.Primordial, job = CharacterJob.Dealer });
+        list.characterCardDatas.Add(new CharacterCardData { id = 1, name = "하얀 검사", skills = new List<int> { 1000, 1001 }, tier = CharacterTierAndCost.Captain, race = CharacterRace.Primordial, job = CharacterJob.Dealer });
+        list.characterCardDatas.Add(new CharacterCardData { id = 2, name = "그림자 속 수호자", skills = new List<int> { 1002, 1003 }, tier = CharacterTierAndCost.Captain, race = CharacterRace.Primordial, job = CharacterJob.Tanker });
+        list.characterCardDatas.Add(new CharacterCardData { id = 3, name = "어설픈 방패병", skills = new List<int> { 1002, 1003 }, tier = CharacterTierAndCost.Captain, race = CharacterRace.Primordial, job = CharacterJob.Tanker });
+        list.characterCardDatas.Add(new CharacterCardData { id = 4, name = "최전선의 창병", skills = new List<int> { 1000, 1003 }, tier = CharacterTierAndCost.Captain, race = CharacterRace.Primordial, job = CharacterJob.Tanker });
 
         LoadDataFromJSON(list, "characterCard_data.json");
     }

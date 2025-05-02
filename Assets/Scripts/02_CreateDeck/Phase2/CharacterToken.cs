@@ -12,9 +12,10 @@ public class CharacterToken : MonoBehaviour
 
     private UIMain uiMain;
     private CharacterCard characterCard;
-    private bool isSelect = false;
-
+    
+    public bool IsSelect { get; private set; }
     public int Key { get; private set; }
+    public CharacterTierAndCost Tier { get; private set; }
 
     private void Start()
     {
@@ -25,10 +26,9 @@ public class CharacterToken : MonoBehaviour
 
     public void Init(Sprite sprite, CharacterCardData characterCardData)
     {
-        Key = characterCardData.id;
-
         gameObject.SetActive(true);
-
+        Key = characterCardData.id;
+        Tier = characterCardData.tier;
         imgCharacter.sprite = sprite;
 
         btn.onClick.RemoveAllListeners();
@@ -39,15 +39,15 @@ public class CharacterToken : MonoBehaviour
             characterCard.InitCardData(sprite, characterCardData, State.Front, CardType.CharacterCard);
 
             //코스트 설정
-            var cost = characterCardData.tier == CharacterTierAndCost.Leader ? 0 : (int)characterCardData.tier;
+            var cost = characterCardData.tier == CharacterTierAndCost.Captain ? 0 : (int)characterCardData.tier;
             uiMain.SetMaxCost(cost);
 
             //캐릭터 토큰 선택 및 선택 해제
-            ControllerRegister.Get<CharacterTokenController>().OnTokenClicked(this, characterCardData.tier);
+            ControllerRegister.Get<CharacterTokenController>().OnClickToken(this, characterCardData.tier);
         });
     }
 
-    public void Select() => cb.SetSelect(isSelect = !isSelect);
+    public void Select() => cb.SetSelect(IsSelect = !IsSelect);
 
-    public void Deselect() => cb.SetSelect(isSelect = false);
+    public void Deselect() => cb.SetSelect(IsSelect = false);
 }
