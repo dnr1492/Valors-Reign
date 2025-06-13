@@ -50,4 +50,6 @@ public class CharacterToken : MonoBehaviour
     public void Select() => cb.SetSelect(IsSelect = !IsSelect);
 
     public void Deselect() => cb.SetSelect(IsSelect = false);
+
+    public Sprite GetCharacterSprite() => imgCharacter.sprite;
 }

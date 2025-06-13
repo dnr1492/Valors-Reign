@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class GridManager : Singleton<GridManager>
 {
@@ -24,6 +25,8 @@ public class GridManager : Singleton<GridManager>
         { (1, 6), "M" },
         { (0, 7), "H" }, { (0, 6), "L" },
     };
+
+    private readonly Dictionary<(int col, int row), Image> imgCharacterMap = new();
 
     public void CreateHexGrid(RectTransform battleFieldRt, GameObject hexPrefab, RectTransform parant)
     {
@@ -65,6 +68,17 @@ public class GridManager : Singleton<GridManager>
                     if (textComponent != null) textComponent.text = textValue;
                     Debug.Log($"열 {col}, 행 {row} : {textValue}");
                 }
+
+                //1. Hex에 Mask 추가
+                //2. Hex 하위에 캐릭터용 이미지를 생성
+                //3. 좌표로 이미지 매핑 등록
+                hex.AddComponent<Mask>();
+                GameObject imgCharacter = new GameObject("imgCharacter", typeof(RectTransform), typeof(Image));
+                imgCharacter.transform.SetParent(hex.transform, false);
+                imgCharacter.GetComponent<RectTransform>().sizeDelta = rt.sizeDelta;
+                var image = imgCharacter.GetComponent<Image>();
+                image.enabled = false;
+                imgCharacterMap[(col, row)] = image;
             }
         }
 
@@ -109,16 +123,29 @@ public class GridManager : Singleton<GridManager>
         foreach (var rt in hexTransforms) rt.anchoredPosition += offset;
     }
 
-    // ===================================================================================================== // 
-    // ===================================================================================================== // 
-    // ===================================================================================================== // 
+    /// <summary>
+    /// 배틀필드 위에 캐릭터 토큰 표시
+    /// </summary>
+    /// <param name="characterToken"></param>
     public void DisplayCharacterTokenOnBattlefield(CharacterToken characterToken)
     {
-        foreach (var map in txtMap) {
-            if (map.Value[0] == characterToken.Tier.ToString()[0]) {
-                Debug.Log($"key: {map.Key} value: {map.Value[0]}");
-                break;
+        //토큰 Tier 글자 추출 (H, L, C ...)
+        char tierLetter = characterToken.Tier.ToString()[0];
+
+        //Tier 글자에 해당하는 좌표 찾기
+        foreach (var kvp in txtMap)
+        {
+            if (kvp.Value[0] != tierLetter) continue;
+
+            //해당 좌표의 이미지에 캐릭터 이미지 할당
+            if (imgCharacterMap.TryGetValue(kvp.Key, out var img)) {
+                img.sprite = characterToken.GetCharacterSprite();
+                img.enabled = true;
+                Debug.Log($"좌표: {kvp.Key} 티어: {tierLetter}");
             }
+
+            //Tier 글자당 하나만 배치
+            break;
         }
     }
 }
