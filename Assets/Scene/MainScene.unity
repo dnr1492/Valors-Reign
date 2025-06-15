@@ -22760,7 +22760,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3483901090305229919}
   m_Layer: 5
-  m_Name: "UICreateDeckPhase2_\uAD6C\uD604 \uC911"
+  m_Name: UICreateDeckPhase2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
