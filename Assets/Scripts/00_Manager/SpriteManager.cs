@@ -13,6 +13,7 @@ public class SpriteManager : Singleton<SpriteManager>
 
     public Dictionary<string, Sprite> dicCharacterOriginSprite = new Dictionary<string, Sprite>();
     public Dictionary<string, Sprite> dicCharacterEnlargeSprite = new Dictionary<string, Sprite>();
+    public Dictionary<string, Sprite> dicSkillSprite = new Dictionary<string, Sprite>();
 
     public void LoadSprites()
     {
@@ -24,6 +25,11 @@ public class SpriteManager : Singleton<SpriteManager>
         var enlarge = Resources.LoadAll<Sprite>("Sprites/Character/Enlarge");
         foreach (var sprite in enlarge) {
             dicCharacterEnlargeSprite.Add(sprite.name, sprite);
+        }
+
+        var skill = Resources.LoadAll<Sprite>("Sprites/Skill");
+        foreach (var sprite in skill) {
+            dicSkillSprite.Add(sprite.name, sprite);
         }
     }
 }

@@ -70,11 +70,11 @@ public class Tool
         };
 
         // ===== 임시 데이터 =====
-        list.skillCardDatas.Add(new SkillCardData { id = 1000, name = "Skill Test 1", rank = (int)SkillCardRankAndMpConsum.Rank1, type = SkillCardType.Move });
-        list.skillCardDatas.Add(new SkillCardData { id = 1001, name = "Skill Test 1", rank = (int)SkillCardRankAndMpConsum.Rank2, type = SkillCardType.Attack });
-        list.skillCardDatas.Add(new SkillCardData { id = 1002, name = "Skill Test 2", rank = (int)SkillCardRankAndMpConsum.Rank1, type = SkillCardType.Move });
-        list.skillCardDatas.Add(new SkillCardData { id = 1003, name = "Skill Test 2", rank = (int)SkillCardRankAndMpConsum.Rank2, type = SkillCardType.Attack });
-        list.skillCardDatas.Add(new SkillCardData { id = 1004, name = "Skill Test 3", rank = (int)SkillCardRankAndMpConsum.Rank1, type = SkillCardType.Buff });
+        list.skillCardDatas.Add(new SkillCardData { id = 1000, name = "Skill Test 1", rank = (int)SkillCardRankAndMpConsum.Rank1, type = SkillCardType.Move, effect = "효과 쩐다" });
+        list.skillCardDatas.Add(new SkillCardData { id = 1001, name = "Skill Test 1", rank = (int)SkillCardRankAndMpConsum.Rank2, type = SkillCardType.Attack, effect = "효과 더 쩐다" });
+        list.skillCardDatas.Add(new SkillCardData { id = 1002, name = "Skill Test 2", rank = (int)SkillCardRankAndMpConsum.Rank1, type = SkillCardType.Move, effect = "효과 덜 쩐다" });
+        list.skillCardDatas.Add(new SkillCardData { id = 1003, name = "Skill Test 2", rank = (int)SkillCardRankAndMpConsum.Rank2, type = SkillCardType.Attack, effect = "효과 개 쩐다" });
+        list.skillCardDatas.Add(new SkillCardData { id = 1004, name = "Skill Test 3", rank = (int)SkillCardRankAndMpConsum.Rank1, type = SkillCardType.Buff, effect = "효과 없다" });
 
         LoadDataFromJSON(list, "skillCard_data.json");
     }
@@ -132,5 +132,6 @@ public class SkillCardData
     public int rank;
     //public int mpConsum;  //MP소모량은 Rank랑 동일
     public SkillCardType type;
+    public string effect;
 }
 #endregion
