@@ -6,9 +6,9 @@ using UnityEngine.UI;
 
 public class CharacterTokenController : MonoBehaviour
 {
-    [SerializeField] GridLayoutGroup gridLayoutGroup;
     [SerializeField] RectTransform contentRt;
 
+    private GridLayoutGroup gridLayoutGroup;
     private CharacterToken[] arrAllCharacterToken;
 
     private readonly int columnCount = 4;
@@ -22,6 +22,8 @@ public class CharacterTokenController : MonoBehaviour
 
     private void Start()
     {
+        gridLayoutGroup = contentRt.GetComponent<GridLayoutGroup>();
+
         ResizeCharacterTokenCellSize();
     }
 
