@@ -17,13 +17,13 @@ public class CharacterTokenController : MonoBehaviour
 
     private void Awake()
     {
+        gridLayoutGroup = contentRt.GetComponent<GridLayoutGroup>();
+
         ControllerRegister.Register(this);
     }
 
     private void Start()
     {
-        gridLayoutGroup = contentRt.GetComponent<GridLayoutGroup>();
-
         ResizeCharacterTokenCellSize();
     }
 

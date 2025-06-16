@@ -10,28 +10,25 @@ public class Card : MonoBehaviour
 
     public void InitCardData(Sprite sprite, object cardData, State state, CardType cardType)
     {
-        //curState = state;
-        //curCardType = cardType;
+        curState = state;
+        curCardType = cardType;
 
-        //switch (cardType)
-        //{
-        //    case CardType.SkillCard:
-        //        var skillCardData = cardData as SkillCardData;
-        //        SetSkillCard(sprite, skillCardData);
-        //        break;
-        //    case CardType.CharacterCard:
-        //        var characterCardData = cardData as CharacterCardData;
-        //        SetCharacterCard(sprite, characterCardData);
-        //        break;
-        //    default:
-        //        Debug.Log("Not Card Type");
-        //        break;
-        //}
+        switch (cardType)
+        {
+            case CardType.SkillCard:
+                //var skillCardData = cardData as SkillCardData;
+                //SetSkillCard(sprite, skillCardData);
+                break;
+            case CardType.CharacterCard:
+                var characterCardData = cardData as CharacterCardData;
+                SetCharacterCard(sprite, characterCardData);
+                break;
+            default:
+                Debug.Log("Not Card Type");
+                break;
+        }
 
-        //SetState(state);
-
-        var characterCardData = cardData as CharacterCardData;
-        SetCharacterCard(sprite, characterCardData);
+        SetState(state);
     }
 
     public void SetState(State newState)
@@ -44,5 +41,5 @@ public class Card : MonoBehaviour
 
     protected virtual void SetCharacterCard(Sprite sprite, CharacterCardData cardData) { }
 
-    protected virtual void SetSkillCard(Sprite sprite, SkillCardData cardData) { }
+    //protected virtual void SetSkillCard(Sprite sprite, SkillCardData cardData) { }
 }

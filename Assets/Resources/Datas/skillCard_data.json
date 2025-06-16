@@ -3,32 +3,37 @@
         {
             "id": 1000,
             "name": "Skill Test 1",
-            "mpConsum": 0,
-            "rank": 1
+            "rank": 1,
+            "type": 0,
+            "effect": "효과 쩐다"
         },
         {
             "id": 1001,
             "name": "Skill Test 1",
-            "mpConsum": 0,
-            "rank": 2
+            "rank": 2,
+            "type": 1,
+            "effect": "효과 더 쩐다"
         },
         {
             "id": 1002,
             "name": "Skill Test 2",
-            "mpConsum": 0,
-            "rank": 1
+            "rank": 1,
+            "type": 0,
+            "effect": "효과 덜 쩐다"
         },
         {
             "id": 1003,
             "name": "Skill Test 2",
-            "mpConsum": 0,
-            "rank": 2
+            "rank": 2,
+            "type": 1,
+            "effect": "효과 개 쩐다"
         },
         {
             "id": 1004,
             "name": "Skill Test 3",
-            "mpConsum": 0,
-            "rank": 1
+            "rank": 1,
+            "type": 2,
+            "effect": "효과 없다"
         }
     ]
 }
