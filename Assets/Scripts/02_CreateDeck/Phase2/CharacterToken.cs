@@ -10,7 +10,7 @@ public class CharacterToken : MonoBehaviour
     [SerializeField] Button btn;
     [SerializeField] CustomBackground cb;
 
-    private UIMain uiMain;
+    private UICreateDeckPhase2 uiCreateDeckPhase2;
     private CharacterCard characterCard;
     
     public bool IsSelect { get; private set; }
@@ -19,7 +19,7 @@ public class CharacterToken : MonoBehaviour
 
     private void Start()
     {
-        uiMain = FindObjectOfType<UIMain>();
+        uiCreateDeckPhase2 = FindObjectOfType<UICreateDeckPhase2>();
         characterCard = FindObjectOfType<CharacterCard>();
         gameObject.SetActive(false);
     }
@@ -40,7 +40,7 @@ public class CharacterToken : MonoBehaviour
 
             //코스트 설정
             var cost = characterCardData.tier == CharacterTierAndCost.Captain ? 0 : (int)characterCardData.tier;
-            uiMain.SetMaxCost(cost);
+            uiCreateDeckPhase2.SetMaxCost(cost);
 
             //캐릭터 토큰 선택 및 선택 해제
             ControllerRegister.Get<CharacterTokenController>().OnClickToken(this, characterCardData.tier);

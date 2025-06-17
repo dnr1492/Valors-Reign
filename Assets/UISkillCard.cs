@@ -4,7 +4,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class UISkillCard : UISkillInfoPopup
+public class UISkillCard : MonoBehaviour
 {
     [SerializeField] TextMeshProUGUI txtName, txtSkillEffect;
     [SerializeField] Image imgSkill;
