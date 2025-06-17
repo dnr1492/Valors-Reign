@@ -58,4 +58,9 @@ public class UICreateDeckPhase2 : UIPopupBase
 
         sliCost.value = sumCost;
     }
+
+    protected override void ResetUI()
+    {
+        // ===== 초기화 로직 구현 요망 ===== //
+    }
 }

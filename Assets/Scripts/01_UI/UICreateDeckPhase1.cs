@@ -17,4 +17,9 @@ public class UICreateDeckPhase1 : UIPopupBase
     {
         UIManager.Instance.ShowPopup<UICreateDeckPhase2>("UICreateDeckPhase2");
     }
+
+    protected override void ResetUI()
+    {
+        // ===== 초기화 로직 구현 요망 ===== //
+    }
 }

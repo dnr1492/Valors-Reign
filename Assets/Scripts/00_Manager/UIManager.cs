@@ -5,17 +5,22 @@ using UnityEngine.UI;
 
 public abstract class UIPopupBase : MonoBehaviour
 {
-    public virtual void Open() => gameObject.SetActive(true);
+    protected abstract void ResetUI();
+
+    public virtual void Open()
+    {
+        ResetUI();
+        gameObject.SetActive(true);
+    }
+
     public virtual void Close() => gameObject.SetActive(false);
 }
 
 public class UIManager : Singleton<UIManager>
 {
-    [Header("필수 레퍼런스")]
-    [SerializeField] private Canvas mainCanvas;  //UI용 최상위 캔버스
-
-    readonly Dictionary<string, GameObject> prefabCache = new();  //로드한 프리팹
-    readonly Dictionary<string, UIPopupBase> activePopups = new();  //활성화된 팝업
+    private Canvas mainCanvas;  //UI용 최상위 캔버스
+    private readonly Dictionary<string, GameObject> prefabCache = new();  //로드한 프리팹
+    private readonly Dictionary<string, UIPopupBase> activePopups = new();  //활성화된 팝업
 
     protected override void Awake()
     {
@@ -29,10 +34,11 @@ public class UIManager : Singleton<UIManager>
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="popupName"></param>
+    /// <param name="isCloseAll"></param>
     /// <returns></returns>
-    public T ShowPopup<T>(string popupName) where T : UIPopupBase
+    public T ShowPopup<T>(string popupName, bool isCloseAll = true) where T : UIPopupBase
     {
-        CloseAll();
+        if (isCloseAll) CloseAll();
 
         //이미 활성화되어 있으면 재활성화
         if (activePopups.TryGetValue(popupName, out UIPopupBase cached)) {

@@ -3,14 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class UISkillInfoPopup : MonoBehaviour
+public class UISkillInfoPopup : UIPopupBase
 {
     [SerializeField] Button btn_close;
-
-    private void Close()
-    {
-        Destroy(gameObject);
-    }
 
     public void Init(SkillCardData skillCardData)
     {
@@ -19,4 +14,6 @@ public class UISkillInfoPopup : MonoBehaviour
 
         btn_close.onClick.AddListener(Close);
     }
+
+    protected override void ResetUI() { /*필요 없음*/ }
 }

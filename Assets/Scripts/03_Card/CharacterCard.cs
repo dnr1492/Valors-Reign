@@ -13,13 +13,8 @@ public class CharacterCard : Card
     [SerializeField] Button[] btnSkills;
     [SerializeField] Image imgCharacter;
 
-    //private GameObject uiSkillInfoPopupPrefab;
-    //private GameObject curSkillInfoPopup;
-
     protected override void SetCharacterCard(Sprite sprite, CharacterCardData characterCardData)
     {
-        //uiSkillInfoPopupPrefab = Resources.Load<GameObject>("Prefabs/UISkillInfoPopup_±¸Çö Áß");
-
         foreach (var txt in txtCounts) txt.gameObject.SetActive(false);
         foreach (var txt in txtRanks) txt.gameObject.SetActive(false);
         foreach (var txt in txtNames) txt.gameObject.SetActive(false);
@@ -33,29 +28,22 @@ public class CharacterCard : Card
         var skillCardData = DataManager.Instance.dicSkillCardData;
         for (int i = 0; i < characterCardData.skills.Count; i++) 
         {
-            var data = skillCardData[characterCardData.skills[i]];
-            if (data == null) continue;
+            var skillData = skillCardData[characterCardData.skills[i]];
+            if (skillData == null) continue;
 
             txtCounts[i].gameObject.SetActive(true);
-            txtCounts[i].text = data.id.ToString();
+            txtCounts[i].text = skillData.id.ToString();
 
             txtRanks[i].gameObject.SetActive(true);
-            txtRanks[i].text = data.rank.ToString();
+            txtRanks[i].text = skillData.rank.ToString();
 
             txtNames[i].gameObject.SetActive(true);
-            txtNames[i].text = data.name;
+            txtNames[i].text = skillData.name;
 
-            btnSkills[i].onClick.AddListener(() => { /*OpenSkillInfoPopup(data);*/ });
+            btnSkills[i].onClick.AddListener(() => { 
+                UIManager.Instance.ShowPopup<UISkillInfoPopup>("UISkillInfoPopup", false).Init(skillData); });
         }
 
         imgCharacter.sprite = sprite;
     }
-
-    //private void OpenSkillInfoPopup(SkillCardData skillCardData)
-    //{
-    //    if (curSkillInfoPopup != null) Destroy(curSkillInfoPopup);
-    //    var skillInfoPopup = Instantiate(uiSkillInfoPopupPrefab);
-    //    skillInfoPopup.GetComponent<UISkillInfoPopup>().Init(skillCardData);
-    //    curSkillInfoPopup = skillInfoPopup;
-    //}
 }
