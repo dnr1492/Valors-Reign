@@ -27,6 +27,8 @@ public class GridManager : Singleton<GridManager>
     };
 
     private readonly Dictionary<(int col, int row), Image> imgCharacterMap = new();
+    private readonly Dictionary<char, List<(int col, int row)>> tierSlots = new();
+    private readonly Dictionary<int, (int col, int row)> tokenPosMap = new();  //토큰의 고유 Key(id)를 좌표와 매핑
 
     public void CreateHexGrid(RectTransform battleFieldRt, GameObject hexPrefab, RectTransform parant)
     {
@@ -83,6 +85,7 @@ public class GridManager : Singleton<GridManager>
         }
 
         FitHexGrid(hexTransforms, parant);
+        BuildTierSlotTable();  //마지막에 호출
     }
 
     private void ResizeHexGrid(RectTransform battleFieldRt)
@@ -123,29 +126,94 @@ public class GridManager : Singleton<GridManager>
         foreach (var rt in hexTransforms) rt.anchoredPosition += offset;
     }
 
-    /// <summary>
-    /// 배틀필드 위에 캐릭터 토큰 표시
-    /// </summary>
-    /// <param name="characterToken"></param>
-    public void DisplayCharacterTokenOnBattlefield(CharacterToken characterToken)
+    // ================================================================================================================ //
+
+    public void DisplayCharacterTokenOnBattlefield(CharacterToken token)
     {
         //토큰 Tier 글자 추출 (H, L, C ...)
-        char tierLetter = characterToken.Tier.ToString()[0];
+        char tier = token.Tier.ToString()[0];
+
+        //이미 배치되어 있는 Token이면 토큰 해제
+        if (tokenPosMap.TryGetValue(token.Key, out var curPos))
+        {
+            ClearToken(curPos);
+            tokenPosMap.Remove(token.Key);
+            Debug.Log($"토큰 해제 좌표: {curPos} Tier: {tier}");
+            return;
+        }
+
+        //배치될 슬롯 리스트
+        var slots = tierSlots[tier];
+
+        //리더면 무조건 첫 칸
+        if (tier == 'C')
+        {
+            PlaceToken(slots[0], token);
+            return;
+        }
+
+        //빈 칸 찾기
+        foreach (var pos in slots)
+        {
+            if (imgCharacterMap[pos].sprite == null)
+            {
+                PlaceToken(pos, token);
+                return;
+            }
+        }
+
+        //다 찬 경우 → 첫 칸 덮어쓰기
+        PlaceToken(slots[0], token);
+    }
+
+    private void BuildTierSlotTable()
+    {
+        tierSlots.Clear();
 
         //Tier 글자에 해당하는 좌표 찾기
         foreach (var kvp in txtMap)
         {
-            if (kvp.Value[0] != tierLetter) continue;
-
-            //해당 좌표의 이미지에 캐릭터 이미지 할당
-            if (imgCharacterMap.TryGetValue(kvp.Key, out var img)) {
-                img.sprite = characterToken.GetCharacterSprite();
-                img.enabled = true;
-                Debug.Log($"좌표: {kvp.Key} 티어: {tierLetter}");
+            //토큰 Tier 글자 추출 (H, L, C ...)
+            char tier = kvp.Value[0];
+            if (!tierSlots.TryGetValue(tier, out var list))
+            {
+                list = new List<(int, int)>();
+                tierSlots[tier] = list;
             }
 
-            //Tier 글자당 하나만 배치
-            break;
+            list.Add(kvp.Key);
         }
+
+        //왼쪽 → 오른쪽, 같은 열이면 아래쪽(행 큰 값) 우선
+        foreach (var list in tierSlots.Values)
+            list.Sort((a, b) =>
+                a.col != b.col ? a.col.CompareTo(b.col)
+                               : b.row.CompareTo(a.row));
+    }
+
+    private void PlaceToken((int col, int row) pos, CharacterToken token)
+    {
+        var img = imgCharacterMap[pos];
+
+        //다른 토큰이 이미 이 칸을 쓰고 있었다면 기록 제거
+        foreach (var kvp in tokenPosMap)
+            if (kvp.Value == pos)
+            {
+                tokenPosMap.Remove(kvp.Key);
+                break;
+            }
+
+        //해당 좌표의 이미지에 캐릭터 이미지 할당
+        img.sprite = token.GetCharacterSprite();
+        img.enabled = true;
+        tokenPosMap[token.Key] = pos;
+        Debug.Log($"토큰 배치 좌표: {tokenPosMap[token.Key]} Tier: {token.Tier}");
+    }
+
+    private void ClearToken((int col, int row) pos)
+    {
+        var img = imgCharacterMap[pos];
+        img.sprite = null;
+        img.enabled = false;
     }
 }

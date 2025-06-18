@@ -38,17 +38,12 @@ public class UICreateDeckPhase2 : UIPopupBase
 
     public void OnClickSave()
     {
-
+        //deckGenerator.CreateDeck();
     }
 
     public void OnClickReset()
     {
 
-    }
-
-    public void OnClickAddDeck()
-    {
-        //deckGenerator.CreateDeck();
     }
 
     public void SetMaxCost(int cost)

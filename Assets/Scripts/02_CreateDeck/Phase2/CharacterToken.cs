@@ -40,16 +40,23 @@ public class CharacterToken : MonoBehaviour
 
             //코스트 설정
             var cost = characterCardData.tier == CharacterTierAndCost.Captain ? 0 : (int)characterCardData.tier;
-            uiCreateDeckPhase2.SetMaxCost(cost);
 
             //캐릭터 토큰 선택 및 선택 해제
-            ControllerRegister.Get<CharacterTokenController>().OnClickToken(this, characterCardData.tier);
+            ControllerRegister.Get<CharacterTokenController>().OnClickToken(this, characterCardData.tier, cost);
         });
     }
 
-    public void Select() => cb.SetSelect(IsSelect = !IsSelect);
+    public void Select(int cost)
+    {
+        cb.SetSelect(IsSelect = !IsSelect);
+        if (cost != 0) uiCreateDeckPhase2.SetMaxCost(cost);
+    }
 
-    public void Deselect() => cb.SetSelect(IsSelect = false);
+    public void Unselect(int cost)
+    {
+        cb.SetSelect(IsSelect = false);
+        if (cost != 0) uiCreateDeckPhase2.SetMaxCost(-cost);
+    }
 
     public Sprite GetCharacterSprite() => imgCharacter.sprite;
 }
