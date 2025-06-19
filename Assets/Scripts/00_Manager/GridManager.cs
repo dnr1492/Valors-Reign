@@ -2,10 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
-using Unity.VisualScripting.Antlr3.Runtime;
 using UnityEngine;
 using UnityEngine.UI;
-using static EnumClass;
 
 public class GridManager : Singleton<GridManager>
 {
@@ -29,10 +27,10 @@ public class GridManager : Singleton<GridManager>
         { (0, 7), "H" }, { (0, 6), "L" },
     };
 
-    private readonly Dictionary<(int col, int row), Image> imgCharacterMap = new();
-    private readonly Dictionary<char, List<(int col, int row)>> tierSlots = new();
+    private readonly Dictionary<(int col, int row), Image> imgCharacterMap = new();  //좌표와 해당 좌표의 Image 매핑
+    private readonly Dictionary<char, List<(int col, int row)>> tierSlots = new();  //티어와 해당 좌표 매핑
     private readonly Dictionary<int, (int col, int row)> tokenPosMap = new();  //토큰의 고유 Key(id)를 좌표와 매핑
-    private readonly Dictionary<(int col, int row), HexTile> hexTileMap = new();
+    private readonly Dictionary<(int col, int row), HexTile> hexTileMap = new();  //좌표와 해당 좌표의 HexTile 매핑
 
     #region 필드 생성
     public void CreateHexGrid(RectTransform battleFieldRt, GameObject hexPrefab, RectTransform parant)
@@ -330,5 +328,59 @@ public class GridManager : Singleton<GridManager>
             tile.transform.SetParent(fromTile.transform, false);
             tile.GetComponent<RectTransform>().anchoredPosition = Vector2.zero;
         }
+    }
+
+    // ========================================================================================================================= //
+
+    public TokenPack GetTokenPack()
+    {
+        var tokenPack = new TokenPack();
+
+        foreach (var kvp in tokenPosMap)
+        {
+            var key = kvp.Key;
+            var (col, row) = kvp.Value;
+            tokenPack.tokenSlots.Add(new TokenSlotData { tokenKey = key, col = col, row = row });
+        }
+
+        return tokenPack;
+
+        //추후 JsonUtility.ToJson(pack)으로 직렬화하면 로컬 저장
+    }
+
+    public void LoadTokenPack(TokenPack tokenPack)
+    {
+        var allTokens = ControllerRegister.Get<CharacterTokenController>().GetAllCharacterToken();
+
+        foreach (var slot in tokenPack.tokenSlots)
+        {
+            var token = allTokens.FirstOrDefault(t => t.Key == slot.tokenKey);
+            if (token == null) continue;
+
+            PlaceToken((slot.col, slot.row), token.Key, token.GetCharacterSprite());  //위치 지정하여 강제 배치
+            token.Select();  //선택 상태도 복원
+        }
+    }
+
+    private static string SavePath => Application.persistentDataPath + "/token_pack.json";
+
+    public static void SavePack(TokenPack tokenPack)
+    {
+        string json = JsonUtility.ToJson(tokenPack, true);
+        System.IO.File.WriteAllText(SavePath, json);
+        Debug.Log($"TokenPack 저장 완료: {SavePath}");
+    }
+
+    public static TokenPack LoadPack()
+    {
+        if (!System.IO.File.Exists(SavePath))
+        {
+            Debug.LogWarning("저장된 TokenPack 없음");
+            return null;
+        }
+
+        string json = System.IO.File.ReadAllText(SavePath);
+        TokenPack tokenPack = JsonUtility.FromJson<TokenPack>(json);
+        return tokenPack;
     }
 }
