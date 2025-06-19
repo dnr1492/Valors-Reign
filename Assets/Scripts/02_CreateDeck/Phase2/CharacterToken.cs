@@ -16,6 +16,9 @@ public class CharacterToken : MonoBehaviour
     public bool IsSelect { get; private set; }
     public int Key { get; private set; }
     public CharacterTierAndCost Tier { get; private set; }
+    public int Cost { get; private set; }
+
+    private int cost;
 
     private void Start()
     {
@@ -29,6 +32,7 @@ public class CharacterToken : MonoBehaviour
         gameObject.SetActive(true);
         Key = characterCardData.id;
         Tier = characterCardData.tier;
+        cost = cost = characterCardData.tier == CharacterTierAndCost.Captain ? 0 : (int)characterCardData.tier;
         imgCharacter.sprite = sprite;
 
         btn.onClick.RemoveAllListeners();
@@ -38,21 +42,19 @@ public class CharacterToken : MonoBehaviour
             //캐릭터 카드 정보 표시
             characterCard.InitCardData(sprite, characterCardData, State.Front, CardType.CharacterCard);
 
-            //코스트 설정
-            var cost = characterCardData.tier == CharacterTierAndCost.Captain ? 0 : (int)characterCardData.tier;
-
+            // ===== 리더를 재선택할 경우 로직이 서로 바뀌는 버그 존재 ===== //
             //캐릭터 토큰 선택 및 선택 해제
-            ControllerRegister.Get<CharacterTokenController>().OnClickToken(this, characterCardData.tier, cost);
+            ControllerRegister.Get<CharacterTokenController>().OnClickToken(this);
         });
     }
 
-    public void Select(int cost)
+    public void Select()
     {
         cb.SetSelect(IsSelect = !IsSelect);
         if (cost != 0) uiCreateDeckPhase2.SetMaxCost(cost);
     }
 
-    public void Unselect(int cost)
+    public void Unselect()
     {
         cb.SetSelect(IsSelect = false);
         if (cost != 0) uiCreateDeckPhase2.SetMaxCost(-cost);

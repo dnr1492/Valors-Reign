@@ -47,18 +47,10 @@ public class CharacterTokenController : MonoBehaviour
         return arrAllCharacterToken;
     }
 
-    public void OnClickToken(CharacterToken clickedToken, EnumClass.CharacterTierAndCost curTier, int cost)
+    public void OnClickToken(CharacterToken clickedToken)
     {
-        //리더인 경우
-        if (curTier == EnumClass.CharacterTierAndCost.Captain) {
-            foreach (var token in arrAllCharacterToken) {
-                //해당 캐릭터 토큰을 제외하고 다른 리더 선택 해제
-                if (token != clickedToken) token.Unselect(cost);
-            }
-        }
-
-        if (clickedToken.IsSelect) clickedToken.Unselect(cost);  //캐릭터 토큰 비활성화
-        else clickedToken.Select(cost);  //캐릭터 토큰 활성화
+        if (clickedToken.IsSelect) clickedToken.Unselect();  //캐릭터 토큰 비활성화
+        else clickedToken.Select();  //캐릭터 토큰 활성화
 
         //캐릭터 토큰을 배틀필드에 표시
         GridManager.Instance.DisplayCharacterTokenOnBattlefield(clickedToken);

@@ -48,9 +48,10 @@ public class UICreateDeckPhase2 : UIPopupBase
 
     public void SetMaxCost(int cost)
     {
-        if (sumCost + cost > maxCost) return;
-        sumCost += cost;
+        int newCost = sumCost + cost;
+        if (newCost < 0 || newCost > maxCost) return;
 
+        sumCost = newCost;
         sliCost.value = sumCost;
     }
 
