@@ -1,8 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
+using Unity.VisualScripting.Antlr3.Runtime;
 using UnityEngine;
 using UnityEngine.UI;
+using static EnumClass;
 
 public class GridManager : Singleton<GridManager>
 {
@@ -29,7 +32,9 @@ public class GridManager : Singleton<GridManager>
     private readonly Dictionary<(int col, int row), Image> imgCharacterMap = new();
     private readonly Dictionary<char, List<(int col, int row)>> tierSlots = new();
     private readonly Dictionary<int, (int col, int row)> tokenPosMap = new();  //토큰의 고유 Key(id)를 좌표와 매핑
+    private readonly Dictionary<(int col, int row), HexTile> hexTileMap = new();
 
+    #region 필드 생성
     public void CreateHexGrid(RectTransform battleFieldRt, GameObject hexPrefab, RectTransform parant)
     {
         ResizeHexGrid(battleFieldRt);
@@ -37,12 +42,12 @@ public class GridManager : Singleton<GridManager>
         float gridWidth = (columns - 1) * hexWidth * 0.75f + hexWidth;
         float gridHeight = rows * hexHeight + (columns > 1 ? hexHeight / 2f : 0);
 
-        Vector2 startOffset = new Vector2(
+        Vector2 startOffset = new(
             -gridWidth / 2f + hexWidth / 2f,
             gridHeight / 2f - hexHeight / 2f
         );
 
-        List<RectTransform> hexTransforms = new List<RectTransform>();
+        List<RectTransform> hexTransforms = new();
 
         //그리드를 생성하면서 RectTransform을 리스트에 저장
         for (int col = 0; col < columns; col++)
@@ -51,7 +56,7 @@ public class GridManager : Singleton<GridManager>
 
             for (int row = 0; row < maxRow; row++)
             {
-                GameObject hex = Object.Instantiate(hexPrefab, parant);
+                GameObject hex = Instantiate(hexPrefab, parant);
                 RectTransform rt = hex.GetComponent<RectTransform>();
                 hexTransforms.Add(rt);
 
@@ -68,8 +73,13 @@ public class GridManager : Singleton<GridManager>
                 {
                     var textComponent = hex.GetComponentInChildren<TextMeshProUGUI>();
                     if (textComponent != null) textComponent.text = textValue;
-                    Debug.Log($"열 {col}, 행 {row} : {textValue}");
                 }
+
+                //구성 요소 추가 및 맵 등록
+                var hexTile = hex.AddComponent<HexTile>();
+                hexTile.Init((col, row));
+                hex.AddComponent<HexTileDraggable>();
+                hexTileMap[(col, row)] = hexTile;
 
                 //1. Hex에 Mask 추가
                 //2. Hex 하위에 캐릭터용 이미지를 생성
@@ -125,9 +135,9 @@ public class GridManager : Singleton<GridManager>
         //그리드의 각 위치를 중앙에 맞게 조정
         foreach (var rt in hexTransforms) rt.anchoredPosition += offset;
     }
+    #endregion
 
-    // ================================================================================================================ //
-
+    #region 필드 위에 선택한 캐릭터 토큰 표시 및 표시 제거
     public void DisplayCharacterTokenOnBattlefield(CharacterToken token)
     {
         //토큰 Tier 글자 추출 (H, L, C ...)
@@ -148,7 +158,7 @@ public class GridManager : Singleton<GridManager>
         //리더면 무조건 첫 칸
         if (tier == 'C')
         {
-            PlaceToken(slots[0], token);
+            PlaceToken(slots[0], token.Key, token.GetCharacterSprite());
             return;
         }
 
@@ -157,13 +167,13 @@ public class GridManager : Singleton<GridManager>
         {
             if (imgCharacterMap[pos].sprite == null)
             {
-                PlaceToken(pos, token);
+                PlaceToken(pos, token.Key, token.GetCharacterSprite());
                 return;
             }
         }
 
         //다 찬 경우 → 첫 칸 덮어쓰기
-        PlaceToken(slots[0], token);
+        PlaceToken(slots[0], token.Key, token.GetCharacterSprite());
     }
 
     private void BuildTierSlotTable()
@@ -191,29 +201,134 @@ public class GridManager : Singleton<GridManager>
                                : b.row.CompareTo(a.row));
     }
 
-    private void PlaceToken((int col, int row) pos, CharacterToken token)
+    private void PlaceToken((int col, int row) pos, int tokenKey, Sprite sprite)
     {
-        var img = imgCharacterMap[pos];
+        if (!hexTileMap.TryGetValue(pos, out var hexTile)) return;
 
-        //다른 토큰이 이미 이 칸을 쓰고 있었다면 기록 제거
-        foreach (var kvp in tokenPosMap)
+        //기존 토큰 제거
+        foreach (var kvp in tokenPosMap.ToList())
+        {
             if (kvp.Value == pos)
             {
                 tokenPosMap.Remove(kvp.Key);
+                hexTile.ClearToken();
                 break;
             }
+        }
 
-        //해당 좌표의 이미지에 캐릭터 이미지 할당
-        img.sprite = token.GetCharacterSprite();
-        img.enabled = true;
-        tokenPosMap[token.Key] = pos;
-        Debug.Log($"토큰 배치 좌표: {tokenPosMap[token.Key]} Tier: {token.Tier}");
+        //이미지 설정
+        imgCharacterMap[pos].sprite = sprite;
+        imgCharacterMap[pos].enabled = true;
+
+        //HexTile에 해당 토큰 Key값 설정
+        hexTile.AssignToken(tokenKey);
+
+        //위치 기록
+        tokenPosMap[tokenKey] = pos;
     }
 
     private void ClearToken((int col, int row) pos)
     {
-        var img = imgCharacterMap[pos];
-        img.sprite = null;
-        img.enabled = false;
+        if (!hexTileMap.TryGetValue(pos, out var hexTile)) return;
+
+        var image = imgCharacterMap[pos];
+        image.sprite = null;
+        image.enabled = false;
+
+        hexTile.ClearToken();
+    }
+    #endregion
+
+    /// <summary>
+    /// (슬롯(Hex)과 마우스 간의) 거리 기반 탐색
+    /// </summary>
+    /// <param name="screenPos"></param>
+    /// <param name="nearestSlot"></param>
+    /// <returns></returns>
+    public bool TryGetNearestSlot(Vector2 screenPos, out (int col, int row) nearestSlot)
+    {
+        nearestSlot = default;
+        float minDistance = float.MaxValue;
+        bool found = false;
+
+        foreach (var kvp in imgCharacterMap)
+        {
+            var rt = kvp.Value.rectTransform;
+            Vector2 screenWorldPos = rt.position;
+            float distance = Vector2.Distance(screenWorldPos, screenPos);
+
+            if (distance < minDistance) {
+                minDistance = distance;
+                nearestSlot = kvp.Key;
+                found = true;
+            }
+        }
+
+        return found && minDistance <= 100f;
+    }
+
+    /// <summary>
+    /// 토큰을 이동
+    /// </summary>
+    /// <param name="from"></param>
+    /// <param name="to"></param>
+    /// <param name="tile"></param>
+    public void MoveToken((int col, int row) from, (int col, int row) to, HexTile tile)
+    {
+        if (from == to || !tile.AssignedTokenKey.HasValue) return;
+
+        int fromKey = tile.AssignedTokenKey.Value;
+        if (!txtMap.TryGetValue(to, out string dropSlotType)) return;
+
+        char dropSlotChar = dropSlotType[0];
+        var fromToken = ControllerRegister.Get<CharacterTokenController>().GetAllCharacterToken()
+            .FirstOrDefault(t => t.Key == fromKey);
+
+        if (fromToken == null || fromToken.Tier.ToString()[0] != dropSlotChar)
+        {
+            //드롭 위치가 동일한 티어의 슬롯이 아니면 복귀 (복사본만 삭제)
+            return;
+        }
+
+        var fromImg = imgCharacterMap[from];
+        var toImg = imgCharacterMap[to];
+        var fromTile = hexTileMap[from];
+        var toTile = hexTileMap[to];
+
+        //빈 칸으로 이동
+        if (!toTile.AssignedTokenKey.HasValue)
+        {
+            tokenPosMap[fromKey] = to;
+            fromTile.ClearToken();
+            toTile.AssignToken(fromKey);
+
+            toImg.sprite = fromImg.sprite;
+            toImg.enabled = true;
+            fromImg.sprite = null;
+            fromImg.enabled = false;
+            return;
+        }
+
+        int toKey = toTile.AssignedTokenKey.Value;
+        var toToken = ControllerRegister.Get<CharacterTokenController>().GetAllCharacterToken()
+            .FirstOrDefault(t => t.Key == toKey);
+
+        if (fromToken.Tier == toToken?.Tier)
+        {
+            tokenPosMap[fromKey] = to;
+            tokenPosMap[toKey] = from;
+
+            fromTile.AssignToken(toKey);
+            toTile.AssignToken(fromKey);
+
+            (fromImg.sprite, toImg.sprite) = (toImg.sprite, fromImg.sprite);
+            fromImg.enabled = fromImg.sprite != null;
+            toImg.enabled = toImg.sprite != null;
+        }
+        else
+        {
+            tile.transform.SetParent(fromTile.transform, false);
+            tile.GetComponent<RectTransform>().anchoredPosition = Vector2.zero;
+        }
     }
 }

@@ -42,7 +42,6 @@ public class CharacterToken : MonoBehaviour
             //캐릭터 카드 정보 표시
             characterCard.InitCardData(sprite, characterCardData, State.Front, CardType.CharacterCard);
 
-            // ===== 리더를 재선택할 경우 로직이 서로 바뀌는 버그 존재 ===== //
             //캐릭터 토큰 선택 및 선택 해제
             ControllerRegister.Get<CharacterTokenController>().OnClickToken(this);
         });
