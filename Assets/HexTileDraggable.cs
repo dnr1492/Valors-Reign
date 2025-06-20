@@ -11,7 +11,7 @@ public class HexTileDraggable : MonoBehaviour, IBeginDragHandler, IDragHandler, 
 
     private HexTile hexTile;
     private Image originalImage;
-    private Sprite tokenSprite;
+    //private Sprite tokenSprite;
 
     private void Awake()
     {
@@ -37,11 +37,11 @@ public class HexTileDraggable : MonoBehaviour, IBeginDragHandler, IDragHandler, 
         if (IsCaptainTier()) return;
 
         if (originalImage == null) {
-            var imageTransform = transform.Find("imgCharacter");
+            var imageTransform = transform.Find("mask").transform.Find("imgCharacter");
             if (imageTransform != null) originalImage = imageTransform.GetComponent<Image>();
         }
 
-        tokenSprite = originalImage.sprite;
+        //tokenSprite = originalImage.sprite;
 
         //드래그용 복제 생성 (자기 자신 복제)
         dragGhost = Instantiate(gameObject, canvas.transform);

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
+using static EnumClass;
 
 public class CharacterTokenController : MonoBehaviour
 {
@@ -50,7 +51,17 @@ public class CharacterTokenController : MonoBehaviour
     public void OnClickToken(CharacterToken clickedToken)
     {
         if (clickedToken.IsSelect) clickedToken.Unselect();  //캐릭터 토큰 비활성화
-        else clickedToken.Select();  //캐릭터 토큰 활성화
+        else
+        {
+            if (clickedToken.Tier == CharacterTierAndCost.Captain) {
+                foreach (var token in GetAllCharacterToken()) {
+                    if (token.Tier == CharacterTierAndCost.Captain && token != clickedToken)
+                        token.Unselect();
+                }
+            }
+
+            clickedToken.Select();  //캐릭터 토큰 활성화
+        }
 
         //캐릭터 토큰을 배틀필드에 표시
         GridManager.Instance.DisplayCharacterTokenOnBattlefield(clickedToken);
