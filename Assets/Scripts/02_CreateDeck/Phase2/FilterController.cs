@@ -25,7 +25,7 @@ public class FilterController : MonoBehaviour
 
     private void Start()
     {
-        SetCharacterToken();
+        StartCoroutine(SetCharacterToken());
 
         for (int i = 0; i < arrFilterButton.Length; i++)
         {
@@ -89,10 +89,10 @@ public class FilterController : MonoBehaviour
             else btn.SetSelected(false);
         }
 
-        ApplyCharacterFilter();
+        ApplyFilter();
     }
 
-    private void ApplyCharacterFilter()
+    private void ApplyFilter()
     {
         var allCharacterCardDatas = DataManager.Instance.dicCharacterCardData;
 
@@ -137,8 +137,9 @@ public class FilterController : MonoBehaviour
         grid.padding = new RectOffset((int)paddingLeft, (int)paddingRight, (int)paddingTop, (int)paddingBottom);  //셀 여백 설정
     }
 
-    private void SetCharacterToken()
+    private IEnumerator SetCharacterToken()
     {
+        yield return null;
         var allCharacterCardDatas = DataManager.Instance.dicCharacterCardData;
         var arrCharacterToken = ControllerRegister.Get<CharacterTokenController>().GetAllCharacterToken();
         var dicCharacterEnlargeSprite = SpriteManager.Instance.dicCharacterEnlargeSprite;
@@ -154,6 +155,8 @@ public class FilterController : MonoBehaviour
             arrCharacterToken[tokenIndex].Init(dicCharacterEnlargeSprite[spriteKey], characterCardData.Value);
             tokenIndex++;
         }
+
+        ApplyFilter();
     }
 
     private void FindCharacterToken(Dictionary<int, CharacterCardData> targetCharacterCardData)
@@ -172,5 +175,19 @@ public class FilterController : MonoBehaviour
                 }
             }
         }
+    }
+
+    public void ResetFilter()
+    {
+        selectedJobKey.Clear();
+        selectedTierKey.Clear();
+
+        //모든 필터 버튼 선택 해제
+        foreach (var btn in arrFilterButton) {
+            btn.SetSelected(false);
+        }
+
+        //전체 캐릭터 다시 표시
+        ApplyFilter();
     }
 }

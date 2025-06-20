@@ -5,11 +5,16 @@ using UnityEngine.UI;
 
 public abstract class UIPopupBase : MonoBehaviour
 {
+    private bool isFirstOpen = true;
+
     protected abstract void ResetUI();
 
     public virtual void Open()
     {
-        ResetUI();
+        //두 번째 이후 오픈부터만 리셋
+        if (!isFirstOpen) ResetUI();
+        //최초 오픈만 건너뜀
+        else isFirstOpen = false;  
         gameObject.SetActive(true);
     }
 
@@ -75,7 +80,7 @@ public class UIManager : Singleton<UIManager>
     {
         if (isCloseAll) CloseAll();
 
-        //이미 활성화되어 있으면 재활성화
+        //활성화
         if (activePopups.TryGetValue(popupName, out UIPopupBase cached)) {
             cached.Open();
             return cached as T;

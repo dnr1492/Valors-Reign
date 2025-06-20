@@ -29,7 +29,6 @@ public class CharacterToken : MonoBehaviour
 
     public void Init(Sprite sprite, CharacterCardData characterCardData)
     {
-        gameObject.SetActive(true);
         Key = characterCardData.id;
         Tier = characterCardData.tier;
         cost = cost = characterCardData.tier == CharacterTierAndCost.Captain ? 0 : (int)characterCardData.tier;

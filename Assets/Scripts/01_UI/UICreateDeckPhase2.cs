@@ -60,11 +60,11 @@ public class UICreateDeckPhase2 : UIPopupBase
 
     public void OnClickReset()
     {
-        GridManager.Instance.ResetDeckPhase2();
+        GridManager.Instance.ResetUIDeckPhase2();
     }
 
     protected override void ResetUI()
     {
-        GridManager.Instance.ResetDeckPhase2();
+        GridManager.Instance.ResetUIDeckPhase2();
     }
 }

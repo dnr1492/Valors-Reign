@@ -8,11 +8,11 @@ public class FilterButton : MonoBehaviour
     private string filterKey;
 
     private bool isSelected;
-    public bool IsSelected() => isSelected;
+    public bool IsSelected { get; }
 
     private Image img;
 
-    private void Start()
+    private void Awake()
     {
         filterKey = transform.name.Split("_")[1];
         Debug.Log($"filterKey: {filterKey}");

@@ -323,8 +323,10 @@ public class GridManager : Singleton<GridManager>
         }
     }
 
-    // ========================================================================================================================= //
-
+    /// <summary>
+    /// TokenPack으로 묶기
+    /// </summary>
+    /// <returns></returns>
     public TokenPack GetTokenPack()
     {
         var tokenPack = new TokenPack();
@@ -339,9 +341,10 @@ public class GridManager : Singleton<GridManager>
         return tokenPack;
     }
 
+    #region (임시로 로컬에서) TokenPack 로드
     public void LoadTokenPack()
     {
-        TokenPack tokenPack = LoadPack();
+        TokenPack tokenPack = Load();
 
         var allTokens = ControllerRegister.Get<CharacterTokenController>().GetAllCharacterToken();
 
@@ -355,29 +358,38 @@ public class GridManager : Singleton<GridManager>
         }
     }
 
-    private string SavePath => Application.persistentDataPath + "/token_pack.json";
-
-    public void SaveTokenPack(TokenPack tokenPack)
+    private TokenPack Load()
     {
-        string json = JsonUtility.ToJson(tokenPack, true);
-        System.IO.File.WriteAllText(SavePath, json);
-        Debug.Log($"TokenPack 저장 완료: {SavePath}");
-    }
+        string savePath = Application.persistentDataPath + "/token_pack.json";
 
-    private TokenPack LoadPack()
-    {
-        if (!System.IO.File.Exists(SavePath))
+        if (!System.IO.File.Exists(savePath))
         {
             Debug.LogWarning("저장된 TokenPack 없음");
             return null;
         }
 
-        string json = System.IO.File.ReadAllText(SavePath);
+        string json = System.IO.File.ReadAllText(savePath);
         TokenPack tokenPack = JsonUtility.FromJson<TokenPack>(json);
         return tokenPack;
     }
+    #endregion
 
-    public void ResetDeckPhase2()
+    /// <summary>
+    /// (임시로 로컬에) TokenPack 저장
+    /// </summary>
+    /// <param name="tokenPack"></param>
+    public void SaveTokenPack(TokenPack tokenPack)
+    {
+        string savePath = Application.persistentDataPath + "/token_pack.json";
+        string json = JsonUtility.ToJson(tokenPack, true);
+        System.IO.File.WriteAllText(savePath, json);
+        Debug.Log($"TokenPack 저장 완료: {savePath}");
+    }
+
+    /// <summary>
+    /// UIDeckPhase2 Popup 초기화
+    /// </summary>
+    public void ResetUIDeckPhase2()
     {
         //모든 토큰 이미지 제거
         foreach (var img in imgCharacterMap.Values) {
@@ -396,5 +408,8 @@ public class GridManager : Singleton<GridManager>
         var tokens = ControllerRegister.Get<CharacterTokenController>().GetAllCharacterToken();
         foreach (var token in tokens)
             if (token.IsSelect) token.Unselect();
+
+        //필터 초기화
+        ControllerRegister.Get<FilterController>().ResetFilter();
     }
 }
