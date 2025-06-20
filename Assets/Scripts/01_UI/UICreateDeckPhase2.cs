@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 public class UICreateDeckPhase2 : UIPopupBase
 {
-    [SerializeField] Button btn_back, btn_save, btn_reset;
+    [SerializeField] Button btn_back, btn_save, btn_load, btn_reset;
 
     [Header("Hex Grid")]
     [SerializeField] RectTransform hexParantRt /*map*/, battleFieldRt;
@@ -19,6 +19,7 @@ public class UICreateDeckPhase2 : UIPopupBase
     {
         btn_back.onClick.AddListener(OnClickBack);
         btn_save.onClick.AddListener(OnClickSave);
+        btn_load.onClick.AddListener(OnClickLoad);
         btn_reset.onClick.AddListener(OnClickReset);
     }
 
@@ -31,21 +32,6 @@ public class UICreateDeckPhase2 : UIPopupBase
         sliCost.maxValue = maxCost;
     }
 
-    public void OnClickBack()
-    {
-        UIManager.Instance.ShowPopup<UICreateDeckPhase1>("UICreateDeckPhase1");
-    }
-
-    public void OnClickSave()
-    {
-        //deckGenerator.CreateDeck();
-    }
-
-    public void OnClickReset()
-    {
-
-    }
-
     public void SetMaxCost(int cost)
     {
         int newCost = sumCost + cost;
@@ -55,8 +41,30 @@ public class UICreateDeckPhase2 : UIPopupBase
         sliCost.value = sumCost;
     }
 
+    public void OnClickBack()
+    {
+        UIManager.Instance.ShowPopup<UICreateDeckPhase1>("UICreateDeckPhase1");
+    }
+
+    public void OnClickSave()
+    {
+        GridManager.Instance.SaveTokenPack(GridManager.Instance.GetTokenPack());
+
+        //deckGenerator.CreateDeck();
+    }
+
+    public void OnClickLoad()
+    {
+        GridManager.Instance.LoadTokenPack();
+    }
+
+    public void OnClickReset()
+    {
+        GridManager.Instance.ResetDeckPhase2();
+    }
+
     protected override void ResetUI()
     {
-        // ===== 초기화 로직 구현 요망 ===== //
+        GridManager.Instance.ResetDeckPhase2();
     }
 }

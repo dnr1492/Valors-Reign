@@ -27,6 +27,41 @@ public class UIManager : Singleton<UIManager>
         base.Awake();
 
         if (mainCanvas == null) mainCanvas = FindObjectOfType<Canvas>();
+
+        LoadAllPopups();
+    }
+
+    /// <summary>
+    /// 모든 팝업 로드
+    /// </summary>
+    private void LoadAllPopups()
+    {
+        //여기에 필요한 팝업 이름 추가
+        string[] popupNames = {
+            "UICreateDeckPhase1",
+            "UICreateDeckPhase2",
+            "UISkillInfoPopup",
+        };
+
+        foreach (string name in popupNames)
+        {
+            if (!prefabCache.TryGetValue(name, out GameObject prefab))
+            {
+                prefab = Resources.Load<GameObject>($"Prefabs/Popup/{name}");
+                if (prefab == null)
+                {
+                    Debug.LogError($"UIManager '{name}' 프리팹 로드 실패");
+                    continue;
+                }
+                prefabCache.Add(name, prefab);
+            }
+
+            GameObject go = Instantiate(prefab, mainCanvas.transform);
+            go.SetActive(false);
+
+            if (go.TryGetComponent<UIPopupBase>(out var popup))
+                activePopups[name] = popup;
+        }
     }
 
     /// <summary>

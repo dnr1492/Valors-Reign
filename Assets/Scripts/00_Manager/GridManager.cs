@@ -1,3 +1,4 @@
+using Coffee.UISoftMask;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -73,20 +74,12 @@ public class GridManager : Singleton<GridManager>
                     if (textComponent != null) textComponent.text = textValue;
                 }
 
-                //구성 요소 추가 및 맵 등록
-                var hexTile = hex.AddComponent<HexTile>();
+                var hexTile = hex.GetComponent<HexTile>();
                 hexTile.Init((col, row));
-                hex.AddComponent<HexTileDraggable>();
                 hexTileMap[(col, row)] = hexTile;
 
-                //1. Hex에 Mask 추가
-                //2. Hex 하위에 캐릭터용 이미지를 생성
-                //3. 좌표로 이미지 매핑 등록
-                hex.AddComponent<Mask>();
-                GameObject imgCharacter = new GameObject("imgCharacter", typeof(RectTransform), typeof(Image));
-                imgCharacter.transform.SetParent(hex.transform, false);
-                imgCharacter.GetComponent<RectTransform>().sizeDelta = rt.sizeDelta;
-                var image = imgCharacter.GetComponent<Image>();
+                //좌표로 이미지 매핑 등록
+                var image = hexTile.transform.Find("mask").transform.Find("imgCharacter").GetComponent<Image>();
                 image.enabled = false;
                 imgCharacterMap[(col, row)] = image;
             }
@@ -344,12 +337,12 @@ public class GridManager : Singleton<GridManager>
         }
 
         return tokenPack;
-
-        //추후 JsonUtility.ToJson(pack)으로 직렬화하면 로컬 저장
     }
 
-    public void LoadTokenPack(TokenPack tokenPack)
+    public void LoadTokenPack()
     {
+        TokenPack tokenPack = LoadPack();
+
         var allTokens = ControllerRegister.Get<CharacterTokenController>().GetAllCharacterToken();
 
         foreach (var slot in tokenPack.tokenSlots)
@@ -362,16 +355,16 @@ public class GridManager : Singleton<GridManager>
         }
     }
 
-    private static string SavePath => Application.persistentDataPath + "/token_pack.json";
+    private string SavePath => Application.persistentDataPath + "/token_pack.json";
 
-    public static void SavePack(TokenPack tokenPack)
+    public void SaveTokenPack(TokenPack tokenPack)
     {
         string json = JsonUtility.ToJson(tokenPack, true);
         System.IO.File.WriteAllText(SavePath, json);
         Debug.Log($"TokenPack 저장 완료: {SavePath}");
     }
 
-    public static TokenPack LoadPack()
+    private TokenPack LoadPack()
     {
         if (!System.IO.File.Exists(SavePath))
         {
@@ -382,5 +375,26 @@ public class GridManager : Singleton<GridManager>
         string json = System.IO.File.ReadAllText(SavePath);
         TokenPack tokenPack = JsonUtility.FromJson<TokenPack>(json);
         return tokenPack;
+    }
+
+    public void ResetDeckPhase2()
+    {
+        //모든 토큰 이미지 제거
+        foreach (var img in imgCharacterMap.Values) {
+            img.sprite = null;
+            img.enabled = false;
+        }
+
+        //모든 HexTile 초기화
+        foreach (var tile in hexTileMap.Values)
+            tile.ClearToken();
+
+        //위치 기록 제거
+        tokenPosMap.Clear();
+
+        //선택 해제
+        var tokens = ControllerRegister.Get<CharacterTokenController>().GetAllCharacterToken();
+        foreach (var token in tokens)
+            if (token.IsSelect) token.Unselect();
     }
 }
