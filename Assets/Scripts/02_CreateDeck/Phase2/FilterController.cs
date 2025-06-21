@@ -3,30 +3,26 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
+using static EnumClass;
 
 public class FilterController : MonoBehaviour
 {
     [SerializeField] FilterButton[] arrFilterButton;
-    private HashSet<string> selectedJobKey = new();   //D, T, S
-    private HashSet<string> selectedTierKey = new();  //C, H, M, L
+    private readonly HashSet<string> selectedJobKey = new();   //D, T, S
+    private readonly HashSet<string> selectedTierKey = new();  //C, H, M, L
 
     [SerializeField] GridLayoutGroup gridLayoutGroup;
-    private int columns = 4;
-    private int rows = 5;
-    private float paddingLeft = 30f;    //셀 왼쪽 여백
-    private float paddingRight = 30f;   //셀 오른쪽 여백
-    private float paddingTop = 30f;     //셀 위쪽 여백
-    private float paddingBottom = 30f;  //셀 아래쪽 여백
+    private readonly int columns = 4;
+    private readonly int rows = 5;
+    private readonly float paddingLeft = 30f;    //셀 왼쪽 여백
+    private readonly float paddingRight = 30f;   //셀 오른쪽 여백
+    private readonly float paddingTop = 30f;     //셀 위쪽 여백
+    private readonly float paddingBottom = 30f;  //셀 아래쪽 여백
+
+    private CharacterRace selectedRace = CharacterRace.None;
 
     private void Awake()
     {
-        ControllerRegister.Register(this);
-    }
-
-    private void Start()
-    {
-        StartCoroutine(SetCharacterToken());
-
         for (int i = 0; i < arrFilterButton.Length; i++)
         {
             var btn = arrFilterButton[i].GetComponent<Button>();
@@ -34,7 +30,32 @@ public class FilterController : MonoBehaviour
             if (btn != null) btn.onClick.AddListener(() => OnClickFilter(filterBtn));
         }
 
+        ControllerRegister.Register(this);
+    }
+
+    public void InitFilter(CharacterRace race)
+    {
+        selectedRace = race;
+
+        StartCoroutine(SetCharacterToken());
+
         ResizeFilterButtonCellSize();
+    }
+
+    public void ResetFilter()
+    {
+        selectedJobKey.Clear();
+        selectedTierKey.Clear();
+        //selectedRace = CharacterRace.None;
+
+        //모든 필터 버튼 선택 해제
+        foreach (var btn in arrFilterButton)
+        {
+            btn.SetSelected(false);
+        }
+
+        //전체 캐릭터 다시 표시
+        ApplyFilter();
     }
 
     private void OnClickFilter(FilterButton filterButton)
@@ -100,13 +121,22 @@ public class FilterController : MonoBehaviour
         List<KeyValuePair<int, CharacterCardData>> filtered;
 
         //전체
-        if (selectedJobKey.Count == 0 && selectedTierKey.Count == 0) filtered = allCharacterCardDatas.ToList();
+        if (selectedJobKey.Count == 0 && selectedTierKey.Count == 0)
+        {
+            if (selectedRace == CharacterRace.None)
+                filtered = allCharacterCardDatas.ToList();
+            else
+                filtered = allCharacterCardDatas
+                    .Where(ch => ch.Value.race == selectedRace)
+                    .ToList();
+        }
         //특정
         else {
             filtered = allCharacterCardDatas.Where(ch =>
             {
                 var job = ch.Value.job;
                 var tier = ch.Value.tier;
+                var race = ch.Value.race;
 
                 bool isValidJob = !string.IsNullOrEmpty(job.ToString());
                 bool isValidTier = !string.IsNullOrEmpty(tier.ToString());
@@ -114,7 +144,8 @@ public class FilterController : MonoBehaviour
                 string jobKey = isValidJob ? job.ToString().Substring(0, 1).ToUpper() : null;
                 string tierKey = isValidTier ? tier.ToString().Substring(0, 1).ToUpper() : null;
 
-                return (selectedTierKey.Count == 0 || (tierKey != null && selectedTierKey.Contains(tierKey))) &&
+                return (selectedRace == CharacterRace.None || race == selectedRace) &&
+                       (selectedTierKey.Count == 0 || (tierKey != null && selectedTierKey.Contains(tierKey))) &&
                        (selectedJobKey.Count == 0 || (jobKey != null && selectedJobKey.Contains(jobKey)));
             }).ToList();
         }
@@ -175,19 +206,5 @@ public class FilterController : MonoBehaviour
                 }
             }
         }
-    }
-
-    public void ResetFilter()
-    {
-        selectedJobKey.Clear();
-        selectedTierKey.Clear();
-
-        //모든 필터 버튼 선택 해제
-        foreach (var btn in arrFilterButton) {
-            btn.SetSelected(false);
-        }
-
-        //전체 캐릭터 다시 표시
-        ApplyFilter();
     }
 }

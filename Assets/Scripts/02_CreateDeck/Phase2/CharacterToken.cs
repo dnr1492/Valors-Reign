@@ -18,8 +18,6 @@ public class CharacterToken : MonoBehaviour
     public CharacterTierAndCost Tier { get; private set; }
     public int Cost { get; private set; }
 
-    private int cost;
-
     private void Start()
     {
         uiCreateDeckPhase2 = FindObjectOfType<UICreateDeckPhase2>();
@@ -31,7 +29,7 @@ public class CharacterToken : MonoBehaviour
     {
         Key = characterCardData.id;
         Tier = characterCardData.tier;
-        cost = cost = characterCardData.tier == CharacterTierAndCost.Captain ? 0 : (int)characterCardData.tier;
+        Cost = characterCardData.tier == CharacterTierAndCost.Captain ? 0 : (int)characterCardData.tier;
         imgCharacter.sprite = sprite;
 
         btn.onClick.RemoveAllListeners();
@@ -49,13 +47,13 @@ public class CharacterToken : MonoBehaviour
     public void Select()
     {
         cb.SetSelect(IsSelect = !IsSelect);
-        if (cost != 0) uiCreateDeckPhase2.SetMaxCost(cost);
+        if (Cost != 0) uiCreateDeckPhase2.SetMaxCost(Cost);
     }
 
     public void Unselect()
     {
         cb.SetSelect(IsSelect = false);
-        if (cost != 0) uiCreateDeckPhase2.SetMaxCost(-cost);
+        if (Cost != 0) uiCreateDeckPhase2.SetMaxCost(-Cost);
     }
 
     public Sprite GetCharacterSprite() => imgCharacter.sprite;

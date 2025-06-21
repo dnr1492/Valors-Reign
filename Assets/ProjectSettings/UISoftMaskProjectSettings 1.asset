@@ -13,6 +13,8 @@ ShaderVariantCollection:
       variants:
       - keywords: SOFTMASKABLE
         passType: 0
+      - keywords: SOFTMASKABLE UNITY_UI_ALPHACLIP
+        passType: 0
   - first: {fileID: 4800000, guid: 2933b413a51fc4ff3a83c7ef4177ae84, type: 3}
     second:
       variants:
