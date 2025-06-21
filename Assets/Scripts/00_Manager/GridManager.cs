@@ -389,7 +389,7 @@ public class GridManager : Singleton<GridManager>
     /// <summary>
     /// UIDeckPhase2 Popup 초기화
     /// </summary>
-    public void ResetUIDeckPhase2()
+    public void ResetUIDeckPhase2(CharacterCard characterCard)
     {
         //모든 토큰 이미지 제거
         foreach (var img in imgCharacterMap.Values) {
@@ -411,5 +411,8 @@ public class GridManager : Singleton<GridManager>
 
         //필터 초기화
         ControllerRegister.Get<FilterController>().ResetFilter();
+
+        //캐릭터 카드 뒷면으로 변경
+        characterCard.SetState(EnumClass.State.Back);
     }
 }

@@ -6,6 +6,7 @@ using UnityEngine.UI;
 public class UICreateDeckPhase2 : UIPopupBase
 {
     [SerializeField] Button btn_back, btn_save, btn_load, btn_reset;
+    [SerializeField] CharacterCard characterCard;
 
     [Header("Hex Grid")]
     [SerializeField] RectTransform hexParantRt /*map*/, battleFieldRt;
@@ -60,11 +61,11 @@ public class UICreateDeckPhase2 : UIPopupBase
 
     public void OnClickReset()
     {
-        GridManager.Instance.ResetUIDeckPhase2();
+        GridManager.Instance.ResetUIDeckPhase2(characterCard);
     }
 
     protected override void ResetUI()
     {
-        GridManager.Instance.ResetUIDeckPhase2();
+        GridManager.Instance.ResetUIDeckPhase2(characterCard);
     }
 }
