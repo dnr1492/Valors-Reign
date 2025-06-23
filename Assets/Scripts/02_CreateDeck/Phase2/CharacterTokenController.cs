@@ -7,6 +7,7 @@ using static EnumClass;
 
 public class CharacterTokenController : MonoBehaviour
 {
+    [SerializeField] SkillSlotCollection skillSlotCollection;
     [SerializeField] RectTransform contentRt;
 
     private GridLayoutGroup gridLayoutGroup;
@@ -90,6 +91,7 @@ public class CharacterTokenController : MonoBehaviour
 
             //선택한 캐릭터 토큰을 배틀필드에 표시 제거
             GridManager.Instance.RemoveTokenFromBattlefield(clickedToken);
+            skillSlotCollection.Refresh();
             return;
         }
 
@@ -109,5 +111,6 @@ public class CharacterTokenController : MonoBehaviour
 
         //선택한 캐릭터 토큰을 배틀필드에 표시
         GridManager.Instance.DisplayTokenOnBattlefield(clickedToken);
+        skillSlotCollection.Refresh();
     }
 }

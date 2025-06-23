@@ -8,6 +8,7 @@ public class UICreateDeckPhase2 : UIPopupBase
 {
     [SerializeField] Button btn_back, btn_save, btn_load, btn_reset;
     [SerializeField] CharacterCard characterCard;
+    [SerializeField] SkillSlotCollection skillSlotCollection; 
 
     [Header("Hex Grid")]
     [SerializeField] RectTransform hexParantRt /*map*/, battleFieldRt;
@@ -54,22 +55,28 @@ public class UICreateDeckPhase2 : UIPopupBase
 
         GridManager.Instance.SaveTokenPack(GridManager.Instance.GetTokenPack());
 
-        //deckGenerator.CreateDeck();
+        skillSlotCollection.Refresh();
     }
 
     public void OnClickLoad()
     {
         GridManager.Instance.LoadTokenPack(characterCard);
+
+        skillSlotCollection.Refresh();
     }
 
     public void OnClickReset()
     {
         GridManager.Instance.ResetUIDeckPhase2(characterCard);
+
+        skillSlotCollection.Refresh();
     }
 
     protected override void ResetUI()
     {
         GridManager.Instance.ResetUIDeckPhase2(characterCard);
+
+        skillSlotCollection.Refresh();
     }
 
     /// <summary>

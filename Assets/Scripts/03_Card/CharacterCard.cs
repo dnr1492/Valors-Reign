@@ -8,6 +8,7 @@ using static EnumClass;
 
 public class CharacterCard : Card
 {
+    [SerializeField] SkillSlotCollection skillSlotCollection;
     [SerializeField] TextMeshProUGUI txtName;
     [SerializeField] TextMeshProUGUI txtHp, txtMp;
     [SerializeField] TextMeshProUGUI[] txtCounts, txtRanks, txtNames;
@@ -66,6 +67,7 @@ public class CharacterCard : Card
                 skillCardCounts[index] = (skillCardCounts[index] + 1) % (maxSkillCardCount + 1);
                 txtCounts[index].text = skillCardCounts[index].ToString();
                 clickedToken.SetSkillCount(skillId, skillCardCounts[index]);
+                skillSlotCollection.Refresh();
             });
 
             btnSkills[index].onClick.AddListener(() => {
