@@ -6,13 +6,10 @@ using UnityEngine.UI;
 public class HexTileDraggable : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
     private Canvas canvas;
+    private HexTile hexTile;
     private RectTransform ghostRect;
     private GameObject dragGhost;
-
-    private HexTile hexTile;
-    private Image originalImage;
-    //private Sprite tokenSprite;
-
+   
     private void Awake()
     {
         canvas = GetComponentInParent<Canvas>();
@@ -35,13 +32,6 @@ public class HexTileDraggable : MonoBehaviour, IBeginDragHandler, IDragHandler, 
     {
         if (hexTile.AssignedTokenKey == null) return;
         if (IsCaptainTier()) return;
-
-        if (originalImage == null) {
-            var imageTransform = transform.Find("mask").transform.Find("imgCharacter");
-            if (imageTransform != null) originalImage = imageTransform.GetComponent<Image>();
-        }
-
-        //tokenSprite = originalImage.sprite;
 
         //드래그용 복제 생성 (자기 자신 복제)
         dragGhost = Instantiate(gameObject, canvas.transform);

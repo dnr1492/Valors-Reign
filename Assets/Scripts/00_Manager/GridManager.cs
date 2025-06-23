@@ -135,8 +135,6 @@ public class GridManager : Singleton<GridManager>
         //토큰 Tier 글자 추출 (H, L, C ...)
         char tier = token.Tier.ToString()[0];
 
-        
-
         //배치될 슬롯 리스트
         var slots = tierSlots[tier];
 
