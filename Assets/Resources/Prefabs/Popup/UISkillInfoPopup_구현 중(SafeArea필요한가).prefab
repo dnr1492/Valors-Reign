@@ -880,7 +880,7 @@ GameObject:
   - component: {fileID: 8674442640190167721}
   - component: {fileID: 8674442640190167720}
   m_Layer: 5
-  m_Name: UISkillInfoPopup
+  m_Name: "UISkillInfoPopup_\uAD6C\uD604 \uC911(SafeArea\uD544\uC694\uD55C\uAC00)"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

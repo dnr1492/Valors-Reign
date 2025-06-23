@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using static EnumClass;
 
 public class UICreateDeckPhase2 : UIPopupBase
 {
@@ -49,6 +50,8 @@ public class UICreateDeckPhase2 : UIPopupBase
 
     public void OnClickSave()
     {
+        if (!CheckSkillCountLimit()) return;
+
         GridManager.Instance.SaveTokenPack(GridManager.Instance.GetTokenPack());
 
         //deckGenerator.CreateDeck();
@@ -56,7 +59,7 @@ public class UICreateDeckPhase2 : UIPopupBase
 
     public void OnClickLoad()
     {
-        GridManager.Instance.LoadTokenPack();
+        GridManager.Instance.LoadTokenPack(characterCard);
     }
 
     public void OnClickReset()
@@ -67,5 +70,35 @@ public class UICreateDeckPhase2 : UIPopupBase
     protected override void ResetUI()
     {
         GridManager.Instance.ResetUIDeckPhase2(characterCard);
+    }
+
+    /// <summary>
+    /// 스킬 개수를 알맞게 설정했는지 확인
+    /// (확정된 캐릭터 x 4 = 최대 스킬 개수)
+    /// </summary>
+    /// <returns></returns>
+    private bool CheckSkillCountLimit()
+    {
+        var tokens = ControllerRegister.Get<CharacterTokenController>().GetAllCharacterToken();
+
+        int confirmTokenCount = 0;
+        int totalSkillCount = 0;
+
+        foreach (var token in tokens)
+        {
+            if (token.State != CharacterTokenState.Confirm) continue;
+            confirmTokenCount++;
+            foreach (var count in token.GetAllSkillCounts().Values) totalSkillCount += count;
+        }
+
+        int maxSkillCount = confirmTokenCount * 4;
+
+        if (totalSkillCount > maxSkillCount) {
+            UIManager.Instance.ShowPopup<UIModalPopup>("UIModalPopup", false)
+                .Set("스킬 개수 초과", $"확정된 캐릭터 {confirmTokenCount}명 × 4 = {maxSkillCount}장 이하로만 설정 가능합니다.");
+            return false;
+        }
+
+        return true;
     }
 }

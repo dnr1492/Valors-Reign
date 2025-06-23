@@ -5,6 +5,7 @@ using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using static EnumClass;
 
 public class GridManager : Singleton<GridManager>
 {
@@ -128,20 +129,13 @@ public class GridManager : Singleton<GridManager>
     }
     #endregion
 
-    #region 필드 위에 선택한 캐릭터 토큰 표시 및 표시 제거
-    public void DisplayCharacterTokenOnBattlefield(CharacterToken token)
+    #region 선택한 캐릭터 토큰을 배틀필드에 표시
+    public void DisplayTokenOnBattlefield(CharacterToken token)
     {
         //토큰 Tier 글자 추출 (H, L, C ...)
         char tier = token.Tier.ToString()[0];
 
-        //이미 배치되어 있는 Token이면 토큰 해제
-        if (tokenPosMap.TryGetValue(token.Key, out var curPos))
-        {
-            ClearToken(curPos);
-            tokenPosMap.Remove(token.Key);
-            Debug.Log($"토큰 해제 좌표: {curPos} Tier: {tier}");
-            return;
-        }
+        
 
         //배치될 슬롯 리스트
         var slots = tierSlots[tier];
@@ -216,6 +210,20 @@ public class GridManager : Singleton<GridManager>
 
         //위치 기록
         tokenPosMap[tokenKey] = pos;
+    }
+    #endregion
+
+    #region 선택한 캐릭터 토큰을 배틀필드에서 표시 제거
+    public void RemoveTokenFromBattlefield(CharacterToken token)
+    {
+        //이미 배치되어 있는 Token이면 토큰 해제
+        if (tokenPosMap.TryGetValue(token.Key, out var curPos))
+        {
+            ClearToken(curPos);
+            tokenPosMap.Remove(token.Key);
+            Debug.Log($"토큰 해제 좌표: {curPos} Tier: {token.Tier}");
+            return;
+        }
     }
 
     private void ClearToken((int col, int row) pos)
@@ -330,32 +338,66 @@ public class GridManager : Singleton<GridManager>
     public TokenPack GetTokenPack()
     {
         var tokenPack = new TokenPack();
+        var allTokens = ControllerRegister.Get<CharacterTokenController>().GetAllCharacterToken();
 
         foreach (var kvp in tokenPosMap)
         {
             var key = kvp.Key;
             var (col, row) = kvp.Value;
-            tokenPack.tokenSlots.Add(new TokenSlotData { tokenKey = key, col = col, row = row });
+
+            var token = allTokens.FirstOrDefault(t => t.Key == key);
+            if (token == null) continue;
+
+            var slotData = new TokenSlotData
+            {
+                tokenKey = key,
+                col = col,
+                row = row,
+                skillCounts = new()
+            };
+
+            foreach (var kv in token.GetAllSkillCounts())
+                slotData.skillCounts.Add(new SkillCountData { skillId = kv.Key, count = kv.Value });
+
+            tokenPack.tokenSlots.Add(slotData);
         }
 
         return tokenPack;
     }
 
     #region (임시로 로컬에서) TokenPack 로드
-    public void LoadTokenPack()
+    public void LoadTokenPack(CharacterCard characterCard)
     {
         TokenPack tokenPack = Load();
 
         var allTokens = ControllerRegister.Get<CharacterTokenController>().GetAllCharacterToken();
 
+        //모든 토큰 상태 초기화 (Select/Confirm -> Cancel)
+        foreach (var token in allTokens)
+        {
+            if (token.State != CharacterTokenState.Cancel)
+                token.SetTokenState(CharacterTokenState.Cancel);
+        }
+
+        //저장된 위치에 Confirm 상태로 배치
         foreach (var slot in tokenPack.tokenSlots)
         {
             var token = allTokens.FirstOrDefault(t => t.Key == slot.tokenKey);
             if (token == null) continue;
 
             PlaceToken((slot.col, slot.row), token.Key, token.GetCharacterSprite());  //위치 지정하여 강제 배치
-            token.Select();  //선택 상태도 복원
+            token.SetTokenState(CharacterTokenState.Confirm);  //선택 상태도 복원
+
+            //스킬 매수 복원
+            if (slot.skillCounts != null)
+            {
+                foreach (var skill in slot.skillCounts)
+                    token.SetSkillCount(skill.skillId, skill.count);
+            }
         }
+
+        //캐릭터 카드 뒷면으로 변경
+        characterCard.SetCardState(CardState.Back);
     }
 
     private TokenPack Load()
@@ -392,7 +434,8 @@ public class GridManager : Singleton<GridManager>
     public void ResetUIDeckPhase2(CharacterCard characterCard)
     {
         //모든 토큰 이미지 제거
-        foreach (var img in imgCharacterMap.Values) {
+        foreach (var img in imgCharacterMap.Values)
+        {
             img.sprite = null;
             img.enabled = false;
         }
@@ -404,15 +447,22 @@ public class GridManager : Singleton<GridManager>
         //위치 기록 제거
         tokenPosMap.Clear();
 
-        //선택 해제
+        //모든 토큰 상태 초기화 (Select 또는 Confirm 상태였던 것들)
         var tokens = ControllerRegister.Get<CharacterTokenController>().GetAllCharacterToken();
         foreach (var token in tokens)
-            if (token.IsSelect) token.Unselect();
+        {
+            if (token.State != CharacterTokenState.Cancel)
+                token.SetTokenState(CharacterTokenState.Cancel);
+
+            //스킬 매수 초기화
+            foreach (var skillId in DataManager.Instance.dicCharacterCardData[token.Key].skills)
+                token.SetSkillCount(skillId, 0);
+        }
 
         //필터 초기화
         ControllerRegister.Get<FilterController>().ResetFilter();
 
         //캐릭터 카드 뒷면으로 변경
-        characterCard.SetState(EnumClass.State.Back);
+        characterCard.SetCardState(CardState.Back);
     }
 }

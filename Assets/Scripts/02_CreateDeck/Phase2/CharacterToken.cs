@@ -12,8 +12,10 @@ public class CharacterToken : MonoBehaviour
 
     private UICreateDeckPhase2 uiCreateDeckPhase2;
     private CharacterCard characterCard;
-    
-    public bool IsSelect { get; private set; }
+
+    private readonly Dictionary<int, int> selectedSkillCounts = new();  //예: { 1000: 2, 1001: 1 } (skillId, count)
+
+    public CharacterTokenState State { get; private set; } = CharacterTokenState.Cancel;
     public int Key { get; private set; }
     public CharacterTierAndCost Tier { get; private set; }
     public int Cost { get; private set; }
@@ -37,24 +39,63 @@ public class CharacterToken : MonoBehaviour
             Debug.Log($"OnClick Event: {characterCardData.name}의 정보 표출");
 
             //캐릭터 카드 정보 표시
-            characterCard.InitCardData(sprite, characterCardData, State.Front, CardType.CharacterCard);
+            characterCard.InitCardData(this, sprite, characterCardData, CardState.Front, CardType.CharacterCard);
 
-            //캐릭터 토큰 선택 및 선택 해제
-            ControllerRegister.Get<CharacterTokenController>().OnClickToken(this);
+            ControllerRegister.Get<CharacterTokenController>().OnClickToken(this, characterCard);
         });
     }
 
-    public void Select()
+    public void SetTokenState(CharacterTokenState newState)
     {
-        cb.SetSelect(IsSelect = !IsSelect);
-        if (Cost != 0) uiCreateDeckPhase2.SetMaxCost(Cost);
-    }
+        if (State == newState) return;
 
-    public void Unselect()
-    {
-        cb.SetSelect(IsSelect = false);
-        if (Cost != 0) uiCreateDeckPhase2.SetMaxCost(-Cost);
+        //상태 전환에 따른 처리
+        switch (newState)
+        {
+            case CharacterTokenState.Cancel:
+                if (State == CharacterTokenState.Confirm && Cost != 0)
+                    uiCreateDeckPhase2.SetMaxCost(-Cost);
+                break;
+
+            case CharacterTokenState.Confirm:
+                if (Cost != 0)
+                    uiCreateDeckPhase2.SetMaxCost(Cost);
+                break;
+        }
+
+        State = newState;
+        cb.SetSelect(newState);
     }
 
     public Sprite GetCharacterSprite() => imgCharacter.sprite;
+
+    /// <summary>
+    /// 스킬 개수 설정
+    /// </summary>
+    /// <param name="skillId"></param>
+    /// <param name="count"></param>
+    public void SetSkillCount(int skillId, int count)
+    {
+        if (count <= 0) selectedSkillCounts.Remove(skillId);
+        else selectedSkillCounts[skillId] = count;
+    }
+
+    /// <summary>
+    /// 스킬 개수 조회
+    /// </summary>
+    /// <param name="skillId"></param>
+    /// <returns></returns>
+    public int GetSkillCount(int skillId)
+    {
+        return selectedSkillCounts.TryGetValue(skillId, out var count) ? count : 0;
+    }
+
+    /// <summary>
+    /// 스킬 전체 조회
+    /// </summary>
+    /// <returns></returns>
+    public Dictionary<int, int> GetAllSkillCounts()
+    {
+        return new Dictionary<int, int>(selectedSkillCounts);  //복사본
+    }
 }

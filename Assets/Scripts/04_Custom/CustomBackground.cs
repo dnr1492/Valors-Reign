@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using static EnumClass;
 
 public class CustomBackground : MonoBehaviour
 {
@@ -11,5 +12,10 @@ public class CustomBackground : MonoBehaviour
     {
         currentSelectID = isSelect ? 1 : 0;  //Select 1, Unselect 0
         if (sps != null && sps.Length > 0) background.sprite = sps[currentSelectID];
+    }
+
+    public void SetSelect(CharacterTokenState state)
+    {
+        background.sprite = sps[(int)state];
     }
 }

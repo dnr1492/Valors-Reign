@@ -48,22 +48,66 @@ public class CharacterTokenController : MonoBehaviour
         return arrAllCharacterToken;
     }
 
-    public void OnClickToken(CharacterToken clickedToken)
+    public void OnClickToken(CharacterToken clickedToken, CharacterCard characterCard)
     {
-        if (clickedToken.IsSelect) clickedToken.Unselect();  //캐릭터 토큰 비활성화
-        else
+        //확정된(Confirm) 토큰을 선택한 경우
+        if (clickedToken.State == CharacterTokenState.Confirm)
         {
-            if (clickedToken.Tier == CharacterTierAndCost.Captain) {
-                foreach (var token in GetAllCharacterToken()) {
-                    if (token.Tier == CharacterTierAndCost.Captain && token != clickedToken)
-                        token.Unselect();
-                }
+            foreach (var token in GetAllCharacterToken())
+            {
+                if (token != clickedToken && token.State == CharacterTokenState.Select)
+                    token.SetTokenState(CharacterTokenState.Cancel);
             }
-
-            clickedToken.Select();  //캐릭터 토큰 활성화
+            return;
         }
 
-        //캐릭터 토큰을 배틀필드에 표시
-        GridManager.Instance.DisplayCharacterTokenOnBattlefield(clickedToken);
+        //선택한(Select) 토큰을 다시 선택한 경우
+        if (clickedToken.State == CharacterTokenState.Select)
+        {
+            clickedToken.SetTokenState(CharacterTokenState.Cancel);
+
+            //캐릭터 카드 뒷면으로 변경
+            characterCard.SetCardState(CardState.Back);
+            return;
+        }
+
+        //선택한(Select) 토큰 외에 다른 토큰을 선택한(Select) 경우
+        foreach (var token in GetAllCharacterToken())
+        {
+            if (token.State == CharacterTokenState.Select)
+                token.SetTokenState(CharacterTokenState.Cancel);
+        }
+
+        clickedToken.SetTokenState(CharacterTokenState.Select);
+    }
+
+    public void OnClickConfirm(CharacterToken clickedToken)
+    {
+        //Confirm 상태에서 다시 누르면 Cancel
+        if (clickedToken.State == CharacterTokenState.Confirm)
+        {
+            clickedToken.SetTokenState(CharacterTokenState.Select);
+
+            //선택한 캐릭터 토큰을 배틀필드에 표시 제거
+            GridManager.Instance.RemoveTokenFromBattlefield(clickedToken);
+            return;
+        }
+
+        if (clickedToken.State != CharacterTokenState.Select) return;
+
+        //Captain은 오직 하나만 Confirm 가능
+        if (clickedToken.Tier == CharacterTierAndCost.Captain)
+        {
+            foreach (var t in GetAllCharacterToken())
+            {
+                if (t.Tier == CharacterTierAndCost.Captain && t.State == CharacterTokenState.Confirm)
+                    t.SetTokenState(CharacterTokenState.Cancel);
+            }
+        }
+
+        clickedToken.SetTokenState(CharacterTokenState.Confirm);
+
+        //선택한 캐릭터 토큰을 배틀필드에 표시
+        GridManager.Instance.DisplayTokenOnBattlefield(clickedToken);
     }
 }

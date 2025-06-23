@@ -466,6 +466,7 @@ MonoBehaviour:
   background: {fileID: 8150746959173053375}
   sps:
   - {fileID: 21300000, guid: 225eea04c7f918f48ad5be07b0f6362e, type: 3}
+  - {fileID: 21300000, guid: 53f7c928b7210424788b2d49b021a698, type: 3}
   - {fileID: 21300000, guid: e9716e41867889843825accc64b8ce82, type: 3}
 --- !u!1 &8150746959179059746
 GameObject:

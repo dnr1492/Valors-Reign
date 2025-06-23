@@ -54,7 +54,7 @@ public class FilterController : MonoBehaviour
             btn.SetSelected(false);
         }
 
-        //전체 캐릭터 다시 표시
+        //캐릭터 표시
         ApplyFilter();
     }
 

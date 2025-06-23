@@ -46,6 +46,7 @@ public class UIManager : Singleton<UIManager>
             "UICreateDeckPhase1",
             "UICreateDeckPhase2",
             "UISkillInfoPopup",
+            "UIModalPopup"
         };
 
         foreach (string name in popupNames)
