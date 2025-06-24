@@ -70,11 +70,11 @@ public class Tool
         };
 
         // ===== ÀÓ½Ã µ¥ÀÌÅÍ =====
-        list.skillCardDatas.Add(new SkillCardData { id = 1000, name = "Skill Test 1", rank = (int)SkillCardRankAndMpConsum.Rank1, type = SkillCardType.Move, effect = "È¿°ú Â¾´Ù" });
-        list.skillCardDatas.Add(new SkillCardData { id = 1001, name = "Skill Test 1", rank = (int)SkillCardRankAndMpConsum.Rank2, type = SkillCardType.Attack, effect = "È¿°ú ´õ Â¾´Ù" });
-        list.skillCardDatas.Add(new SkillCardData { id = 1002, name = "Skill Test 2", rank = (int)SkillCardRankAndMpConsum.Rank1, type = SkillCardType.Move, effect = "È¿°ú ´ú Â¾´Ù" });
-        list.skillCardDatas.Add(new SkillCardData { id = 1003, name = "Skill Test 2", rank = (int)SkillCardRankAndMpConsum.Rank2, type = SkillCardType.Attack, effect = "È¿°ú °³ Â¾´Ù" });
-        list.skillCardDatas.Add(new SkillCardData { id = 1004, name = "Skill Test 3", rank = (int)SkillCardRankAndMpConsum.Rank1, type = SkillCardType.Buff, effect = "È¿°ú ¾ø´Ù" });
+        list.skillCardDatas.Add(new SkillCardData { id = 1000, name = "Skill Test 1", rank = (int)SkillCardRankAndMpConsum.Rank1, type = SkillCardType.Move, effect = "½ºÅ³ 1, ·©Å© 1" });
+        list.skillCardDatas.Add(new SkillCardData { id = 1001, name = "Skill Test 1", rank = (int)SkillCardRankAndMpConsum.Rank2, type = SkillCardType.Attack, effect = "½ºÅ³ 1, ·©Å© 2" });
+        list.skillCardDatas.Add(new SkillCardData { id = 1002, name = "Skill Test 2", rank = (int)SkillCardRankAndMpConsum.Rank1, type = SkillCardType.Move, effect = "½ºÅ³ 2, ·©Å© 1" });
+        list.skillCardDatas.Add(new SkillCardData { id = 1003, name = "Skill Test 2", rank = (int)SkillCardRankAndMpConsum.Rank2, type = SkillCardType.Attack, effect = "½ºÅ³ 2, ·©Å© 2" });
+        list.skillCardDatas.Add(new SkillCardData { id = 1004, name = "Skill Test 3", rank = (int)SkillCardRankAndMpConsum.Rank1, type = SkillCardType.Buff, effect = "È¿°ú ½ºÅ³ 3, ·©Å© 1" });
 
         LoadDataFromJSON(list, "skillCard_data.json");
     }

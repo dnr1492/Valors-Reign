@@ -55,6 +55,7 @@ public class CharacterToken : MonoBehaviour
             case CharacterTokenState.Cancel:
                 if (State == CharacterTokenState.Confirm && Cost != 0)
                     uiCreateDeckPhase2.SetMaxCost(-Cost);
+                    selectedSkillCounts.Clear();  //스킬 개수 초기화
                 break;
 
             case CharacterTokenState.Confirm:
