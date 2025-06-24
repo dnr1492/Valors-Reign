@@ -6,8 +6,10 @@ using UnityEditor;
 using UnityEngine;
 using static EnumClass;
 
+
 public class Tool
 {
+#if UNITY_EDITOR
     private static void LoadDataFromJSON<T>(T data, string fileName)
     {
         //Resources/Datas 경로
@@ -79,6 +81,7 @@ public class Tool
         LoadDataFromJSON(list, "skillCard_data.json");
     }
     #endregion
+#endif
 }
 
 #region 게임 플레이 데이터
