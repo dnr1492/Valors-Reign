@@ -9,4 +9,12 @@ public class EnumClass
     public enum CardType { None = -1, CharacterCard, SkillCard }
     public enum SkillCardType { None = -1, Move, Attack, Buff, Debuff, Trap }  // ===== ÃßÈÄ ¼öÁ¤ ¿ä¸Á ===== //
     public enum SkillCardRankAndMpConsum { None = -1, Rank1 = 1, Rank2 = 2, Rank3 = 3 }
+    public enum SkillRangeType
+    {
+        None,
+        LineForward1,  //Á÷¼± 1Ä­
+        LineForward2,  //Á÷¼± 2Ä­
+        LineForward3,  //Á÷¼± 3Ä­
+        Custom
+    }
 }

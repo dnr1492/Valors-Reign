@@ -34,6 +34,17 @@ public class HexTile : MonoBehaviour
         AssignedTokenKey = null;
     }
 
+    public void ShowDecorations(bool isShow)
+    {
+        outline.gameObject.SetActive(isShow);
+        direction.gameObject.SetActive(isShow);
+    }
+
+    public void SetColor(Color color)
+    {
+        imgCharacter.color = color;
+    }
+
     // ===== 추후 방향 셋팅용 ===== //
     // ===== 다른 곳에서 사용 예시: hexTile.SetCharacterTokenDirection(CharacterTokenDirection.UpLeft); ===== //
     public void SetCharacterTokenDirection(CharacterTokenDirection direction)
@@ -41,11 +52,5 @@ public class HexTile : MonoBehaviour
         float[] angles = { 0f, 60f, 120f, 180f, 240f, 300f };
         int index = Mathf.Clamp((int)direction, 0, 5);
         imgCharacter.rectTransform.rotation = Quaternion.Euler(0, 0, -angles[index]);  //시계방향 회전
-    }
-
-    private void ShowDecorations(bool isShow)
-    {
-        outline.gameObject.SetActive(isShow);
-        direction.gameObject.SetActive(isShow);
     }
 }

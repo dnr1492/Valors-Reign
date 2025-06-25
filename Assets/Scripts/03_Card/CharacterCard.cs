@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using Unity.VisualScripting;
@@ -17,7 +17,7 @@ public class CharacterCard : Card
     [SerializeField] Button btnConfirm;
 
     private int[] skillCardCounts;
-    private const int maxSkillCardCount = 4;  //ÃÖ´ë °³¼ö
+    private const int maxSkillCardCount = 4;  //ìµœëŒ€ ê°œìˆ˜
 
     protected override void SetCharacterCard(CharacterToken clickedToken, Sprite sprite, CharacterCardData characterCardData)
     {
@@ -44,14 +44,14 @@ public class CharacterCard : Card
 
             int index = i;
 
-            //½ºÅ³ ¸Å¼ö ÃÊ±âÈ­ ¶Ç´Â ºÒ·¯¿À±â (ConfirmÀÎ °æ¿ì¿¡¸¸ ºÒ·¯¿À±â)
+            //ìŠ¤í‚¬ ë§¤ìˆ˜ ì´ˆê¸°í™” ë˜ëŠ” ë¶ˆëŸ¬ì˜¤ê¸° (Confirmì¸ ê²½ìš°ì—ë§Œ ë¶ˆëŸ¬ì˜¤ê¸°)
             int savedCount = clickedToken.State == CharacterTokenState.Confirm
                 ? clickedToken.GetSkillCount(skillId)
                 : 0;
 
             skillCardCounts[index] = savedCount;
 
-            //ÅØ½ºÆ® ¼³Á¤
+            //í…ìŠ¤íŠ¸ ì„¤ì •
             txtRanks[index].gameObject.SetActive(true);
             txtRanks[index].text = skillData.rank.ToString();
 
@@ -61,7 +61,7 @@ public class CharacterCard : Card
             txtCounts[index].gameObject.SetActive(true);
             txtCounts[index].text = savedCount.ToString();
 
-            //¹öÆ° ÃÊ±âÈ­: Å¬¸¯ ½Ã ½ºÅ³ °³¼ö Áõ°¡ & ÅäÅ«¿¡ ¹Ý¿µ
+            //ë²„íŠ¼ ì´ˆê¸°í™”: í´ë¦­ ì‹œ ìŠ¤í‚¬ ê°œìˆ˜ ì¦ê°€ & í† í°ì— ë°˜ì˜
             btnCounts[index].onClick.AddListener(() =>
             {
                 skillCardCounts[index] = (skillCardCounts[index] + 1) % (maxSkillCardCount + 1);
