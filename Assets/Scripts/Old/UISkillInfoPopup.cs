@@ -15,5 +15,5 @@ public class UISkillInfoPopup : UIPopupBase
         btn_close.onClick.AddListener(Close);
     }
 
-    protected override void ResetUI() { /*필요 없음*/ }
+    protected override void ResetUI() { }
 }

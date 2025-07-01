@@ -136,16 +136,4 @@ public class CharacterTokenController : MonoBehaviour
         GridManager.Instance.DisplayTokenOnBattlefield(token);
         skillSlotCollection.Refresh();
     }
-
-    //특정 상태의 토큰들 가져오기 (현재 사용하지 않음 - 추후 필터링 기능 구현 시 사용 예정)
-    //public CharacterToken[] GetTokensByState(CharacterTokenState state)
-    //{
-    //    return GetAllCharacterToken().Where(token => token.State == state).ToArray();
-    //}
-
-    //선택된 토큰들 가져오기 (현재 사용하지 않음 - 추후 덱 저장 기능 구현 시 사용 예정)
-    //public CharacterToken[] GetSelectedTokens()
-    //{
-    //    return GetTokensByState(CharacterTokenState.Confirm);
-    //}
 }

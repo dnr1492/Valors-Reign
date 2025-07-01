@@ -74,5 +74,5 @@ public class UIEditorDeckPhase1 : UIPopupBase
         }
     }
 
-    protected override void ResetUI() {}
+    protected override void ResetUI() { }
 }

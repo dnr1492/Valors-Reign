@@ -17,5 +17,5 @@ public class UIEditorDeckPhase2 : UIPopupBase
         UIManager.Instance.ShowPopup<UIEditorDeckPhase1>("UIEditorDeckPhase1");
     }
 
-    protected override void ResetUI() {}
+    protected override void ResetUI() { }
 }
