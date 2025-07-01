@@ -15,9 +15,9 @@ public class BackendManager : Singleton<BackendManager>
 
     private void InitBackend()
     {
-        //µÚ³¡ ¼­¹ö¿¡ ¿¬°á
+        //ï¿½Ú³ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
         var bro = Backend.Initialize();
-        if (bro.IsSuccess()) Debug.Log($"µÚ³¡ ¼­¹ö ÃÊ±âÈ­ ¼º°ø : {bro}");  //204
-        else Debug.Log($"µÚ³¡ ¼­¹ö ÃÊ±âÈ­ ½ÇÆÐ : {bro}");  //400
+        if (bro.IsSuccess()) Debug.Log($"ï¿½Ú³ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ê±ï¿½È­ ï¿½ï¿½ï¿½ï¿½ : {bro}");  //204
+        else Debug.Log($"ï¿½Ú³ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ê±ï¿½È­ ï¿½ï¿½ï¿½ï¿½ : {bro}");  //400
     }
 }

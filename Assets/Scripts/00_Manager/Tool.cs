@@ -6,7 +6,6 @@ using UnityEditor;
 using UnityEngine;
 using static EnumClass;
 
-
 public class Tool
 {
 #if UNITY_EDITOR
@@ -130,11 +129,13 @@ public class SkillCardDataList
 [Serializable]
 public class SkillCardData
 {
-    public int id;  //CharacterCardData의 skills가 키값, ex) 1001
+    public int id;  //CharacterCardData의 skills가 키값 ex) 1001
     public string name;
     public int rank;
     //public int mpConsum;  //MP소모량은 Rank랑 동일
     public SkillCardType type;
     public string effect;
+
+    // ===== Damage, Count, 이동 불가 (enum) 등으로 추가하기 ===== //
 }
 #endregion

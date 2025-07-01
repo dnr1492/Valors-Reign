@@ -1,5 +1,3 @@
-using Coffee.UISoftMask;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
@@ -9,15 +7,15 @@ using static EnumClass;
 
 public class GridManager : Singleton<GridManager>
 {
-    private float hexWidth;  //À°°¢ÇüÀÇ °¡·Î Å©±â, ÇØ´ç ÇÁ¸®ÆÕÀÇ ±âº» Å©±â 70
-    private float hexHeight;  //À°°¢ÇüÀÇ ¼¼·Î Å©±â (Á¤À°°¢Çü ±âÁØÀ¸·Î ¡î3/2 * ³Êºñ), ÇØ´ç ÇÁ¸®ÆÕÀÇ ±âº» Å©±â 60
+    private float hexWidth;  //ìœ¡ê°í˜•ì˜ ê°€ë¡œ í¬ê¸°, í•´ë‹¹ ìœ¡ê°í˜•ì˜ ê¸°ë³¸ í¬ê¸° 70
+    private float hexHeight;  //ìœ¡ê°í˜•ì˜ ì„¸ë¡œ í¬ê¸° (ìœ¡ê°í˜•ì˜ ë†’ì´ëŠ” ê°€ë¡œ*âˆš3/2), í•´ë‹¹ ìœ¡ê°í˜•ì˜ ê¸°ë³¸ í¬ê¸° 60
 
-    private readonly int rows = 8;  //Çà (°¡·Î)
-    private readonly int columns = 9;  //¿­ (¼¼·Î)
+    private readonly int rows = 8;  //í–‰ (ì„¸ë¡œ)
+    private readonly int columns = 9;  //ì—´ (ê°€ë¡œ)
 
     private readonly Dictionary<(int col, int row), string> txtMap = new()
     {
-        //Çà, ¿­
+        //ì—´, í–‰
         { (8, 7), "H" }, { (8, 6), "L" },
         { (7, 6), "M" },
         { (6, 7), "H" }, { (6, 6), "L" },
@@ -29,12 +27,12 @@ public class GridManager : Singleton<GridManager>
         { (0, 7), "H" }, { (0, 6), "L" },
     };
 
-    private readonly Dictionary<(int col, int row), Image> imgCharacterMap = new();  //ÁÂÇ¥¿Í ÇØ´ç ÁÂÇ¥ÀÇ Image ¸ÅÇÎ
-    private readonly Dictionary<char, List<(int col, int row)>> tierSlots = new();  //Æ¼¾î¿Í ÇØ´ç ÁÂÇ¥ ¸ÅÇÎ
-    private readonly Dictionary<int, (int col, int row)> tokenPosMap = new();  //ÅäÅ«ÀÇ °íÀ¯ Key(id)¸¦ ÁÂÇ¥¿Í ¸ÅÇÎ
-    private readonly Dictionary<(int col, int row), HexTile> hexTileMap = new();  //ÁÂÇ¥¿Í ÇØ´ç ÁÂÇ¥ÀÇ HexTile ¸ÅÇÎ
+    private readonly Dictionary<(int col, int row), Image> imgCharacterMap = new();  //ì¢Œí‘œì— í•´ë‹¹í•˜ëŠ” ì¢Œí‘œì˜ Image ì»´í¬ë„ŒíŠ¸
+    private readonly Dictionary<char, List<(int col, int row)>> tierSlots = new();  //í‹°ì–´ì— í•´ë‹¹í•˜ëŠ” ì¢Œí‘œ ë¦¬ìŠ¤íŠ¸
+    private readonly Dictionary<int, (int col, int row)> tokenPosMap = new();  //í† í°ì˜ ê³ ìœ  Key(id)ì™€ ì¢Œí‘œë¥¼ ë§¤í•‘
+    private readonly Dictionary<(int col, int row), HexTile> hexTileMap = new();  //ì¢Œí‘œì— í•´ë‹¹í•˜ëŠ” ì¢Œí‘œì˜ HexTile ì»´í¬ë„ŒíŠ¸
 
-    #region ÇÊµå »ı¼º
+    #region ê·¸ë¦¬ë“œ ìƒì„±
     public void CreateHexGrid(RectTransform battleFieldRt, GameObject hexPrefab, RectTransform parant)
     {
         ResizeHexGrid(battleFieldRt);
@@ -49,7 +47,7 @@ public class GridManager : Singleton<GridManager>
 
         List<RectTransform> hexTransforms = new();
 
-        //±×¸®µå¸¦ »ı¼ºÇÏ¸é¼­ RectTransformÀ» ¸®½ºÆ®¿¡ ÀúÀå
+        //ìœ¡ê°í˜•ì„ ìƒì„±í•˜ë©´ì„œ RectTransformì„ ë¦¬ìŠ¤íŠ¸ì— ì¶”ê°€
         for (int col = 0; col < columns; col++)
         {
             int maxRow = rows - ((col % 2 == 1) ? 1 : 0);
@@ -79,7 +77,7 @@ public class GridManager : Singleton<GridManager>
                 hexTile.Init((col, row));
                 hexTileMap[(col, row)] = hexTile;
 
-                //ÁÂÇ¥·Î ÀÌ¹ÌÁö ¸ÅÇÎ µî·Ï
+                //ì¢Œí‘œì˜ ì´ë¯¸ì§€ ì»´í¬ë„ŒíŠ¸ ì°¸ì¡°
                 var image = hexTile.transform.Find("mask").transform.Find("imgCharacter").GetComponent<Image>();
                 image.enabled = false;
                 imgCharacterMap[(col, row)] = image;
@@ -87,7 +85,7 @@ public class GridManager : Singleton<GridManager>
         }
 
         FitHexGrid(hexTransforms, parant);
-        BuildTierSlotTable();  //¸¶Áö¸·¿¡ È£Ãâ
+        BuildTierSlotTable();  //í‹°ì–´ ìŠ¬ë¡¯ í…Œì´ë¸” í˜¸ì¶œ
     }
 
     private void ResizeHexGrid(RectTransform battleFieldRt)
@@ -95,57 +93,57 @@ public class GridManager : Singleton<GridManager>
         float availableWidth = battleFieldRt.rect.width;
         float availableHeight = battleFieldRt.rect.height;
 
-        //±âÁØ hex Å©±â (ÀÓÀÇ ÃÊ±â°ª)
+        //ê¸°ë³¸ hex í¬ê¸° (ê¸°ë³¸ ì´ˆê¸°ê°’)
         float baseHexWidth = 72f;
-        float baseHexHeight = baseHexWidth * Mathf.Sqrt(3) / 2f;  //Á¤À°°¢Çü ±âÁØ ºñÀ²
+        float baseHexHeight = baseHexWidth * Mathf.Sqrt(3) / 2f;  //ìœ¡ê°í˜•ì˜ ë†’ì´ ê³µì‹
 
-        //Grid ÀüÃ¼ ³Êºñ/³ôÀÌ¸¦ ÃÊ±â Å©±â·Î °è»ê
+        //Grid ì „ì²´ ê°€ë¡œ/ì„¸ë¡œë¥¼ ê¸°ë³¸ í¬ê¸°ë¡œ ê³„ì‚°
         float rawTotalWidth = (columns - 1) * baseHexWidth * 0.75f + baseHexWidth;
         float rawTotalHeight = rows * baseHexHeight + (columns > 1 ? baseHexHeight / 2f : 0);
 
-        //½ÇÁ¦ Å©±â¿¡ ¸Â°Ô ½ºÄÉÀÏ Á¶Á¤
+        //ì‚¬ìš© ê°€ëŠ¥í•œ í¬ê¸°ì— ë§ì¶° ìŠ¤ì¼€ì¼ ê³„ì‚°
         float scaleX = availableWidth / rawTotalWidth;
         float scaleY = availableHeight / rawTotalHeight;
-        float scaleFactor = Mathf.Min(scaleX, scaleY);  //³Ê¹« Ä¿ÁöÁö ¾Êµµ·Ï ÀÛÀº °ª ¼±ÅÃ
+        float scaleFactor = Mathf.Min(scaleX, scaleY);  //ë” ì‘ì€ ìŠ¤ì¼€ì¼ì„ ì‚¬ìš©í•˜ì—¬ ë¹„ìœ¨ ìœ ì§€
 
-        //ÃÖÁ¾ Àû¿ë hex Å©±â
+        //ìµœì¢… ê³„ì‚°ëœ hex í¬ê¸°
         hexWidth = baseHexWidth * scaleFactor;
         hexHeight = baseHexHeight * scaleFactor;
     }
 
     private void FitHexGrid(List<RectTransform> hexTransforms, RectTransform parant)
     {
-        //¸ğµç Hex ¿ÀºêÁ§Æ®ÀÇ Áß¾Ó°ªÀ» ±¸ÇÏ±â
+        //ëª¨ë“  Hex íŠ¸ëœìŠ¤í¼ì˜ ì¤‘ì‹¬ì  ê³„ì‚°
         Vector2 totalCenter = Vector2.zero;
         foreach (var rt in hexTransforms) totalCenter += rt.anchoredPosition;
         totalCenter /= hexTransforms.Count;
 
-        //ºÎ¸ğ RectTransformÀÇ Áß¾Ó¿¡ ¸ÂÃß±â
+        //ë¶€ëª¨ RectTransformì˜ ì¤‘ì‹¬ì  ê³„ì‚°
         Vector2 parentCenter = parant.rect.center;
         Vector2 offset = parentCenter - totalCenter;
 
-        //±×¸®µåÀÇ °¢ À§Ä¡¸¦ Áß¾Ó¿¡ ¸Â°Ô Á¶Á¤
+        //ìœ¡ê°í˜•ë“¤ì„ ë¶€ëª¨ì˜ ì¤‘ì‹¬ì— ë§ì¶° ì´ë™
         foreach (var rt in hexTransforms) rt.anchoredPosition += offset;
     }
     #endregion
 
-    #region ¼±ÅÃÇÑ Ä³¸¯ÅÍ ÅäÅ«À» ¹èÆ²ÇÊµå¿¡ Ç¥½Ã
+    #region ìºë¦­í„° í† í°ì„ ì „ì¥ì— í‘œì‹œ
     public void DisplayTokenOnBattlefield(CharacterToken token)
     {
-        //ÅäÅ« Tier ±ÛÀÚ ÃßÃâ (H, L, C ...)
+        //í† í° Tier ë¬¸ì ì¶”ì¶œ (H, L, C ...)
         char tier = token.Tier.ToString()[0];
 
-        //¹èÄ¡µÉ ½½·Ô ¸®½ºÆ®
+        //í•´ë‹¹í•˜ëŠ” ì¢Œí‘œ ë¦¬ìŠ¤íŠ¸
         var slots = tierSlots[tier];
 
-        //¸®´õ¸é ¹«Á¶°Ç Ã¹ Ä­
+        //ìº¡í‹´ì€ ì¤‘ì•™ ì²« ì¹¸
         if (tier == 'C')
         {
             PlaceToken(slots[0], token.Key, token.GetCharacterSprite());
             return;
         }
 
-        //ºó Ä­ Ã£±â
+        //ë¹ˆ ì¹¸ ì°¾ê¸°
         foreach (var pos in slots)
         {
             if (imgCharacterMap[pos].sprite == null)
@@ -155,7 +153,7 @@ public class GridManager : Singleton<GridManager>
             }
         }
 
-        //´Ù Âù °æ¿ì ¡æ Ã¹ Ä­ µ¤¾î¾²±â
+        //ë¹ˆ ì¹¸ì´ ì—†ìœ¼ë©´ ì²« ì¹¸ì— ë°°ì¹˜
         PlaceToken(slots[0], token.Key, token.GetCharacterSprite());
     }
 
@@ -163,10 +161,10 @@ public class GridManager : Singleton<GridManager>
     {
         tierSlots.Clear();
 
-        //Tier ±ÛÀÚ¿¡ ÇØ´çÇÏ´Â ÁÂÇ¥ Ã£±â
+        //Tier ë¬¸ìì™€ í•´ë‹¹í•˜ëŠ” ì¢Œí‘œ ì°¾ê¸°
         foreach (var kvp in txtMap)
         {
-            //ÅäÅ« Tier ±ÛÀÚ ÃßÃâ (H, L, C ...)
+            //í† í° Tier ë¬¸ì ì¶”ì¶œ (H, L, C ...)
             char tier = kvp.Value[0];
             if (!tierSlots.TryGetValue(tier, out var list))
             {
@@ -177,7 +175,7 @@ public class GridManager : Singleton<GridManager>
             list.Add(kvp.Key);
         }
 
-        //¿ŞÂÊ ¡æ ¿À¸¥ÂÊ, °°Àº ¿­ÀÌ¸é ¾Æ·¡ÂÊ(Çà Å« °ª) ¿ì¼±
+        //ê° ë¦¬ìŠ¤íŠ¸ë¥¼ ì •ë ¬, ê°™ì€ ì—´ì—ì„œëŠ” ì•„ë˜ìª½(í–‰ì´ í° ìª½) ìš°ì„ 
         foreach (var list in tierSlots.Values)
             list.Sort((a, b) =>
                 a.col != b.col ? a.col.CompareTo(b.col)
@@ -188,7 +186,7 @@ public class GridManager : Singleton<GridManager>
     {
         if (!hexTileMap.TryGetValue(pos, out var hexTile)) return;
 
-        //±âÁ¸ ÅäÅ« Á¦°Å
+        //ê¸°ì¡´ í† í° ì œê±°
         foreach (var kvp in tokenPosMap.ToList())
         {
             if (kvp.Value == pos)
@@ -199,27 +197,27 @@ public class GridManager : Singleton<GridManager>
             }
         }
 
-        //ÀÌ¹ÌÁö ¼³Á¤
+        //ì´ë¯¸ì§€ ì„¤ì •
         imgCharacterMap[pos].sprite = sprite;
         imgCharacterMap[pos].enabled = true;
 
-        //HexTile¿¡ ÇØ´ç ÅäÅ« Key°ª ¼³Á¤
+        //HexTileì— í•´ë‹¹ í† í° Keyë¥¼ í• ë‹¹
         hexTile.AssignToken(tokenKey);
 
-        //À§Ä¡ ±â·Ï
+        //ìœ„ì¹˜ ë§¤í•‘
         tokenPosMap[tokenKey] = pos;
     }
     #endregion
 
-    #region ¼±ÅÃÇÑ Ä³¸¯ÅÍ ÅäÅ«À» ¹èÆ²ÇÊµå¿¡¼­ Ç¥½Ã Á¦°Å
+    #region ìºë¦­í„° í† í°ì„ ì „ì¥ì—ì„œ ì œê±°
     public void RemoveTokenFromBattlefield(CharacterToken token)
     {
-        //ÀÌ¹Ì ¹èÄ¡µÇ¾î ÀÖ´Â TokenÀÌ¸é ÅäÅ« ÇØÁ¦
+        //ì´ë¯¸ ë°°ì¹˜ë˜ì–´ ìˆëŠ” Tokenì´ë©´ í† í° ì œê±°
         if (tokenPosMap.TryGetValue(token.Key, out var curPos))
         {
             ClearToken(curPos);
             tokenPosMap.Remove(token.Key);
-            Debug.Log($"ÅäÅ« ÇØÁ¦ ÁÂÇ¥: {curPos} Tier: {token.Tier}");
+            Debug.Log($"í† í° ì œê±° ì¢Œí‘œ: {curPos} Tier: {token.Tier}");
             return;
         }
     }
@@ -237,7 +235,7 @@ public class GridManager : Singleton<GridManager>
     #endregion
 
     /// <summary>
-    /// (½½·Ô(Hex)°ú ¸¶¿ì½º °£ÀÇ) °Å¸® ±â¹İ Å½»ö
+    /// (ë§ˆìš°ìŠ¤(Hex)ì˜ ë§ˆìš°ìŠ¤ ìœ„ì¹˜) ê°€ì¥ ê°€ê¹Œìš´ ìŠ¬ë¡¯ ê²€ìƒ‰
     /// </summary>
     /// <param name="screenPos"></param>
     /// <param name="nearestSlot"></param>
@@ -265,7 +263,7 @@ public class GridManager : Singleton<GridManager>
     }
 
     /// <summary>
-    /// ÅäÅ«À» ÀÌµ¿
+    /// í† í°ì„ ì´ë™
     /// </summary>
     /// <param name="from"></param>
     /// <param name="to"></param>
@@ -283,7 +281,7 @@ public class GridManager : Singleton<GridManager>
 
         if (fromToken == null || fromToken.Tier.ToString()[0] != dropSlotChar)
         {
-            //µå·Ó À§Ä¡°¡ µ¿ÀÏÇÑ Æ¼¾îÀÇ ½½·ÔÀÌ ¾Æ´Ï¸é º¹±Í (º¹»çº»¸¸ »èÁ¦)
+            //ë“œë¡­ ìœ„ì¹˜ì˜ í‹°ì–´ì™€ í† í°ì˜ í‹°ì–´ê°€ ë‹¤ë¥´ë©´ ì´ë™ (ì´ë™ ë¶ˆê°€)
             return;
         }
 
@@ -292,7 +290,7 @@ public class GridManager : Singleton<GridManager>
         var fromTile = hexTileMap[from];
         var toTile = hexTileMap[to];
 
-        //ºó Ä­À¸·Î ÀÌµ¿
+        //ë¹ˆ ì¹¸ìœ¼ë¡œ ì´ë™
         if (!toTile.AssignedTokenKey.HasValue)
         {
             tokenPosMap[fromKey] = to;
@@ -330,14 +328,17 @@ public class GridManager : Singleton<GridManager>
     }
 
     /// <summary>
-    /// TokenPackÀ¸·Î ¹­±â
+    /// DeckPack ìƒì„±
     /// </summary>
+    /// <param name="deckName">ë± ì´ë¦„</param>
     /// <returns></returns>
-    public TokenPack GetTokenPack()
+    public DeckPack CreateDeckPack(string deckName)
     {
-        var tokenPack = new TokenPack();
-        var allTokens = ControllerRegister.Get<CharacterTokenController>().GetAllCharacterToken();
+        var DeckPack = new DeckPack();
+        DeckPack.deckName = deckName;
+        DeckPack.race = ControllerRegister.Get<FilterController>().GetSelectedRace();
 
+        var allTokens = ControllerRegister.Get<CharacterTokenController>().GetAllCharacterToken();
         foreach (var kvp in tokenPosMap)
         {
             var key = kvp.Key;
@@ -357,36 +358,39 @@ public class GridManager : Singleton<GridManager>
             foreach (var kv in token.GetAllSkillCounts())
                 slotData.skillCounts.Add(new SkillCountData { skillId = kv.Key, count = kv.Value });
 
-            tokenPack.tokenSlots.Add(slotData);
+            DeckPack.tokenSlots.Add(slotData);
         }
 
-        return tokenPack;
+        return DeckPack;
     }
 
-    #region (ÀÓ½Ã·Î ·ÎÄÃ¿¡¼­) TokenPack ·Îµå
-    public void LoadTokenPack(CharacterCard characterCard)
+    /// <summary>
+    /// DeckPack ì ìš©
+    /// </summary>
+    /// <param name="deckPack"></param>
+    /// <param name="characterCard"></param>
+    public void ApplyDeckPack(DeckPack deckPack, CharacterCard characterCard)
     {
-        TokenPack tokenPack = Load();
+        ControllerRegister.Get<FilterController>().InitFilter(deckPack.race);
 
+        //ëª¨ë“  í† í° ìƒíƒœ ì´ˆê¸°í™” (Select/Confirm -> Cancel)
         var allTokens = ControllerRegister.Get<CharacterTokenController>().GetAllCharacterToken();
-
-        //¸ğµç ÅäÅ« »óÅÂ ÃÊ±âÈ­ (Select/Confirm -> Cancel)
         foreach (var token in allTokens)
         {
             if (token.State != CharacterTokenState.Cancel)
                 token.SetTokenState(CharacterTokenState.Cancel);
         }
 
-        //ÀúÀåµÈ À§Ä¡¿¡ Confirm »óÅÂ·Î ¹èÄ¡
-        foreach (var slot in tokenPack.tokenSlots)
+        //ì €ì¥ëœ ìœ„ì¹˜ì— Confirm ìƒíƒœë¡œ ë°°ì¹˜
+        foreach (var slot in deckPack.tokenSlots)
         {
             var token = allTokens.FirstOrDefault(t => t.Key == slot.tokenKey);
             if (token == null) continue;
 
-            PlaceToken((slot.col, slot.row), token.Key, token.GetCharacterSprite());  //À§Ä¡ ÁöÁ¤ÇÏ¿© °­Á¦ ¹èÄ¡
-            token.SetTokenState(CharacterTokenState.Confirm);  //¼±ÅÃ »óÅÂµµ º¹¿ø
+            PlaceToken((slot.col, slot.row), token.Key, token.GetCharacterSprite());  //ìœ„ì¹˜ ê³„ì‚°í•´ì„œ ë°°ì¹˜
+            token.SetTokenState(CharacterTokenState.Confirm);  //ìƒíƒœë¥¼ Confirmìœ¼ë¡œ ë³€ê²½
 
-            //½ºÅ³ ¸Å¼ö º¹¿ø
+            //ìŠ¤í‚¬ ê°œìˆ˜ ë³µì›
             if (slot.skillCounts != null)
             {
                 foreach (var skill in slot.skillCounts)
@@ -394,73 +398,45 @@ public class GridManager : Singleton<GridManager>
             }
         }
 
-        //Ä³¸¯ÅÍ Ä«µå µŞ¸éÀ¸·Î º¯°æ
+        //ìºë¦­í„° ì¹´ë“œ ìˆ¨ê¹€ìƒíƒœë¡œ ë³€ê²½
         characterCard.SetCardState(CardState.Back);
     }
 
-    private TokenPack Load()
-    {
-        string savePath = Application.persistentDataPath + "/token_pack.json";
-
-        if (!System.IO.File.Exists(savePath))
-        {
-            Debug.LogWarning("ÀúÀåµÈ TokenPack ¾øÀ½");
-            return null;
-        }
-
-        string json = System.IO.File.ReadAllText(savePath);
-        TokenPack tokenPack = JsonUtility.FromJson<TokenPack>(json);
-        return tokenPack;
-    }
-    #endregion
-
     /// <summary>
-    /// (ÀÓ½Ã·Î ·ÎÄÃ¿¡) TokenPack ÀúÀå
+    /// UIDeckPhase3 Popup ì´ˆê¸°í™”
     /// </summary>
-    /// <param name="tokenPack"></param>
-    public void SaveTokenPack(TokenPack tokenPack)
+    public void ResetUIDeckPhase3(CharacterCard characterCard)
     {
-        string savePath = Application.persistentDataPath + "/token_pack.json";
-        string json = JsonUtility.ToJson(tokenPack, true);
-        System.IO.File.WriteAllText(savePath, json);
-        Debug.Log($"TokenPack ÀúÀå ¿Ï·á: {savePath}");
-    }
-
-    /// <summary>
-    /// UIDeckPhase2 Popup ÃÊ±âÈ­
-    /// </summary>
-    public void ResetUIDeckPhase2(CharacterCard characterCard)
-    {
-        //¸ğµç ÅäÅ« ÀÌ¹ÌÁö Á¦°Å
+        //ëª¨ë“  í† í° ì´ë¯¸ì§€ ì œê±°
         foreach (var img in imgCharacterMap.Values)
         {
             img.sprite = null;
             img.enabled = false;
         }
 
-        //¸ğµç HexTile ÃÊ±âÈ­
+        //ëª¨ë“  HexTile ì´ˆê¸°í™”
         foreach (var tile in hexTileMap.Values)
             tile.ClearToken();
 
-        //À§Ä¡ ±â·Ï Á¦°Å
+        //ìœ„ì¹˜ ë§¤í•‘ ì´ˆê¸°í™”
         tokenPosMap.Clear();
 
-        //¸ğµç ÅäÅ« »óÅÂ ÃÊ±âÈ­ (Select ¶Ç´Â Confirm »óÅÂ¿´´ø °Íµé)
+        //ëª¨ë“  í† í° ìƒíƒœ ì´ˆê¸°í™”
         var tokens = ControllerRegister.Get<CharacterTokenController>().GetAllCharacterToken();
         foreach (var token in tokens)
         {
             if (token.State != CharacterTokenState.Cancel)
                 token.SetTokenState(CharacterTokenState.Cancel);
 
-            //½ºÅ³ ¸Å¼ö ÃÊ±âÈ­
+            //ìŠ¤í‚¬ ê°œìˆ˜ ì´ˆê¸°í™”
             foreach (var skillId in DataManager.Instance.dicCharacterCardData[token.Key].skills)
                 token.SetSkillCount(skillId, 0);
         }
 
-        //ÇÊÅÍ ÃÊ±âÈ­
-        ControllerRegister.Get<FilterController>().ResetFilter();
+        ////í•„í„° ì´ˆê¸°í™”
+        //ControllerRegister.Get<FilterController>().ResetFilter();
 
-        //Ä³¸¯ÅÍ Ä«µå µŞ¸éÀ¸·Î º¯°æ
+        //ìºë¦­í„° ì¹´ë“œ ìˆ¨ê¹€ìƒíƒœë¡œ ë³€ê²½
         characterCard.SetCardState(CardState.Back);
     }
 }
