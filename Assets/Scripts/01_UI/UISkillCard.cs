@@ -37,7 +37,7 @@ public class UISkillCard : MonoBehaviour
         {
             name = "Heal Zone",
             effect = "Restores HP",
-            rangeType = SkillRangeType.LineForward2,
+            rangeType = SkillRangeType.Ring1,
             customOffsetRange = new List<(int, int, Color)> {
                 (0, 0, Color.gray),
                 (1, 0, Color.red),
@@ -109,15 +109,20 @@ public class UISkillCard : MonoBehaviour
         switch (data.rangeType)
         {
             case SkillRangeType.LineForward1:
-                range.AddRange(GetLine((0, -1), 1, Color.red));
+                range.AddRange(SkillRangeHelper.GetLine((0, -1), 1, Color.red));
                 break;
 
             case SkillRangeType.LineForward2:
-                range.AddRange(GetLine((0, -1), 2, Color.red));
+                range.AddRange(SkillRangeHelper.GetLine((0, -1), 2, Color.red));
                 break;
 
             case SkillRangeType.LineForward3:
-                range.AddRange(GetLine((0, -1), 3, Color.red));
+                range.AddRange(SkillRangeHelper.GetLine((0, -1), 3, Color.red));
+                break;
+
+            case SkillRangeType.Ring1:
+                //range.Add((0, 0, Color.gray));  //중심은 회색
+                range.AddRange(SkillRangeHelper.GetRing(1, Color.green));  //1칸, ring은 초록
                 break;
 
             case SkillRangeType.Custom:
@@ -139,20 +144,7 @@ public class UISkillCard : MonoBehaviour
             centerHex.GetComponent<HexTile>().SetColor(Color.gray);
     }
 
-    // ============== 1. 범위 표시하는 스크립트 따로 만들어두는게 어때?? Controller도 괜찮고.. ================= //
-    // ============== 2. Craete Hex의 Container가 0x0인 상태로 호출돼서 첫 생성이 이상하게 되는 버그... ================= //
-    private List<(int dq, int dr, Color color)> GetLine((int dq, int dr) direction, int length, Color color)
-    {
-        var result = new List<(int, int, Color)>();
-        int q = 0, r = 0;
-        for (int i = 1; i <= length; i++)
-        {
-            q += direction.dq;
-            r += direction.dr;
-            result.Add((q, r, color));
-        }
-        return result;
-    }
+    // ============== 1. Craete Hex의 Container가 0x0인 상태로 호출돼서 첫 생성이 이상하게 되는 버그... ================= //
 
     public class TempSkillCardData
     {

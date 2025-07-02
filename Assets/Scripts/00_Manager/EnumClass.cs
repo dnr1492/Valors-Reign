@@ -15,6 +15,7 @@ public class EnumClass
         LineForward1,  //Á÷¼± 1Ä­
         LineForward2,  //Á÷¼± 2Ä­
         LineForward3,  //Á÷¼± 3Ä­
+        Ring1,         //¿øÇü 1Ä­
         Custom
     }
 }
