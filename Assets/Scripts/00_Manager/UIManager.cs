@@ -43,10 +43,11 @@ public class UIManager : Singleton<UIManager>
     {
         //여기에 필요한 팝업 이름 추가
         string[] popupNames = {
-            "UICreateDeckPhase1",
-            "UICreateDeckPhase2",
-            "UISkillInfoPopup",
+            "UIEditorDeckPhase1",
+            "UIEditorDeckPhase2",
+            "UIEditorDeckPhase3",
             "UIModalPopup"
+            //"UISkillInfoPopup",
         };
 
         foreach (string name in popupNames)
@@ -65,8 +66,7 @@ public class UIManager : Singleton<UIManager>
             GameObject go = Instantiate(prefab, mainCanvas.transform);
             go.SetActive(false);
 
-            if (go.TryGetComponent<UIPopupBase>(out var popup))
-                activePopups[name] = popup;
+            if (go.TryGetComponent<UIPopupBase>(out var popup)) activePopups[name] = popup;
         }
     }
 
@@ -102,8 +102,7 @@ public class UIManager : Singleton<UIManager>
     /// <param name="popupName"></param>
     public void ClosePopup(string popupName)
     {
-        if (activePopups.TryGetValue(popupName, out UIPopupBase popup))
-            popup.Close();
+        if (activePopups.TryGetValue(popupName, out UIPopupBase popup)) popup.Close();
     }
 
     /// <summary>
@@ -115,11 +114,16 @@ public class UIManager : Singleton<UIManager>
     }
 
     /// <summary>
-    /// 팝업이 현재 열려 있는지 확인
+    /// 팝업 가져오기
     /// </summary>
+    /// <typeparam name="T"></typeparam>
     /// <param name="popupName"></param>
     /// <returns></returns>
-    public bool IsOpen(string popupName) => activePopups.TryGetValue(popupName, out var p) && p.gameObject.activeSelf;
+    public T GetPopup<T>(string popupName) where T : UIPopupBase
+    {
+        if (activePopups.TryGetValue(popupName, out UIPopupBase popup)) return popup as T;
+        return null;
+    }
 
     #region 내부 로드 / 인스턴스화
     private T InstantiatePopup<T>(string popupName) where T : UIPopupBase

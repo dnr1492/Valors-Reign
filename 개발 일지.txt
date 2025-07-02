@@ -1,0 +1,11 @@
+1. filter button
+2. 캐릭터 및 스킬 curCount / maxCount로 표시
+3. [디자인] Editor Deck에 Icon/Background 등 할당
+
+버그
+1. 덱 이름 설정할 때 사소한 에러가 뜸 (덱 이름을 누르고 바로 저장을 누를 경우.. 또는 다른 곳 클릭할 경우)
+2. Captain/C를 Boss/B로 수정하기
+3. ***첫 클릭 시 데이터가 적용이 안되는 버그
+       => GridManager의 ApplyDeckPack 함수 내부 Token이 null이라서 생기는 문제이다!
+       => allTokens에 데이터가 안들어가 있는 상태라서 생기는 문제이다!!
+       => FilterController의 Frame 미는 함수가 문제인 듯??

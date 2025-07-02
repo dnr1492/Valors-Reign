@@ -1,18 +1,21 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static EnumClass;
 
 [System.Serializable]
-public class TokenPack
+public class DeckPack
 {
+    public string deckName = "";  //ë± ì´ë¦„
+    public CharacterRace race;  //ë± ì¢…ì¡±
     public List<TokenSlotData> tokenSlots = new();
 }
 
 [System.Serializable]
 public class TokenSlotData
 {
-    public int tokenKey;  //Ä³¸¯ÅÍ °íÀ¯ ID
-    public int col, row;  //¹èÄ¡µÈ À§Ä¡
+    public int tokenKey;
+    public int col, row;  //ì¢Œí‘œ
     public List<SkillCountData> skillCounts = new();  //skillId, count
 }
 
