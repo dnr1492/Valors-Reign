@@ -12,9 +12,9 @@ public class RaceButton : MonoBehaviour
     private void Awake()
     {
         btn = GetComponent<Button>();
-        btn.onClick.AddListener(() => {
+        btn.onClick.AddListener(async () => {
             UIManager.Instance.ShowPopup<UIEditorDeckPhase3>("UIEditorDeckPhase3");
-            ControllerRegister.Get<FilterController>().InitFilter(race);
+            await ControllerRegister.Get<FilterController>().InitFilterAsync(race);
             Debug.Log($"Selected Race: {race}");
         });
     }

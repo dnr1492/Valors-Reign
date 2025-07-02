@@ -369,37 +369,42 @@ public class GridManager : Singleton<GridManager>
     /// </summary>
     /// <param name="deckPack"></param>
     /// <param name="characterCard"></param>
-    public void ApplyDeckPack(DeckPack deckPack, CharacterCard characterCard)
+    public async void ApplyDeckPack(DeckPack deckPack, CharacterCard characterCard)
     {
-        ControllerRegister.Get<FilterController>().InitFilter(deckPack.race);
-
-        //모든 토큰 상태 초기화 (Select/Confirm -> Cancel)
-        var allTokens = ControllerRegister.Get<CharacterTokenController>().GetAllCharacterToken();
-        foreach (var token in allTokens)
+        try
         {
-            if (token.State != CharacterTokenState.Cancel)
-                token.SetTokenState(CharacterTokenState.Cancel);
+            await ControllerRegister.Get<FilterController>().InitFilterAsync(deckPack.race);
         }
-
-        //저장된 위치에 Confirm 상태로 배치
-        foreach (var slot in deckPack.tokenSlots)
+        finally
         {
-            var token = allTokens.FirstOrDefault(t => t.Key == slot.tokenKey);
-            if (token == null) continue;
-
-            PlaceToken((slot.col, slot.row), token.Key, token.GetCharacterSprite());  //위치 계산해서 배치
-            token.SetTokenState(CharacterTokenState.Confirm);  //상태를 Confirm으로 변경
-
-            //스킬 개수 복원
-            if (slot.skillCounts != null)
+            //모든 토큰 상태 초기화 (Select/Confirm -> Cancel)
+            var allTokens = ControllerRegister.Get<CharacterTokenController>().GetAllCharacterToken();
+            foreach (var token in allTokens)
             {
-                foreach (var skill in slot.skillCounts)
-                    token.SetSkillCount(skill.skillId, skill.count);
+                if (token.State != CharacterTokenState.Cancel)
+                    token.SetTokenState(CharacterTokenState.Cancel);
             }
-        }
 
-        //캐릭터 카드 숨김상태로 변경
-        characterCard.SetCardState(CardState.Back);
+            //저장된 위치에 Confirm 상태로 배치
+            foreach (var slot in deckPack.tokenSlots)
+            {
+                var token = allTokens.FirstOrDefault(t => t.Key == slot.tokenKey);
+                if (token == null) continue;
+
+                PlaceToken((slot.col, slot.row), token.Key, token.GetCharacterSprite());  //위치 계산해서 배치
+                token.SetTokenState(CharacterTokenState.Confirm);  //상태를 Confirm으로 변경
+
+                //스킬 개수 복원
+                if (slot.skillCounts != null)
+                {
+                    foreach (var skill in slot.skillCounts)
+                        token.SetSkillCount(skill.skillId, skill.count);
+                }
+            }
+
+            //캐릭터 카드 숨김상태로 변경
+            characterCard.SetCardState(CardState.Back);
+        }
     }
 
     /// <summary>

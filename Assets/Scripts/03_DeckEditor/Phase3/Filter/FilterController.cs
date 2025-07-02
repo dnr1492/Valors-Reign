@@ -16,19 +16,18 @@ public class FilterController : MonoBehaviour
     }
 
     //해당 Race에 해당하는 캐릭터 토큰 전부를 보여주는 메서드
-    public void InitFilter(CharacterRace race)
+    public async UniTask InitFilterAsync(CharacterRace race)
     {
         selectedRace = race;
         Debug.Log($"FilterController: {race} 종족의 캐릭터들을 표시합니다.");
 
-        SetCharacterTokenByRace().Forget();
+        await UniTask.Yield();
+        SetCharacterTokenByRace();
     }
 
     //Race에 해당하는 캐릭터 토큰만 표시
-    private async UniTaskVoid SetCharacterTokenByRace()
+    private void SetCharacterTokenByRace()
     {
-        await UniTask.Yield();
-        
         var allCharacterCardDatas = DataManager.Instance.dicCharacterCardData;
         var arrCharacterToken = ControllerRegister.Get<CharacterTokenController>().GetAllCharacterToken();
         var dicCharacterEnlargeSprite = SpriteManager.Instance.dicCharacterEnlargeSprite;
@@ -64,10 +63,7 @@ public class FilterController : MonoBehaviour
                 arrCharacterToken[tokenIndex].gameObject.SetActive(true);
                 tokenIndex++;
             }
-            else
-            {
-                Debug.Log($"스프라이트를 찾을 수 없습니다: {spriteKey}");
-            }
+            else Debug.Log($"스프라이트를 찾을 수 없습니다: {spriteKey}");
         }
     }
 
