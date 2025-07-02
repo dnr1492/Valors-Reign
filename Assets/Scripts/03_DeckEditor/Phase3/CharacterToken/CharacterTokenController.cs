@@ -86,8 +86,8 @@ public class CharacterTokenController : MonoBehaviour
 
         if (clickedToken.State != CharacterTokenState.Select) return;
 
-        //Captain은 하나만 Confirm 가능
-        if (clickedToken.Tier == CharacterTierAndCost.Captain) CancelOtherCaptainTokens();
+        //Boss는 하나만 Confirm 가능
+        if (clickedToken.Tier == CharacterTierAndCost.Boss) CancelOtherBossTokens();
 
         clickedToken.SetTokenState(CharacterTokenState.Confirm);
         DisplayTokenOnBattlefield(clickedToken);
@@ -113,12 +113,12 @@ public class CharacterTokenController : MonoBehaviour
         }
     }
 
-    //다른 Captain 토큰들 취소
-    private void CancelOtherCaptainTokens()
+    //다른 Boss 토큰들 취소
+    private void CancelOtherBossTokens()
     {
         foreach (var token in GetAllCharacterToken())
         {
-            if (token.Tier == CharacterTierAndCost.Captain && token.State == CharacterTokenState.Confirm) 
+            if (token.Tier == CharacterTierAndCost.Boss && token.State == CharacterTokenState.Confirm) 
                 token.SetTokenState(CharacterTokenState.Cancel);
         }
     }

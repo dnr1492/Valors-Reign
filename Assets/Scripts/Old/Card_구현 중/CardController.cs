@@ -31,13 +31,13 @@ public class CardController : MonoBehaviour
         selectedCharacterCardIDs = new List<int>();
         selectedCharacterCardCounts = new Dictionary<int, int>();
         characterCardTierMaxCounts = new Dictionary<string, int>() {
-            { CharacterTierAndCost.Captain.ToString(), gamePlayData.maxLeaderCount },
+            { CharacterTierAndCost.Boss.ToString(), gamePlayData.maxLeaderCount },
             { CharacterTierAndCost.High.ToString(), gamePlayData.maxHighTierCount },
             { CharacterTierAndCost.Middle.ToString(), gamePlayData.maxMiddleTierCount },
             { CharacterTierAndCost.Low.ToString(), gamePlayData.maxLowTierCount },
         };
         characterCardTierCurrentCounts = new Dictionary<string, int>() {
-            { CharacterTierAndCost.Captain.ToString(), 0 },
+            { CharacterTierAndCost.Boss.ToString(), 0 },
             { CharacterTierAndCost.High.ToString(), 0 },
             { CharacterTierAndCost.Middle.ToString(), 0 },
             { CharacterTierAndCost.Low.ToString(), 0 },

@@ -16,7 +16,7 @@ public class HexTileDraggable : MonoBehaviour, IBeginDragHandler, IDragHandler, 
         hexTile = GetComponent<HexTile>();
     }
 
-    private bool IsCaptainTier()
+    private bool IsBossTier()
     {
         var key = hexTile.AssignedTokenKey;
         if (!key.HasValue) return false;
@@ -25,13 +25,13 @@ public class HexTileDraggable : MonoBehaviour, IBeginDragHandler, IDragHandler, 
             .GetAllCharacterToken()
             .FirstOrDefault(t => t.Key == key.Value);
 
-        return token?.Tier == EnumClass.CharacterTierAndCost.Captain;
+        return token?.Tier == EnumClass.CharacterTierAndCost.Boss;
     }
 
     public void OnBeginDrag(PointerEventData eventData)
     {
         if (hexTile.AssignedTokenKey == null) return;
-        if (IsCaptainTier()) return;
+        if (IsBossTier()) return;
 
         //드래그용 복제 생성 (자기 자신 복제)
         dragGhost = Instantiate(gameObject, canvas.transform);

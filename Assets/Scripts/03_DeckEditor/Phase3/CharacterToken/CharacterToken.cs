@@ -33,7 +33,7 @@ public class CharacterToken : MonoBehaviour
     {
         Key = characterCardData.id;
         Tier = characterCardData.tier;
-        Cost = characterCardData.tier == CharacterTierAndCost.Captain ? 0 : (int)characterCardData.tier;
+        Cost = characterCardData.tier == CharacterTierAndCost.Boss ? 0 : (int)characterCardData.tier;
         imgCharacter.sprite = sprite;
 
         btn.onClick.RemoveAllListeners();

@@ -20,7 +20,7 @@ public class GridManager : Singleton<GridManager>
         { (7, 6), "M" },
         { (6, 7), "H" }, { (6, 6), "L" },
         { (5, 6), "M" },
-        { (4, 7), "C" }, { (4, 6), "L" },
+        { (4, 7), "B" }, { (4, 6), "L" },
         { (3, 6), "M" },
         { (2, 7), "H" }, { (2, 6), "L" },
         { (1, 6), "M" },
@@ -130,14 +130,14 @@ public class GridManager : Singleton<GridManager>
     #region 캐릭터 토큰을 전장에 표시
     public void DisplayTokenOnBattlefield(CharacterToken token)
     {
-        //토큰 Tier 문자 추출 (H, L, C ...)
+        //토큰 Tier 문자 추출 (H, L, B ...)
         char tier = token.Tier.ToString()[0];
 
         //해당하는 좌표 리스트
         var slots = tierSlots[tier];
 
         //캡틴은 중앙 첫 칸
-        if (tier == 'C')
+        if (tier == 'B')
         {
             PlaceToken(slots[0], token.Key, token.GetCharacterSprite());
             return;
@@ -164,7 +164,7 @@ public class GridManager : Singleton<GridManager>
         //Tier 문자와 해당하는 좌표 찾기
         foreach (var kvp in txtMap)
         {
-            //토큰 Tier 문자 추출 (H, L, C ...)
+            //토큰 Tier 문자 추출 (H, L, B ...)
             char tier = kvp.Value[0];
             if (!tierSlots.TryGetValue(tier, out var list))
             {

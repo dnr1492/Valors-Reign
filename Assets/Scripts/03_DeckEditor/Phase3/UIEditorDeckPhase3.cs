@@ -21,7 +21,7 @@ public class UIEditorDeckPhase3 : UIPopupBase
 
     [Header("DeckName")]
     [SerializeField] TMP_InputField inputFieldDeckName;
-    [SerializeField] Button btnDeckEditor;
+    [SerializeField] Button btnDeckNameEditor;
     private string currentDeckName = "";
 
     private void Awake()
@@ -38,7 +38,7 @@ public class UIEditorDeckPhase3 : UIPopupBase
             ResetDeckName();
         });
 
-        btnDeckEditor.onClick.AddListener(StartInputDeckName);
+        btnDeckNameEditor.onClick.AddListener(StartInputDeckName);
     }
 
     private void Start()
