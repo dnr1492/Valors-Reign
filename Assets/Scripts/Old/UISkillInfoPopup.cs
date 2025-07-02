@@ -5,6 +5,7 @@ using UnityEngine.UI;
 
 public class UISkillInfoPopup : UIPopupBase
 {
+    [SerializeField] GameObject uiSkillCardPrefab; 
     [SerializeField] Button btn_close;
 
     public void Init(SkillCardData skillCardData)

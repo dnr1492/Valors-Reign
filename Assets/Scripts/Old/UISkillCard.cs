@@ -17,8 +17,10 @@ using static EnumClass;
 
 public class UISkillCard : MonoBehaviour
 {
-    [SerializeField] TextMeshProUGUI txtName, txtSkillEffect;
+    [SerializeField] TextMeshProUGUI txtSkillRank, txtSkillType, txtSkillName, txtSkillEffect;
     [SerializeField] Image imgSkill;
+    [SerializeField] Button btnDecrease, btnIncrease;
+    [SerializeField] Button btnEnlargeImage, btnEnlargeRange;
     [SerializeField] RectTransform hexContainer;
     [SerializeField] GameObject hexPrefab;
 
@@ -28,11 +30,12 @@ public class UISkillCard : MonoBehaviour
     private readonly float spacingX = 1f;
     private readonly float spacingY = 0.5f;
     private readonly float hexScale = 1.1f;
-    private readonly int visualOffset = 2;  //Hex 생성을 위, 아래 2칸씩 더 추가 
+    private readonly int visualOffset = 2;  //Hex 생성을 위, 아래 2칸씩 더 추가
 
     public void Set(Sprite sprite, SkillCardData skillCardData)
     {
         CreateSkillHexGrid();
+
         ShowSkillHexRange(new TempSkillCardData
         {
             name = "Heal Zone",
@@ -45,11 +48,24 @@ public class UISkillCard : MonoBehaviour
             }
         });
 
-        txtName.text = skillCardData.name;
-        imgSkill.sprite = sprite;
+        txtSkillRank.text = skillCardData.rank.ToString();
+        txtSkillType.text = skillCardData.type.ToString();
+        txtSkillName.text = skillCardData.name;
         txtSkillEffect.text = skillCardData.effect;
+        imgSkill.sprite = sprite;
+
+        btnDecrease.onClick.RemoveAllListeners();
+        btnIncrease.onClick.RemoveAllListeners();
+        btnEnlargeImage.onClick.RemoveAllListeners();
+        btnEnlargeRange.onClick.RemoveAllListeners();
+
+        btnDecrease.onClick.AddListener(OnClickDecrease);
+        btnIncrease.onClick.AddListener(OnClickIncrease);
+        btnEnlargeImage.onClick.AddListener(OnClickEnlargeImage);
+        btnEnlargeRange.onClick.AddListener(OnClickEnlargeRange);
     }
 
+    #region Skill HexGrid 생성
     private void CreateSkillHexGrid()
     {
         ClearSkillHexGrid();
@@ -94,14 +110,18 @@ public class UISkillCard : MonoBehaviour
             }
         }
     }
+    #endregion
 
+    #region Skill HexGrid 초기화
     private void ClearSkillHexGrid()
     {
         foreach (var hex in skillHexes) Destroy(hex);
         skillHexes.Clear();
         hexMap.Clear();
     }
+    #endregion
 
+    #region HexGrid에 스킬 범위를 표시
     private void ShowSkillHexRange(TempSkillCardData data)
     {
         List<(int dq, int dr, Color color)> range = new();
@@ -143,6 +163,12 @@ public class UISkillCard : MonoBehaviour
         if (hexMap.TryGetValue((0, 0), out var centerHex))
             centerHex.GetComponent<HexTile>().SetColor(Color.gray);
     }
+    #endregion
+
+    private void OnClickDecrease() { }
+    private void OnClickIncrease() { }
+    private void OnClickEnlargeImage() { }
+    private void OnClickEnlargeRange() { }
 
     // ============== 1. Craete Hex의 Container가 0x0인 상태로 호출돼서 첫 생성이 이상하게 되는 버그... ================= //
     // ============== 2. 원형의 경우 제대로 적용이 안되는 버그... ================= //
