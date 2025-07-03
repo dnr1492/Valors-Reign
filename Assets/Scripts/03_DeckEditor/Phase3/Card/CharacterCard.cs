@@ -38,6 +38,7 @@ public class CharacterCard : Card
         imgCharacter.sprite = sprite;
 
         var skillCardData = DataManager.Instance.dicSkillCardData;
+        List<SkillCardData> skillDataList = new();
         skillCardCounts = new int[btnCounts.Length];
 
         for (int i = 0; i < characterCardData.skills.Count; i++)
@@ -45,11 +46,10 @@ public class CharacterCard : Card
             var skillId = characterCardData.skills[i];
             var skillData = skillCardData[skillId];
             if (skillData == null) continue;
+            skillDataList.Add(skillData);
 
             int index = i;
-
-            //토큰에 저장된 스킬 매수 불러오기 (확정 상태가 아니어도 저장된 값 사용)
-            int savedCount = clickedToken.GetSkillCount(skillId);
+            int savedCount = clickedToken.GetSkillCount(skillId);  //토큰에 저장된 스킬 매수 불러오기 (확정 상태가 아니어도 저장된 값 사용)
             skillCardCounts[index] = savedCount;
 
             txtNames[index].gameObject.SetActive(true);
@@ -68,9 +68,16 @@ public class CharacterCard : Card
 
                 skillSlotCollection.Refresh();
             });
+        }
 
-            btnSkills[index].onClick.AddListener(() => {
-                UIManager.Instance.ShowPopup<UISkillInfoPopup>("UISkillInfoPopup", false).Init(skillData);
+        //어떤 스킬 버튼을 클릭하든지 모든 스킬을 스킬 정보 팝업에 표시
+        for (int i = 0; i < skillDataList.Count; i++)
+        {
+            int index = i;
+            btnSkills[index].onClick.AddListener(() =>
+            {
+                UIManager.Instance.ShowPopup<UISkillInfoPopup>("UISkillInfoPopup", false)
+                    .Init(skillDataList, this);
             });
         }
     }
@@ -87,6 +94,47 @@ public class CharacterCard : Card
         {
             var skillId = characterCardData.skills[i];
             curClickedToken.SetSkillCount(skillId, skillCardCounts[i]);
+        }
+    }
+
+    //현재 UI에 표시된 스킬 매수를 가져오기
+    public int GetSkillCount(int skillId)
+    {
+        var characterCardData = DataManager.Instance.dicCharacterCardData[curClickedToken.Key];
+        if (characterCardData == null) return 0;
+
+        for (int i = 0; i < characterCardData.skills.Count; i++)
+        {
+            if (characterCardData.skills[i] == skillId)
+                return skillCardCounts[i];
+        }
+
+        return 0;
+    }
+
+    //스킬 매수를 외부에서 수동으로 반영
+    public void SetSkillCountManually(int skillId, int count)
+    {
+        var characterCardData = DataManager.Instance.dicCharacterCardData[curClickedToken.Key];
+        if (characterCardData == null) return;
+
+        for (int i = 0; i < characterCardData.skills.Count; i++)
+        {
+            if (characterCardData.skills[i] == skillId)
+            {
+                //UI 업데이트
+                skillCardCounts[i] = count;
+                txtCounts[i].text = count.ToString();
+
+                //Confirm 상태면 Token 및 Collection에도 반영
+                if (curClickedToken.State == CharacterTokenState.Confirm)
+                {
+                    curClickedToken.SetSkillCount(skillId, count);
+                    skillSlotCollection.Refresh();
+                }
+
+                return;
+            }
         }
     }
 

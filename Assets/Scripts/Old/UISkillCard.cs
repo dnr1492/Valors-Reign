@@ -17,6 +17,7 @@ using static EnumClass;
 
 public class UISkillCard : MonoBehaviour
 {
+    [SerializeField] TextMeshProUGUI txtTotalSkillCount, txtSelectedSkillCount;
     [SerializeField] TextMeshProUGUI txtSkillRank, txtSkillType, txtSkillName, txtSkillEffect;
     [SerializeField] Image imgSkill;
     [SerializeField] Button btnDecrease, btnIncrease;
@@ -32,7 +33,12 @@ public class UISkillCard : MonoBehaviour
     private readonly float hexScale = 1.1f;
     private readonly int visualOffset = 2;  //Hex 생성을 위, 아래 2칸씩 더 추가
 
-    public void Set(Sprite sprite, SkillCardData skillCardData)
+    private int count = 0;
+    private int skillId = -1;
+    public int GetSkillId() => skillId;
+    public int GetCount() => count;
+
+    public void Set(Sprite sprite, SkillCardData skillCardData, int initialCount)
     {
         CreateSkillHexGrid();
 
@@ -63,6 +69,10 @@ public class UISkillCard : MonoBehaviour
         btnIncrease.onClick.AddListener(OnClickIncrease);
         btnEnlargeImage.onClick.AddListener(OnClickEnlargeImage);
         btnEnlargeRange.onClick.AddListener(OnClickEnlargeRange);
+
+        skillId = skillCardData.id;
+        count = Mathf.Clamp(initialCount, 0, 4);
+        txtSelectedSkillCount.text = count.ToString();
     }
 
     #region Skill HexGrid 생성
@@ -165,13 +175,29 @@ public class UISkillCard : MonoBehaviour
     }
     #endregion
 
-    private void OnClickDecrease() { }
-    private void OnClickIncrease() { }
+    private void OnClickDecrease()
+    {
+        if (count > 0) {
+            count--;
+            txtSelectedSkillCount.text = count.ToString();
+        }
+    }
+
+    private void OnClickIncrease()
+    {
+        if (count < 4) {
+            count++;
+            txtSelectedSkillCount.text = count.ToString();
+        }
+    }
+
     private void OnClickEnlargeImage() { }
+
     private void OnClickEnlargeRange() { }
 
     // ============== 1. Craete Hex의 Container가 0x0인 상태로 호출돼서 첫 생성이 이상하게 되는 버그... ================= //
     // ============== 2. 원형의 경우 제대로 적용이 안되는 버그... ================= //
+    // ============== 3. TempSkillCardData를 Tool의 SkillData에 반영 필요... =============================== //
 
     public class TempSkillCardData
     {

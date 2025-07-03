@@ -1542,7 +1542,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &3800432479457631676
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2357,6 +2357,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7995242278192924648}
+  - component: {fileID: 1846579493570788340}
   - component: {fileID: 7995242278192924655}
   m_Layer: 5
   m_Name: UISkillCard
@@ -2387,6 +2388,26 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 350, y: 550}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1846579493570788340
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7995242278192924649}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 306cc8c2b49d7114eaa3623786fc2126, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_IgnoreLayout: 0
+  m_MinWidth: -1
+  m_MinHeight: -1
+  m_PreferredWidth: 350
+  m_PreferredHeight: 550
+  m_FlexibleWidth: -1
+  m_FlexibleHeight: -1
+  m_LayoutPriority: 1
 --- !u!114 &7995242278192924655
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2399,13 +2420,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 33fc780ae79fad340a5b48ccf4dcc430, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  txtSkillTier: {fileID: 0}
-  txtSkillType: {fileID: 0}
-  txtSkillName: {fileID: 0}
+  txtTotalSkillCount: {fileID: 7723520326720959802}
+  txtSelectedSkillCount: {fileID: 4054751541115816235}
+  txtSkillRank: {fileID: 3186727118167622503}
+  txtSkillType: {fileID: 6296444299930908714}
+  txtSkillName: {fileID: 7144960563888133977}
   txtSkillEffect: {fileID: 7995242277204713787}
   imgSkill: {fileID: 7995242277455836811}
-  btnEnlargeSkillImage: {fileID: 0}
-  btnEnlargeSkillRange: {fileID: 0}
+  btnDecrease: {fileID: 8890362520368289629}
+  btnIncrease: {fileID: 3154376959247083167}
+  btnEnlargeImage: {fileID: 2643480508616017298}
+  btnEnlargeRange: {fileID: 2797105040514288092}
   hexContainer: {fileID: 7995242277345419851}
   hexPrefab: {fileID: 138201516482705832, guid: d5e3f1ef6ac85824583b859df46c1975, type: 3}
 --- !u!1 &7995242278311459083
