@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,6 +12,22 @@ public class UISkillInfoPopup : UIPopupBase
 
     private readonly List<UISkillCard> skillCardPool = new();
     private CharacterCard targetCharacterCard;
+
+    [Header("Overlay Enlarge")]
+    [SerializeField] GameObject overlayPreventClick;
+    [SerializeField] GameObject overlayEnlargedImage, overlayEnlargedRange;
+    [SerializeField] Button btn_close_image, btn_close_range;
+    [SerializeField] RectTransform hexContainer;
+
+    private void Awake()
+    {
+        overlayEnlargedImage.SetActive(false);
+        overlayEnlargedRange.SetActive(false);
+        overlayPreventClick.SetActive(false);
+
+        btn_close_image.onClick.AddListener(() => CloseOverlay(overlayEnlargedImage));
+        btn_close_range.onClick.AddListener(() => CloseOverlay(overlayEnlargedRange));
+    }
 
     public void Init(List<SkillCardData> skillDataList, CharacterCard characterCard)
     {
@@ -82,6 +99,33 @@ public class UISkillInfoPopup : UIPopupBase
         }
 
         Close();
+    }
+
+    public void ShowImageOverlay(Sprite sprite)
+    {
+        overlayEnlargedImage.SetActive(true);
+        overlayPreventClick.SetActive(true);
+
+        var image = overlayEnlargedImage.GetComponentInChildren<Image>();
+        if (image != null) image.sprite = sprite;
+    }
+
+    public void ShowRangeOverlay(SkillCardData skillData)
+    {
+        overlayPreventClick.SetActive(true);
+        overlayEnlargedRange.SetActive(true);
+
+        Debug.Log("Range Overlay는 아직 미구현...");
+
+        //ClearHexGrid();              
+        //CreateHexGrid();             
+        //ShowSkillHexRange(skillData);
+    }
+
+    private void CloseOverlay(GameObject target)
+    {
+        target.SetActive(false);
+        overlayPreventClick.SetActive(false);
     }
 
     protected override void ResetUI() { }

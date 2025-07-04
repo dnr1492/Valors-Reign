@@ -191,9 +191,15 @@ public class UISkillCard : MonoBehaviour
         }
     }
 
-    private void OnClickEnlargeImage() { }
+    private void OnClickEnlargeImage()
+    {
+        UIManager.Instance.GetPopup<UISkillInfoPopup>("UISkillInfoPopup").ShowImageOverlay(imgSkill.sprite);
+    }
 
-    private void OnClickEnlargeRange() { }
+    private void OnClickEnlargeRange()
+    {
+        //UIManager.Instance.GetPopup<UISkillInfoPopup>("UISkillInfoPopup").ShowImageOverlay(skillData);
+    }
 
     // ============== 1. Craete Hex의 Container가 0x0인 상태로 호출돼서 첫 생성이 이상하게 되는 버그... ================= //
     // ============== 2. 원형의 경우 제대로 적용이 안되는 버그... ================= //

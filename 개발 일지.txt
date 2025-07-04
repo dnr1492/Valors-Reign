@@ -1,6 +1,7 @@
-1. filter button
+1. filterPopup
 2. 캐릭터 및 스킬 curCount / maxCount로 표시
 3. [디자인 - GUI Pro Asset] Editor Deck에 Icon/Background 등 할당
+4. Range 확대
 
 버그
 1. 덱 이름 설정할 때 사소한 에러가 뜸 (덱 이름을 누르고 바로 저장을 누를 경우... 또는 다른 곳 클릭할 경우)
