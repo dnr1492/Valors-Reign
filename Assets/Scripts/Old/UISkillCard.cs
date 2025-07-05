@@ -26,13 +26,9 @@ public class UISkillCard : MonoBehaviour
     [SerializeField] GameObject hexPrefab;
 
     private readonly List<GameObject> skillHexes = new();
-    private readonly Dictionary<(int dq, int dr), GameObject> hexMap = new();
+    private readonly Dictionary<(int dq, int dr), GameObject> skillHexMap = new();
 
-    private readonly float spacingX = 1f;
-    private readonly float spacingY = 0.5f;
-    private readonly float hexScale = 1.1f;
-    private readonly int visualOffset = 2;  //Hex 생성을 위, 아래 2칸씩 더 추가
-
+    private SkillCardData curSkillCardData;
     private int count = 0;
     private int skillId = -1;
     public int GetSkillId() => skillId;
@@ -40,22 +36,8 @@ public class UISkillCard : MonoBehaviour
 
     public void Set(Sprite sprite, SkillCardData skillCardData, int initialCount)
     {
-        CreateSkillHexGrid();
-
-        ShowSkillHexRange(new TempSkillCardData
-        {
-            name = "Heal Zone",
-            effect = "Restores HP",
-            rangeType = SkillRangeType.Ring1,
-            customOffsetRange = new List<(int, int, Color)> {
-                (0, 0, Color.gray),
-                (1, 0, Color.red),
-                (-1, 1, Color.green)
-            }
-        });
-
         txtSkillRank.text = skillCardData.rank.ToString();
-        txtSkillType.text = skillCardData.type.ToString();
+        txtSkillType.text = skillCardData.cardType.ToString();
         txtSkillName.text = skillCardData.name;
         txtSkillEffect.text = skillCardData.effect;
         imgSkill.sprite = sprite;
@@ -70,110 +52,15 @@ public class UISkillCard : MonoBehaviour
         btnEnlargeImage.onClick.AddListener(OnClickEnlargeImage);
         btnEnlargeRange.onClick.AddListener(OnClickEnlargeRange);
 
+        curSkillCardData = skillCardData;
         skillId = skillCardData.id;
         count = Mathf.Clamp(initialCount, 0, 4);
         txtSelectedSkillCount.text = count.ToString();
+
+        SkillHexGridHelper.ClearSkillHexGrid(skillHexes, skillHexMap);
+        SkillHexGridHelper.CreateSkillHexGrid(hexContainer, hexPrefab, skillHexes, skillHexMap, 1.1f);
+        SkillHexGridHelper.ShowSkillHexRange(skillCardData, skillHexMap);
     }
-
-    #region Skill HexGrid 생성
-    private void CreateSkillHexGrid()
-    {
-        ClearSkillHexGrid();
-
-        float parentWidth = hexContainer.rect.width;
-        float parentHeight = hexContainer.rect.height;
-
-        float baseHexWidth = 24f;
-        float baseHexHeight = baseHexWidth * Mathf.Sqrt(3f) / 2f;
-
-        float unitWidth = baseHexWidth * 0.75f + spacingX;
-        float unitHeight = baseHexHeight + spacingY;
-
-        int cols = Mathf.FloorToInt((parentWidth + spacingX) / unitWidth);
-        int rows = Mathf.FloorToInt((parentHeight + spacingY) / unitHeight);
-
-        int halfCols = cols / 2;
-        int halfRows = rows / 2;
-
-        float hexWidth = (parentWidth - spacingX * (cols - 1)) / (cols * 0.75f + 0.25f);
-        float hexHeight = hexWidth * Mathf.Sqrt(3f) / 2f;
-
-        hexWidth *= hexScale;
-        hexHeight *= hexScale;
-
-        for (int dq = -halfCols; dq <= halfCols; dq++)
-        {
-            for (int dr = -(halfRows + visualOffset); dr <= (halfRows + visualOffset); dr++)
-            {
-                var hex = Instantiate(hexPrefab, hexContainer);
-                hex.GetComponent<HexTile>().ShowDecorations(false);
-                skillHexes.Add(hex);
-                hexMap[(dq, dr)] = hex;
-
-                var rt = hex.GetComponent<RectTransform>();
-                rt.sizeDelta = new Vector2(hexWidth, hexHeight);
-
-                float x = dq * (hexWidth * 0.75f + spacingX);
-                float y = dr * (hexHeight + spacingY) + (dq % 2 != 0 ? (hexHeight + spacingY) / 2f : 0f);
-
-                rt.anchoredPosition = new Vector2(x, -y);
-            }
-        }
-    }
-    #endregion
-
-    #region Skill HexGrid 초기화
-    private void ClearSkillHexGrid()
-    {
-        foreach (var hex in skillHexes) Destroy(hex);
-        skillHexes.Clear();
-        hexMap.Clear();
-    }
-    #endregion
-
-    #region HexGrid에 스킬 범위를 표시
-    private void ShowSkillHexRange(TempSkillCardData data)
-    {
-        List<(int dq, int dr, Color color)> range = new();
-
-        switch (data.rangeType)
-        {
-            case SkillRangeType.LineForward1:
-                range.AddRange(SkillRangeHelper.GetLine((0, -1), 1, Color.red));
-                break;
-
-            case SkillRangeType.LineForward2:
-                range.AddRange(SkillRangeHelper.GetLine((0, -1), 2, Color.red));
-                break;
-
-            case SkillRangeType.LineForward3:
-                range.AddRange(SkillRangeHelper.GetLine((0, -1), 3, Color.red));
-                break;
-
-            case SkillRangeType.Ring1:
-                //range.Add((0, 0, Color.gray));  //중심은 회색
-                range.AddRange(SkillRangeHelper.GetRing(1, Color.green));  //1칸, ring은 초록
-                break;
-
-            case SkillRangeType.Custom:
-                range = data.customOffsetRange;
-                break;
-        }
-
-        //먼저 전체 범위 표시 (중심 제외)
-        foreach (var (dq, dr, color) in range)
-        {
-            if (dq == 0 && dr == 0) continue;
-
-            if (hexMap.TryGetValue((dq, dr), out var hex))
-                hex.GetComponent<HexTile>().SetColor(color);
-        }
-
-        //중심은 항상 회색
-        if (hexMap.TryGetValue((0, 0), out var centerHex))
-            centerHex.GetComponent<HexTile>().SetColor(Color.gray);
-    }
-    #endregion
 
     private void OnClickDecrease()
     {
@@ -198,18 +85,6 @@ public class UISkillCard : MonoBehaviour
 
     private void OnClickEnlargeRange()
     {
-        //UIManager.Instance.GetPopup<UISkillInfoPopup>("UISkillInfoPopup").ShowImageOverlay(skillData);
-    }
-
-    // ============== 1. Craete Hex의 Container가 0x0인 상태로 호출돼서 첫 생성이 이상하게 되는 버그... ================= //
-    // ============== 2. 원형의 경우 제대로 적용이 안되는 버그... ================= //
-    // ============== 3. TempSkillCardData를 Tool의 SkillData에 반영 필요... =============================== //
-
-    public class TempSkillCardData
-    {
-        public string name;
-        public string effect;
-        public SkillRangeType rangeType;
-        public List<(int dq, int dr, Color color)> customOffsetRange;
+        UIManager.Instance.GetPopup<UISkillInfoPopup>("UISkillInfoPopup").ShowRangeOverlay(curSkillCardData);
     }
 }
