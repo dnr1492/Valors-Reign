@@ -7,7 +7,7 @@ using static EnumClass;
 
 public class UIEditorDeckPhase3 : UIPopupBase
 {
-    [SerializeField] Button btn_back, btn_save, btn_reset;
+    [SerializeField] Button btn_back, btn_filter, btn_save, btn_reset;
     [SerializeField] CharacterCard characterCard;
     [SerializeField] SkillSlotCollection skillSlotCollection; 
 
@@ -28,6 +28,10 @@ public class UIEditorDeckPhase3 : UIPopupBase
     {
         btn_back.onClick.AddListener(() => {
             UIManager.Instance.ShowPopup<UIEditorDeckPhase2>("UIEditorDeckPhase2");
+        });
+
+        btn_filter.onClick.AddListener(() => {
+            UIManager.Instance.ShowPopup<UIFilterPopup>("UIFilterPopup");
         });
 
         btn_save.onClick.AddListener(OnClickSave);

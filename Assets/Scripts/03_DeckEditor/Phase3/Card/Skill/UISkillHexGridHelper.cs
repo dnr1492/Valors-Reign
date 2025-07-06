@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using static EnumClass;
 
-public static class SkillHexGridHelper
+public static class UISkillHexGridHelper
 {
     private readonly static float spacingX = 1f;
     private readonly static float spacingY = 0.5f;
@@ -100,4 +100,6 @@ public static class SkillHexGridHelper
             centerHex.GetComponent<HexTile>().SetColor(Color.gray);
     }
     #endregion
+
+    // ============== 원형(Ring1)의 경우 제대로 적용이 안되는 버그... ================= //
 }

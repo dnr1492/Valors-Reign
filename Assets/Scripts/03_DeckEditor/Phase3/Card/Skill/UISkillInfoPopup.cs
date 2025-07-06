@@ -1,9 +1,6 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using TMPro;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using static EnumClass;
 
 public class UISkillInfoPopup : UIPopupBase
 {
@@ -120,9 +117,9 @@ public class UISkillInfoPopup : UIPopupBase
         overlayPreventClick.SetActive(true);
         overlayEnlargedRange.SetActive(true);
 
-        SkillHexGridHelper.ClearSkillHexGrid(enlargedSkillHexes, enlargedSkillHexMap);
-        SkillHexGridHelper.CreateSkillHexGrid(hexContainer, hexPrefab, enlargedSkillHexes, enlargedSkillHexMap, 1.3f);
-        SkillHexGridHelper.ShowSkillHexRange(skillData, enlargedSkillHexMap);
+        UISkillHexGridHelper.ClearSkillHexGrid(enlargedSkillHexes, enlargedSkillHexMap);
+        UISkillHexGridHelper.CreateSkillHexGrid(hexContainer, hexPrefab, enlargedSkillHexes, enlargedSkillHexMap, 2f);
+        UISkillHexGridHelper.ShowSkillHexRange(skillData, enlargedSkillHexMap);
     }
 
     private void CloseOverlay(GameObject target)
@@ -132,7 +129,4 @@ public class UISkillInfoPopup : UIPopupBase
     }
 
     protected override void ResetUI() { }
-
-    // ============== 1. Craete Hex의 Container가 0x0인 상태로 호출돼서 첫 생성이 이상하게 되는 버그... ================= //
-    // ============== 2. 원형의 경우 제대로 적용이 안되는 버그... ================= //
 }
