@@ -31,7 +31,7 @@ public class UIEditorDeckPhase3 : UIPopupBase
         });
 
         btn_filter.onClick.AddListener(() => {
-            UIManager.Instance.ShowPopup<UIFilterPopup>("UIFilterPopup");
+            UIManager.Instance.ShowPopup<UIFilterPopup>("UIFilterPopup", false);
         });
 
         btn_save.onClick.AddListener(OnClickSave);

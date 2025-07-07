@@ -5,7 +5,7 @@
             "name": "Skill Test 1",
             "rank": 1,
             "effect": "스킬 1, 랭크 1",
-            "cardType": 0,
+            "cardType": 2,
             "rangeType": 1
         },
         {
@@ -13,7 +13,7 @@
             "name": "Skill Test 1",
             "rank": 2,
             "effect": "스킬 1, 랭크 2",
-            "cardType": 1,
+            "cardType": 0,
             "rangeType": 2
         },
         {
@@ -21,7 +21,7 @@
             "name": "Skill Test 2",
             "rank": 1,
             "effect": "스킬 2, 랭크 1",
-            "cardType": 0,
+            "cardType": 2,
             "rangeType": 2
         },
         {
@@ -29,7 +29,7 @@
             "name": "Skill Test 2",
             "rank": 2,
             "effect": "스킬 2, 랭크 2",
-            "cardType": 1,
+            "cardType": 0,
             "rangeType": 3
         },
         {
@@ -37,7 +37,7 @@
             "name": "Skill Test 3",
             "rank": 1,
             "effect": "효과 스킬 3, 랭크 1",
-            "cardType": 2,
+            "cardType": 3,
             "rangeType": 4
         }
     ]

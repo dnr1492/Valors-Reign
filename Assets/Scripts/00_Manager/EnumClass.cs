@@ -2,13 +2,22 @@ public class EnumClass
 {
     public enum CharacterRace { None = -1, Primordial, Earthbound, Seaborne, Verdant, Skyborne, Mythkin, Divinite, Morphid, Undying, Automaton }  //영장, 지주, 수생, 식물, 천익, 환수, 성휘, 이형, 불사, 기계
     public enum CharacterTokenState { None = -1, Cancel, Select, Confirm }
-    public enum CharacterTokenDirection { Right = 0, UpRight, UpLeft, Left, DownLeft, DownRight }
+    public enum CharacterTokenDirection { None = -1, Right = 0, UpRight, UpLeft, Left, DownLeft, DownRight }
     public enum CharacterTierAndCost { None = -1, Boss = 100, High = 4, Middle = 3, Low = 2 }
-    public enum CharacterJob { Dealer, Tanker, Supporter }
+    public enum CharacterJob { None = -1, Dealer, Tanker, Supporter }
+    public enum FilterType
+    {
+        Job,
+        Tier,
+        Hp,
+        Mp,
+        SkillCardRank,
+        SkillCardType
+    }
     public enum CardState { None = -1, Front, Back }
     public enum CardType { None = -1, CharacterCard, SkillCard }
-    public enum SkillCardType { None = -1, Move, Attack, Buff, Debuff, Trap }  // ===== 추후 수정 요망 ===== //
-    public enum SkillCardRankAndMpConsum { None = -1, Rank1 = 1, Rank2 = 2, Rank3 = 3 }
+    public enum SkillCardType { None = -1, Attack, Defense, Move, Buff, Debuff, Trap }  // ===== 추후 수정 요망 ===== //
+    public enum SkillCardRankAndMpConsum { None = -1, Rank1 = 1, Rank2 = 2, Rank3 = 3, Rank4 =4, Rank5 = 5 }
     public enum SkillRangeType
     {
         None,

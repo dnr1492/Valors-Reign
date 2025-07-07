@@ -18,7 +18,7 @@ public class CharacterToken : MonoBehaviour
 
     public CharacterTokenState State { get; private set; } = CharacterTokenState.Cancel;
     public int Key { get; private set; }
-    public CharacterTierAndCost Tier { get; private set; }
+    public CharacterTierAndCost Tier { get; private set; } = CharacterTierAndCost.None;
     public int Cost { get; private set; }
 
     private void Start()
