@@ -71,11 +71,11 @@ public class Tool
         };
 
         // ===== 임시 데이터 =====
-        list.skillCardDatas.Add(new SkillCardData { id = 1000, name = "Skill Test 1", rank = (int)SkillCardRankAndMpConsum.Rank1, type = SkillCardType.Move, effect = "스킬 1, 랭크 1" });
-        list.skillCardDatas.Add(new SkillCardData { id = 1001, name = "Skill Test 1", rank = (int)SkillCardRankAndMpConsum.Rank2, type = SkillCardType.Attack, effect = "스킬 1, 랭크 2" });
-        list.skillCardDatas.Add(new SkillCardData { id = 1002, name = "Skill Test 2", rank = (int)SkillCardRankAndMpConsum.Rank1, type = SkillCardType.Move, effect = "스킬 2, 랭크 1" });
-        list.skillCardDatas.Add(new SkillCardData { id = 1003, name = "Skill Test 2", rank = (int)SkillCardRankAndMpConsum.Rank2, type = SkillCardType.Attack, effect = "스킬 2, 랭크 2" });
-        list.skillCardDatas.Add(new SkillCardData { id = 1004, name = "Skill Test 3", rank = (int)SkillCardRankAndMpConsum.Rank1, type = SkillCardType.Buff, effect = "효과 스킬 3, 랭크 1" });
+        list.skillCardDatas.Add(new SkillCardData { id = 1000, name = "Skill Test 1", rank = (int)SkillCardRankAndMpConsum.Rank1, cardType = SkillCardType.Move, rangeType = SkillRangeType.LineForward1, effect = "스킬 1, 랭크 1" });
+        list.skillCardDatas.Add(new SkillCardData { id = 1001, name = "Skill Test 1", rank = (int)SkillCardRankAndMpConsum.Rank2, cardType = SkillCardType.Attack, rangeType = SkillRangeType.LineForward2, effect = "스킬 1, 랭크 2" });
+        list.skillCardDatas.Add(new SkillCardData { id = 1002, name = "Skill Test 2", rank = (int)SkillCardRankAndMpConsum.Rank1, cardType = SkillCardType.Move, rangeType = SkillRangeType.LineForward2, effect = "스킬 2, 랭크 1" });
+        list.skillCardDatas.Add(new SkillCardData { id = 1003, name = "Skill Test 2", rank = (int)SkillCardRankAndMpConsum.Rank2, cardType = SkillCardType.Attack, rangeType = SkillRangeType.LineForward3, effect = "스킬 2, 랭크 2" });
+        list.skillCardDatas.Add(new SkillCardData { id = 1004, name = "Skill Test 3", rank = (int)SkillCardRankAndMpConsum.Rank1, cardType = SkillCardType.Buff, rangeType = SkillRangeType.Ring1, effect = "효과 스킬 3, 랭크 1" });
 
         LoadDataFromJSON(list, "skillCard_data.json");
     }
@@ -133,9 +133,13 @@ public class SkillCardData
     public string name;
     public int rank;
     //public int mpConsum;  //MP소모량은 Rank랑 동일
-    public SkillCardType type;
     public string effect;
+    public SkillCardType cardType;
+    public SkillRangeType rangeType;
+    public List<(int dq, int dr, Color color)> customOffsetRange;
 
+    // ===== Damage, Count, 이동 불가 (enum) 등으로 추가하기 ===== //
+    // ===== Damage, Count, 이동 불가 (enum) 등으로 추가하기 ===== //
     // ===== Damage, Count, 이동 불가 (enum) 등으로 추가하기 ===== //
 }
 #endregion

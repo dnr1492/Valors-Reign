@@ -4,36 +4,41 @@
             "id": 1000,
             "name": "Skill Test 1",
             "rank": 1,
-            "type": 0,
-            "effect": "스킬 1, 랭크 1"
+            "effect": "스킬 1, 랭크 1",
+            "cardType": 0,
+            "rangeType": 1
         },
         {
             "id": 1001,
             "name": "Skill Test 1",
             "rank": 2,
-            "type": 1,
-            "effect": "스킬 1, 랭크 2"
+            "effect": "스킬 1, 랭크 2",
+            "cardType": 1,
+            "rangeType": 2
         },
         {
             "id": 1002,
             "name": "Skill Test 2",
             "rank": 1,
-            "type": 0,
-            "effect": "스킬 2, 랭크 1"
+            "effect": "스킬 2, 랭크 1",
+            "cardType": 0,
+            "rangeType": 2
         },
         {
             "id": 1003,
             "name": "Skill Test 2",
             "rank": 2,
-            "type": 1,
-            "effect": "스킬 2, 랭크 2"
+            "effect": "스킬 2, 랭크 2",
+            "cardType": 1,
+            "rangeType": 3
         },
         {
             "id": 1004,
             "name": "Skill Test 3",
             "rank": 1,
-            "type": 2,
-            "effect": "효과 스킬 3, 랭크 1"
+            "effect": "효과 스킬 3, 랭크 1",
+            "cardType": 2,
+            "rangeType": 4
         }
     ]
 }

@@ -48,6 +48,7 @@ public class UIManager : Singleton<UIManager>
             "UIEditorDeckPhase3",
             "UIModalPopup",
             "UISkillInfoPopup",
+            "UIFilterPopup",
         };
 
         foreach (string name in popupNames)

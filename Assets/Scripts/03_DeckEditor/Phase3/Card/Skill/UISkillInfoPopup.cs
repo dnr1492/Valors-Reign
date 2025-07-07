@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using TMPro;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -18,6 +16,10 @@ public class UISkillInfoPopup : UIPopupBase
     [SerializeField] GameObject overlayEnlargedImage, overlayEnlargedRange;
     [SerializeField] Button btn_close_image, btn_close_range;
     [SerializeField] RectTransform hexContainer;
+    [SerializeField] GameObject hexPrefab;
+
+    private readonly List<GameObject> enlargedSkillHexes = new();
+    private readonly Dictionary<(int dq, int dr), GameObject> enlargedSkillHexMap = new();
 
     private void Awake()
     {
@@ -115,11 +117,9 @@ public class UISkillInfoPopup : UIPopupBase
         overlayPreventClick.SetActive(true);
         overlayEnlargedRange.SetActive(true);
 
-        Debug.Log("Range Overlay는 아직 미구현...");
-
-        //ClearHexGrid();              
-        //CreateHexGrid();             
-        //ShowSkillHexRange(skillData);
+        UISkillHexGridHelper.ClearSkillHexGrid(enlargedSkillHexes, enlargedSkillHexMap);
+        UISkillHexGridHelper.CreateSkillHexGrid(hexContainer, hexPrefab, enlargedSkillHexes, enlargedSkillHexMap, 2f);
+        UISkillHexGridHelper.ShowSkillHexRange(skillData, enlargedSkillHexMap);
     }
 
     private void CloseOverlay(GameObject target)
