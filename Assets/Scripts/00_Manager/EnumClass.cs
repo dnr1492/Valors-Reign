@@ -16,8 +16,8 @@ public class EnumClass
     }
     public enum CardState { None = -1, Front, Back }
     public enum CardType { None = -1, CharacterCard, SkillCard }
-    public enum SkillCardType { None = -1, Attack, Defense, Move, Buff, Debuff, Trap }  // ===== 추후 수정 요망 ===== //
-    public enum SkillCardRankAndMpConsum { None = -1, Rank1 = 1, Rank2 = 2, Rank3 = 3, Rank4 =4, Rank5 = 5 }
+    public enum SkillCardType { None = -1, Attack, Defense, Move, Buff, Debuff }
+    public enum SkillCardRankAndMpConsum { None = -1, Zero = 0, Rank1 = 1, Rank2 = 2, Rank3 = 3, Rank4 =4, Rank5 = 5 }
     public enum SkillRangeType
     {
         None,

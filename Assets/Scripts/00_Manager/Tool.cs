@@ -50,12 +50,15 @@ public class Tool
             characterCardDatas = new List<CharacterCardData>()
         };
 
-        // ===== 임시 데이터 =====
-        list.characterCardDatas.Add(new CharacterCardData { id = 0, name = "그림자 속 암살자", skills = new List<int> { 1000, 1001 }, tier = CharacterTierAndCost.Boss, hp = 5, race = CharacterRace.Primordial, job = CharacterJob.Dealer });
-        list.characterCardDatas.Add(new CharacterCardData { id = 1, name = "하얀 검사", skills = new List<int> { 1000, 1004 }, tier = CharacterTierAndCost.High, hp = 3, race = CharacterRace.Primordial, job = CharacterJob.Dealer });
-        list.characterCardDatas.Add(new CharacterCardData { id = 2, name = "그림자 속 수호자", skills = new List<int> { 1002, 1003 }, tier = CharacterTierAndCost.Boss, hp = 6, race = CharacterRace.Primordial, job = CharacterJob.Tanker });
-        list.characterCardDatas.Add(new CharacterCardData { id = 3, name = "어설픈 방패병", skills = new List<int> { 1002, 1003 }, tier = CharacterTierAndCost.High, hp = 4, race = CharacterRace.Primordial, job = CharacterJob.Tanker });
-        list.characterCardDatas.Add(new CharacterCardData { id = 4, name = "최전선의 창병", skills = new List<int> { 1000, 1003 }, tier = CharacterTierAndCost.Low, hp = 1, race = CharacterRace.Primordial, job = CharacterJob.Tanker });
+        list.characterCardDatas.Add(new CharacterCardData { id = 0, name = "어설픈 방패병", tier = CharacterTierAndCost.Low, hp = 4, mp = 1, race = CharacterRace.Primordial, job = CharacterJob.Tanker, skills = new List<int> { 1001, 3001 } });
+        list.characterCardDatas.Add(new CharacterCardData { id = 1, name = "최전선의 창병", tier = CharacterTierAndCost.Low, hp = 3, mp = 1, race = CharacterRace.Primordial, job = CharacterJob.Tanker, skills = new List<int> { 1002, 2001, 3002 } });
+        list.characterCardDatas.Add(new CharacterCardData { id = 2, name = "그림자속 수호자", tier = CharacterTierAndCost.Low, hp = 2, mp = 2, race = CharacterRace.Primordial, job = CharacterJob.Tanker, skills = new List<int> { 1003, 3003, 3004 } });
+        list.characterCardDatas.Add(new CharacterCardData { id = 3, name = "침착한 수비수", tier = CharacterTierAndCost.Middle, hp = 4, mp = 2, race = CharacterRace.Primordial, job = CharacterJob.Tanker, skills = new List<int> { 1004, 3005, 2002 } });
+        list.characterCardDatas.Add(new CharacterCardData { id = 4, name = "나태한 문지기", tier = CharacterTierAndCost.Middle, hp = 3, mp = 3, race = CharacterRace.Primordial, job = CharacterJob.Tanker, skills = new List<int> { 1005, 3006 } });
+        list.characterCardDatas.Add(new CharacterCardData { id = 5, name = "마법방패를 두른 수호자", tier = CharacterTierAndCost.Middle, hp = 2, mp = 4, race = CharacterRace.Primordial, job = CharacterJob.Tanker, skills = new List<int> { 1006, 4001, 3007 } });
+        list.characterCardDatas.Add(new CharacterCardData { id = 6, name = "산군 -강수-", tier = CharacterTierAndCost.High, hp = 6, mp = 3, race = CharacterRace.Primordial, job = CharacterJob.Tanker, skills = new List<int> { 1007, 3008, 2003, 3009 } });
+        list.characterCardDatas.Add(new CharacterCardData { id = 7, name = "은결의 마녀 -루안-", tier = CharacterTierAndCost.High, hp = 2, mp = 6, race = CharacterRace.Primordial, job = CharacterJob.Tanker, skills = new List<int> { 1008, 5001, 5002, 3010, 3011 } });
+        list.characterCardDatas.Add(new CharacterCardData { id = 8, name = "블러드가드 -로간-", tier = CharacterTierAndCost.High, hp = 6, mp = 3, race = CharacterRace.Primordial, job = CharacterJob.Tanker, skills = new List<int> { 1009, 4002, 2004, 3012 } });
 
         LoadDataFromJSON(list, "characterCard_data.json");
     }
@@ -70,12 +73,7 @@ public class Tool
             skillCardDatas = new List<SkillCardData>()
         };
 
-        // ===== 임시 데이터 =====
-        list.skillCardDatas.Add(new SkillCardData { id = 1000, name = "Skill Test 1", rank = (int)SkillCardRankAndMpConsum.Rank1, cardType = SkillCardType.Move, rangeType = SkillRangeType.LineForward1, effect = "스킬 1, 랭크 1" });
-        list.skillCardDatas.Add(new SkillCardData { id = 1001, name = "Skill Test 1", rank = (int)SkillCardRankAndMpConsum.Rank2, cardType = SkillCardType.Attack, rangeType = SkillRangeType.LineForward2, effect = "스킬 1, 랭크 2" });
-        list.skillCardDatas.Add(new SkillCardData { id = 1002, name = "Skill Test 2", rank = (int)SkillCardRankAndMpConsum.Rank1, cardType = SkillCardType.Move, rangeType = SkillRangeType.LineForward2, effect = "스킬 2, 랭크 1" });
-        list.skillCardDatas.Add(new SkillCardData { id = 1003, name = "Skill Test 2", rank = (int)SkillCardRankAndMpConsum.Rank2, cardType = SkillCardType.Attack, rangeType = SkillRangeType.LineForward3, effect = "스킬 2, 랭크 2" });
-        list.skillCardDatas.Add(new SkillCardData { id = 1004, name = "Skill Test 3", rank = (int)SkillCardRankAndMpConsum.Rank1, cardType = SkillCardType.Buff, rangeType = SkillRangeType.Ring1, effect = "효과 스킬 3, 랭크 1" });
+        list.skillCardDatas.Add(new SkillCardData { id = 1001, name = "어설픈 방패병 (이동)", rank = (int)SkillCardRankAndMpConsum.Zero, effect = "", cardType = SkillCardType.Move, rangeType = SkillRangeType.None });
 
         LoadDataFromJSON(list, "skillCard_data.json");
     }
@@ -138,8 +136,8 @@ public class SkillCardData
     public SkillRangeType rangeType;
     public List<(int dq, int dr, Color color)> customOffsetRange;
 
-    // ===== Damage, Count, 이동 불가 (enum) 등으로 추가하기 ===== //
-    // ===== Damage, Count, 이동 불가 (enum) 등으로 추가하기 ===== //
-    // ===== Damage, Count, 이동 불가 (enum) 등으로 추가하기 ===== //
+    // ↓↓↓ Damage, Count, 이동 불가 (enum) 등으로 추가하기 ↓↓↓ //
+    // ↓↓↓ Damage, Count, 이동 불가 (enum) 등으로 추가하기 ↓↓↓ //
+    // ↓↓↓ Damage, Count, 이동 불가 (enum) 등으로 추가하기 ↓↓↓ //
 }
 #endregion

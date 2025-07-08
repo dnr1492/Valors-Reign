@@ -44,7 +44,7 @@ public class CharacterCard : Card
         for (int i = 0; i < characterCardData.skills.Count; i++)
         {
             var skillId = characterCardData.skills[i];
-            var skillData = skillCardData[skillId];
+            skillCardData.TryGetValue(skillId, out SkillCardData skillData);
             if (skillData == null) continue;
             skillDataList.Add(skillData);
 
