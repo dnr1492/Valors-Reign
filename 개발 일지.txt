@@ -1,11 +1,8 @@
 
-1. 캐릭터 카드 width 비율을 줄이기!
-2. 캐릭터 확정 버튼 height 비율 늘리기!
-3. filter popup의 적용, 초기화 버튼 비율 늘리기!
-4. [디자인 - GUI Pro Asset] Editor Deck에 Icon/Background 등 할당
-5. 캐릭터 및 스킬 curCount / maxCount로 표시
-6. 덱 저장할 때 편집하던 덱 이름이랑 동일한 경우에는 저장이 가능하도록 하기
-7. 덱 편집 관련 전체적인 플로우의 UI 해상도 대응 테스트 및 적용하기
+1. [디자인 - GUI Pro Asset] Editor Deck에 Icon/Background 등 할당
+2. 캐릭터 및 스킬 curCount / maxCount로 표시
+3. 덱 저장할 때 편집하던 덱 이름이랑 동일한 경우에는 저장이 가능하도록 하기
+4. 덱 편집 관련 전체적인 플로우의 UI 해상도 대응 테스트 및 적용하기
 
 버그
 1. 덱 이름 설정할 때 사소한 에러가 뜸 (덱 이름을 누르고 바로 저장을 누를 경우... 또는 다른 곳 클릭할 경우)
