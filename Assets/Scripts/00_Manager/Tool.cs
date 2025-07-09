@@ -50,15 +50,42 @@ public class Tool
             characterCardDatas = new List<CharacterCardData>()
         };
 
-        list.characterCardDatas.Add(new CharacterCardData { id = 0, name = "어설픈 방패병", tier = CharacterTierAndCost.Low, hp = 4, mp = 1, race = CharacterRace.Primordial, job = CharacterJob.Tanker, skills = new List<int> { 1001, 3001 } });
-        list.characterCardDatas.Add(new CharacterCardData { id = 1, name = "최전선의 창병", tier = CharacterTierAndCost.Low, hp = 3, mp = 1, race = CharacterRace.Primordial, job = CharacterJob.Tanker, skills = new List<int> { 1002, 2001, 3002 } });
-        list.characterCardDatas.Add(new CharacterCardData { id = 2, name = "그림자속 수호자", tier = CharacterTierAndCost.Low, hp = 2, mp = 2, race = CharacterRace.Primordial, job = CharacterJob.Tanker, skills = new List<int> { 1003, 3003, 3004 } });
-        list.characterCardDatas.Add(new CharacterCardData { id = 3, name = "침착한 수비수", tier = CharacterTierAndCost.Middle, hp = 4, mp = 2, race = CharacterRace.Primordial, job = CharacterJob.Tanker, skills = new List<int> { 1004, 3005, 2002 } });
-        list.characterCardDatas.Add(new CharacterCardData { id = 4, name = "나태한 문지기", tier = CharacterTierAndCost.Middle, hp = 3, mp = 3, race = CharacterRace.Primordial, job = CharacterJob.Tanker, skills = new List<int> { 1005, 3006 } });
-        list.characterCardDatas.Add(new CharacterCardData { id = 5, name = "마법방패를 두른 수호자", tier = CharacterTierAndCost.Middle, hp = 2, mp = 4, race = CharacterRace.Primordial, job = CharacterJob.Tanker, skills = new List<int> { 1006, 4001, 3007 } });
-        list.characterCardDatas.Add(new CharacterCardData { id = 6, name = "산군 -강수-", tier = CharacterTierAndCost.High, hp = 6, mp = 3, race = CharacterRace.Primordial, job = CharacterJob.Tanker, skills = new List<int> { 1007, 3008, 2003, 3009 } });
-        list.characterCardDatas.Add(new CharacterCardData { id = 7, name = "은결의 마녀 -루안-", tier = CharacterTierAndCost.High, hp = 2, mp = 6, race = CharacterRace.Primordial, job = CharacterJob.Tanker, skills = new List<int> { 1008, 5001, 5002, 3010, 3011 } });
-        list.characterCardDatas.Add(new CharacterCardData { id = 8, name = "블러드가드 -로간-", tier = CharacterTierAndCost.High, hp = 6, mp = 3, race = CharacterRace.Primordial, job = CharacterJob.Tanker, skills = new List<int> { 1009, 4002, 2004, 3012 } });
+        list.characterCardDatas.Add(new CharacterCardData { id = 101, name = "어설픈 방패병", tier = CharacterTierAndCost.Low, hp = 4, mp = 1, race = CharacterRace.Primordial, job = CharacterJob.Tanker, skills = new List<int> { 1001, 3001 } });
+        list.characterCardDatas.Add(new CharacterCardData { id = 102, name = "최전선의 창병", tier = CharacterTierAndCost.Low, hp = 3, mp = 1, race = CharacterRace.Primordial, job = CharacterJob.Tanker, skills = new List<int> { 1001, 2001, 3002 } });
+        list.characterCardDatas.Add(new CharacterCardData { id = 103, name = "그림자속 수호자", tier = CharacterTierAndCost.Low, hp = 2, mp = 2, race = CharacterRace.Primordial, job = CharacterJob.Tanker, skills = new List<int> { 1001, 3003, 3004 } });
+        list.characterCardDatas.Add(new CharacterCardData { id = 104, name = "침착한 수비수", tier = CharacterTierAndCost.Middle, hp = 4, mp = 2, race = CharacterRace.Primordial, job = CharacterJob.Tanker, skills = new List<int> { 1001, 3005, 2002 } });
+        list.characterCardDatas.Add(new CharacterCardData { id = 105, name = "나태한 문지기", tier = CharacterTierAndCost.Middle, hp = 3, mp = 3, race = CharacterRace.Primordial, job = CharacterJob.Tanker, skills = new List<int> { 1001, 3006 } });
+        list.characterCardDatas.Add(new CharacterCardData { id = 106, name = "마법방패를 두른 수호자", tier = CharacterTierAndCost.Middle, hp = 2, mp = 4, race = CharacterRace.Primordial, job = CharacterJob.Tanker, skills = new List<int> { 1001, 4001, 3007 } });
+        list.characterCardDatas.Add(new CharacterCardData { id = 107, name = "산군 -강수-", tier = CharacterTierAndCost.High, hp = 6, mp = 3, race = CharacterRace.Primordial, job = CharacterJob.Tanker, skills = new List<int> { 1001, 3008, 2003, 3009 } });
+        list.characterCardDatas.Add(new CharacterCardData { id = 108, name = "은결의 마녀 -루안-", tier = CharacterTierAndCost.High, hp = 2, mp = 6, race = CharacterRace.Primordial, job = CharacterJob.Tanker, skills = new List<int> { 1001, 5001, 5002, 3010, 3011 } });
+        list.characterCardDatas.Add(new CharacterCardData { id = 109, name = "블러드가드 -로간-", tier = CharacterTierAndCost.High, hp = 6, mp = 3, race = CharacterRace.Primordial, job = CharacterJob.Tanker, skills = new List<int> { 1001, 4002, 2004, 3012 } });
+        list.characterCardDatas.Add(new CharacterCardData { id = 110, name = "검은 장미 -엘-", tier = CharacterTierAndCost.Boss, hp = 2, mp = 1, race = CharacterRace.Primordial, job = CharacterJob.Tanker, skills = new List<int> { 1001, 3013 } });
+        list.characterCardDatas.Add(new CharacterCardData { id = 111, name = "빛의 방패 -세노티-", tier = CharacterTierAndCost.Boss, hp = 2, mp = 1, race = CharacterRace.Primordial, job = CharacterJob.Tanker, skills = new List<int> { 1001, 4003 } });
+        list.characterCardDatas.Add(new CharacterCardData { id = 112, name = "철의 성벽 -우르-", tier = CharacterTierAndCost.Boss, hp = 3, mp = 1, race = CharacterRace.Primordial, job = CharacterJob.Tanker, skills = new List<int> { 1001, 3014 } });
+        list.characterCardDatas.Add(new CharacterCardData { id = 113, name = "하얀검사", tier = CharacterTierAndCost.Low, hp = 3, mp = 2, race = CharacterRace.Primordial, job = CharacterJob.Dealer, skills = new List<int> { 1001, 2005 } });
+        list.characterCardDatas.Add(new CharacterCardData { id = 114, name = "그림자 속 암살자", tier = CharacterTierAndCost.Low, hp = 2, mp = 2, race = CharacterRace.Primordial, job = CharacterJob.Dealer, skills = new List<int> { 1001, 2006, 2007 } });
+        list.characterCardDatas.Add(new CharacterCardData { id = 115, name = "죽음과 함께 걷는 암살자", tier = CharacterTierAndCost.Low, hp = 2, mp = 3, race = CharacterRace.Primordial, job = CharacterJob.Dealer, skills = new List<int> { 1001, 2008 } });
+        list.characterCardDatas.Add(new CharacterCardData { id = 116, name = "섬광의 명궁", tier = CharacterTierAndCost.Middle, hp = 4, mp = 2, race = CharacterRace.Primordial, job = CharacterJob.Dealer, skills = new List<int> { 1001, 2009, 2010 } });
+        list.characterCardDatas.Add(new CharacterCardData { id = 117, name = "푸른눈의 저격수", tier = CharacterTierAndCost.Middle, hp = 2, mp = 3, race = CharacterRace.Primordial, job = CharacterJob.Dealer, skills = new List<int> { 1001, 4004, 1002, 2011 } });
+        list.characterCardDatas.Add(new CharacterCardData { id = 118, name = "석양의 보안관", tier = CharacterTierAndCost.Middle, hp = 3, mp = 2, race = CharacterRace.Primordial, job = CharacterJob.Dealer, skills = new List<int> { 1001, 2012, 2013, 2014 } });
+        list.characterCardDatas.Add(new CharacterCardData { id = 119, name = "카이른 블레이즈", tier = CharacterTierAndCost.High, hp = 6, mp = 3, race = CharacterRace.Primordial, job = CharacterJob.Dealer, skills = new List<int> { 1001, 2015, 2016, 2017 } });
+        list.characterCardDatas.Add(new CharacterCardData { id = 120, name = "광전사 -가르칸-", tier = CharacterTierAndCost.High, hp = 9, mp = -1, race = CharacterRace.Primordial, job = CharacterJob.Dealer, skills = new List<int> { 1001, 2018, 2019, 2020 } });
+        list.characterCardDatas.Add(new CharacterCardData { id = 121, name = "광무 -잔영-", tier = CharacterTierAndCost.High, hp = 5, mp = 4, race = CharacterRace.Primordial, job = CharacterJob.Dealer, skills = new List<int> { 1001, 2021, 2022, 2023 } });
+        list.characterCardDatas.Add(new CharacterCardData { id = 122, name = "검은불꽃 -청현-", tier = CharacterTierAndCost.Boss, hp = 2, mp = 1, race = CharacterRace.Primordial, job = CharacterJob.Dealer, skills = new List<int> { 1001, 2024, 2025 } });
+        list.characterCardDatas.Add(new CharacterCardData { id = 123, name = "이계의 창 -라이트-", tier = CharacterTierAndCost.Boss, hp = 1, mp = 2, race = CharacterRace.Primordial, job = CharacterJob.Dealer, skills = new List<int> { 1001, 2026 } });
+        list.characterCardDatas.Add(new CharacterCardData { id = 124, name = "기사단장 -자스안-", tier = CharacterTierAndCost.Boss, hp = 2, mp = 1, race = CharacterRace.Primordial, job = CharacterJob.Dealer, skills = new List<int> { 1001, 2027 } });
+        list.characterCardDatas.Add(new CharacterCardData { id = 125, name = "자유의 치유사", tier = CharacterTierAndCost.Low, hp = 1, mp = 4, race = CharacterRace.Primordial, job = CharacterJob.Supporter, skills = new List<int> { 1001, 4005 } });
+        list.characterCardDatas.Add(new CharacterCardData { id = 126, name = "행운의 치료사", tier = CharacterTierAndCost.Low, hp = 2, mp = 3, race = CharacterRace.Primordial, job = CharacterJob.Supporter, skills = new List<int> { 1001, 4006 } });
+        list.characterCardDatas.Add(new CharacterCardData { id = 127, name = "검은 마력의 저주사", tier = CharacterTierAndCost.Low, hp = 2, mp = 2, race = CharacterRace.Primordial, job = CharacterJob.Supporter, skills = new List<int> { 1001, 5003, 5004 } });
+        list.characterCardDatas.Add(new CharacterCardData { id = 128, name = "노련한 전략가", tier = CharacterTierAndCost.Middle, hp = 2, mp = 3, race = CharacterRace.Primordial, job = CharacterJob.Supporter, skills = new List<int> { 1001, 1003, 4007, 3015 } });
+        list.characterCardDatas.Add(new CharacterCardData { id = 129, name = "교활한 정보원", tier = CharacterTierAndCost.Middle, hp = 3, mp = 3, race = CharacterRace.Primordial, job = CharacterJob.Supporter, skills = new List<int> { 1001, 4008, 1004 } });
+        list.characterCardDatas.Add(new CharacterCardData { id = 130, name = "현자의 돌을 지닌 연금술사", tier = CharacterTierAndCost.Middle, hp = 2, mp = 4, race = CharacterRace.Primordial, job = CharacterJob.Supporter, skills = new List<int> { 1001, 4009, 3016 } });
+        list.characterCardDatas.Add(new CharacterCardData { id = 131, name = "로열 에이드", tier = CharacterTierAndCost.High, hp = 3, mp = 5, race = CharacterRace.Primordial, job = CharacterJob.Supporter, skills = new List<int> { 1001, 4010, 5005, 4011, 4012 } });
+        list.characterCardDatas.Add(new CharacterCardData { id = 132, name = "북방의 마법현자 -와이즈-", tier = CharacterTierAndCost.High, hp = 5, mp = 4, race = CharacterRace.Primordial, job = CharacterJob.Supporter, skills = new List<int> { 1001, 4013, 4014, 5006 } });
+        list.characterCardDatas.Add(new CharacterCardData { id = 133, name = "순풍의 가인 -라에나-", tier = CharacterTierAndCost.High, hp = 3, mp = 6, race = CharacterRace.Primordial, job = CharacterJob.Supporter, skills = new List<int> { 1001, 4015, 4016, 4017 } });
+        list.characterCardDatas.Add(new CharacterCardData { id = 134, name = "시간을 걷는 자 -노아-", tier = CharacterTierAndCost.Boss, hp = 1, mp = 2, race = CharacterRace.Primordial, job = CharacterJob.Supporter, skills = new List<int> { 1001, 4018, 5007 } });
+        list.characterCardDatas.Add(new CharacterCardData { id = 135, name = "천상의 울림 -벨-", tier = CharacterTierAndCost.Boss, hp = 2, mp = 2, race = CharacterRace.Primordial, job = CharacterJob.Supporter, skills = new List<int> { 1001, 4019 } });
+        list.characterCardDatas.Add(new CharacterCardData { id = 136, name = "망각 -루누스-", tier = CharacterTierAndCost.Boss, hp = 2, mp = 1, race = CharacterRace.Primordial, job = CharacterJob.Supporter, skills = new List<int> { 1001, 5008 } });
 
         LoadDataFromJSON(list, "characterCard_data.json");
     }
@@ -80,6 +107,10 @@ public class Tool
     #endregion
 #endif
 }
+
+#region 유저 데이터
+
+#endregion
 
 #region 게임 플레이 데이터
 [Serializable]
