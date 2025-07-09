@@ -15,7 +15,7 @@ public class UIEditorDeckPhase1 : UIPopupBase
 
     private void LoadSavedDecks()
     {
-        foreach (var (deckName, pack) in DeckHandler.LoadAll())
+        foreach (var (_, pack) in DeckHandler.LoadAll())
         {
             GameObject obj = Instantiate(deckPrefab, deckContainer);
             Deck deck = obj.GetComponent<Deck>();
@@ -69,10 +69,13 @@ public class UIEditorDeckPhase1 : UIPopupBase
     private void OnApplyDeck(Deck deck)
     {
         if (deck?.GetDeckPack() != null) {
+            currentDeck = deck;
             var popup = UIManager.Instance.ShowPopup<UIEditorDeckPhase3>("UIEditorDeckPhase3");
             popup.ApplyDeckPack(deck.GetDeckPack());
         }
     }
+
+    public DeckPack GetCurrentDeckPack() => currentDeck?.GetDeckPack();
 
     protected override void ResetUI() { }
 }

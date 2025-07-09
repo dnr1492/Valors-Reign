@@ -12,33 +12,31 @@ public static class DeckHandler
         if (!Directory.Exists(basePath)) Directory.CreateDirectory(basePath);
 
         string name = SanitizeFileName(pack.deckName);
-        string path = Path.Combine(basePath, $"deck_{name}.json");
+        string path = Path.Combine(basePath, $"deck_{pack.guid}.json");
 
         string json = JsonUtility.ToJson(pack, true);
         File.WriteAllText(path, json);
     }
 
-    public static DeckPack Load(string deckName)
+    public static DeckPack LoadByGuid(string guid)
     {
-        string name = SanitizeFileName(deckName);
-        string path = Path.Combine(basePath, $"deck_{name}.json");
-
+        string path = Path.Combine(basePath, $"deck_{guid}.json");
         if (!File.Exists(path)) return null;
 
         string json = File.ReadAllText(path);
         return JsonUtility.FromJson<DeckPack>(json);
     }
 
-    public static IEnumerable<(string deckName, DeckPack pack)> LoadAll()
+    public static IEnumerable<(string guid, DeckPack pack)> LoadAll()
     {
         if (!Directory.Exists(basePath)) yield break;
 
         string[] files = Directory.GetFiles(basePath, "deck_*.json");
         foreach (string file in files)
         {
-            string deckName = Path.GetFileNameWithoutExtension(file).Replace("deck_", "");
-            DeckPack pack = Load(deckName);
-            if (pack != null) yield return (deckName, pack);
+            string json = File.ReadAllText(file);
+            DeckPack pack = JsonUtility.FromJson<DeckPack>(json);
+            if (pack != null && !string.IsNullOrEmpty(pack.guid)) yield return (pack.guid, pack);
         }
     }
 

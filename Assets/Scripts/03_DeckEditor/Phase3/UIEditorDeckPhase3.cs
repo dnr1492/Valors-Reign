@@ -23,6 +23,7 @@ public class UIEditorDeckPhase3 : UIPopupBase
     [SerializeField] TMP_InputField inputFieldDeckName;
     [SerializeField] Button btnDeckNameEditor;
     private string currentDeckName = "";
+    private string previousDeckName = "";
 
     private void Awake()
     {
@@ -90,6 +91,8 @@ public class UIEditorDeckPhase3 : UIPopupBase
 
     private void StartInputDeckName()
     {
+        previousDeckName = currentDeckName;
+
         inputFieldDeckName.interactable = true;
         inputFieldDeckName.Select();
         inputFieldDeckName.ActivateInputField();
@@ -104,7 +107,7 @@ public class UIEditorDeckPhase3 : UIPopupBase
         {
             UIManager.Instance.ShowPopup<UIModalPopup>("UIModalPopup", false)
                 .Set("덱 이름 오류", "덱 이름을 입력해주세요.");
-            inputFieldDeckName.text = currentDeckName;  //이전 이름 복구
+            inputFieldDeckName.text = previousDeckName;
             return;
         }
 
@@ -134,8 +137,8 @@ public class UIEditorDeckPhase3 : UIPopupBase
         phase1Popup.OnClickSave(deckPack);
         
         skillSlotCollection.Refresh();
-        
-        Debug.Log($"덱 저장 완료: {deckPack.deckName}");
+
+        Debug.Log($"덱 저장 완료: {deckPack.deckName} / {deckPack.guid}");
     }
 
     /// <summary>
@@ -175,11 +178,29 @@ public class UIEditorDeckPhase3 : UIPopupBase
             return false;
         }
 
-        if (DeckHandler.Load(currentDeckName) != null)
+        //덱 이름 중복 검사 + 현재 편집 중인 덱은 예외
+        var allDecks = DeckHandler.LoadAll();
+        foreach (var (guid, pack) in allDecks)
         {
-            UIManager.Instance.ShowPopup<UIModalPopup>("UIModalPopup", false)
-                .Set("중복된 덱 이름", "이미 존재하는 덱 이름입니다. 다른 이름을 입력해주세요.");
-            return false;
+            if (pack.deckName == currentDeckName)
+            {
+                //같은 이름의 다른 덱이 이미 존재한다면
+                var phase1Popup = UIManager.Instance.GetPopup<UIEditorDeckPhase1>("UIEditorDeckPhase1");
+                var currentDeckPack = phase1Popup?.GetCurrentDeckPack();
+                if (currentDeckPack == null || currentDeckPack.guid != guid)
+                {
+                    UIManager.Instance.ShowPopup<UIModalPopup>("UIModalPopup", false)
+                        .Set("중복된 덱 이름", "이미 존재하는 덱 이름입니다. 다른 이름을 입력해주세요.");
+
+                    //기존 설정된 덱 이름으로 되돌리기
+                    inputFieldDeckName.text = previousDeckName;
+                    currentDeckName = previousDeckName;
+                    inputFieldDeckName.DeactivateInputField();
+                    inputFieldDeckName.interactable = false;
+
+                    return false;
+                }
+            }
         }
 
         return true;

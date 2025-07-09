@@ -6,6 +6,7 @@ using static EnumClass;
 [System.Serializable]
 public class DeckPack
 {
+    public string guid;  //덱 고유 id
     public string deckName = "";  //덱 이름
     public CharacterRace race;  //덱 종족
     public List<TokenSlotData> tokenSlots = new();

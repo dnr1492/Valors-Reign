@@ -1,4 +1,5 @@
 using Cysharp.Threading.Tasks;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
@@ -335,7 +336,10 @@ public class GridManager : Singleton<GridManager>
     /// <returns></returns>
     public DeckPack CreateDeckPack(string deckName)
     {
+        var phase1Popup = UIManager.Instance.GetPopup<UIEditorDeckPhase1>("UIEditorDeckPhase1");
+        var currentDeckPack = phase1Popup?.GetCurrentDeckPack();
         var DeckPack = new DeckPack();
+        DeckPack.guid = currentDeckPack?.guid ?? Guid.NewGuid().ToString();  //덱이 이미 존재하는 경우 기존 guid 재사용
         DeckPack.deckName = deckName;
         DeckPack.race = ControllerRegister.Get<FilterController>().GetSelectedRace();
 
