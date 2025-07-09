@@ -69,12 +69,14 @@ public class UIEditorDeckPhase3 : UIPopupBase
         skillSlotCollection.Refresh();
     }
 
-    public void ApplyDeckPack(DeckPack deckPack)
+    public async void ApplyDeckPack(DeckPack deckPack)
     {
-        GridManager.Instance.ApplyDeckPack(deckPack, characterCard);
+        await GridManager.Instance.ApplyDeckPack(deckPack, characterCard);
 
         currentDeckName = deckPack.deckName;
         inputFieldDeckName.text = currentDeckName;
+
+        skillSlotCollection.Refresh();
     }
 
     public void SetMaxCost(int cost)

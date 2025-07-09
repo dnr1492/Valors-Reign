@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
@@ -369,7 +370,7 @@ public class GridManager : Singleton<GridManager>
     /// </summary>
     /// <param name="deckPack"></param>
     /// <param name="characterCard"></param>
-    public async void ApplyDeckPack(DeckPack deckPack, CharacterCard characterCard)
+    public async UniTask ApplyDeckPack(DeckPack deckPack, CharacterCard characterCard)
     {
         try
         {
