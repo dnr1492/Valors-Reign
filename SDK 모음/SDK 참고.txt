@@ -1,0 +1,2 @@
+*GPGS 연동
+https://developer.android.com/games/pgs/unity/unity-start?hl=ko
