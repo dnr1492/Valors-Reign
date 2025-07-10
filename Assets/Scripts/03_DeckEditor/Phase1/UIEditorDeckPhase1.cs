@@ -1,16 +1,28 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 public class UIEditorDeckPhase1 : UIPopupBase
 {
+    [SerializeField] Button btn_back;
     [SerializeField] GameObject deckPrefab;
     [SerializeField] Transform deckContainer;
 
     private Deck currentDeck = null;  //현재 작업 중인 덱
 
+    private void Awake()
+    {
+        btn_back.onClick.AddListener(OnClickBack);
+    }
+
     private void Start()
     {
         LoadSavedDecks();  //저장된 덱들을 모두 생성
         EnsureNewDeckSlot();
+    }
+
+    private void OnClickBack()
+    {
+        UIManager.Instance.ShowPopup<UILoginPopup>("UILoginPopup");
     }
 
     private void LoadSavedDecks()

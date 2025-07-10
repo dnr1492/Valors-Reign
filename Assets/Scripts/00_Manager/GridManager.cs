@@ -439,8 +439,14 @@ public class GridManager : Singleton<GridManager>
                 token.SetTokenState(CharacterTokenState.Cancel);
 
             //스킬 개수 초기화
-            foreach (var skillId in DataManager.Instance.dicCharacterCardData[token.Key].skills)
-                token.SetSkillCount(skillId, 0);
+            if (DataManager.Instance.dicCharacterCardData.TryGetValue(token.Key, out var cardData) 
+                && cardData.skills != null 
+                && cardData.skills.Count > 0)
+            {
+                foreach (var skillId in cardData.skills) {
+                    token.SetSkillCount(skillId, 0);
+                }
+            }
         }
 
         ////필터 초기화

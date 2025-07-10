@@ -20,11 +20,11 @@ public class BackendManager : Singleton<BackendManager>
             await UniTask.DelayFrame(1);  //안정화 대기 (프레임 기준)
 
             if (bro.IsSuccess()) {
-                Debug.Log("[BackendManager] 뒤끝 초기화 성공");
+                Debug.Log("뒤끝 초기화 성공");
                 return true;
             }
             else {
-                Debug.LogError($"[BackendManager] 뒤끝 초기화 실패: {bro.GetMessage()}");
+                Debug.LogError($"뒤끝 초기화 실패: {bro.GetMessage()}");
                 return false;
             }
         }
@@ -43,8 +43,16 @@ public class BackendManager : Singleton<BackendManager>
             onSuccess?.Invoke();
         }
         else {
-            Debug.LogError($"게스트 로그인 실패: {bro.GetMessage()}");
-            onFail?.Invoke(bro.GetMessage());
+            //새로 가입 시도
+            bro = Backend.BMember.GuestLogin();
+            if (bro.IsSuccess()) {
+                Debug.Log("게스트 계정 생성 및 로그인 성공");
+                onSuccess?.Invoke();
+            }
+            else {
+                Debug.LogError($"게스트 로그인 실패: {bro.GetMessage()}");
+                onFail?.Invoke(bro.GetMessage());
+            }
         }
     }
 
@@ -60,4 +68,6 @@ public class BackendManager : Singleton<BackendManager>
             onFail?.Invoke(bro.GetMessage());
         }
     }
+
+    public string GetNickname() => Backend.UserNickName;
 }
