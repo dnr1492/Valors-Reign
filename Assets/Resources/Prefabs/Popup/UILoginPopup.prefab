@@ -371,8 +371,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: "\uAC8C\uC2A4\uD2B8 \uACC4\uC815\uC73C\uB85C \uB85C\uADF8\uC778"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: bf93a9f8e8acbfc43a63d7e860a23365, type: 2}
-  m_sharedMaterial: {fileID: -5506863559948280677, guid: bf93a9f8e8acbfc43a63d7e860a23365, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: cc604f61b5bf19348a3ff622f20f4545, type: 2}
+  m_sharedMaterial: {fileID: -9131770026233852502, guid: cc604f61b5bf19348a3ff622f20f4545, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
