@@ -26,14 +26,10 @@ public class BackendManager : Singleton<BackendManager>
                 Debug.Log("뒤끝 초기화 성공");
                 return true;
             }
-            else {
-                Debug.LogError($"뒤끝 초기화 실패: {bro.GetMessage()}");
-                return false;
-            }
+            else return false;
         }
         catch (Exception e)
         {
-            Debug.LogError($"뒤끝 초기화 예외 발생: {e.Message}");
             return false;
         }
     }
@@ -53,7 +49,6 @@ public class BackendManager : Singleton<BackendManager>
                 onSuccess?.Invoke();
             }
             else {
-                Debug.LogError($"게스트 로그인 실패: {bro.GetMessage()}");
                 onFail?.Invoke(bro.GetMessage());
             }
         }
@@ -66,10 +61,7 @@ public class BackendManager : Singleton<BackendManager>
             Debug.Log("닉네임 설정 성공");
             onSuccess?.Invoke();
         }
-        else {
-            Debug.LogError($"닉네임 설정 실패: {bro.GetMessage()}");
-            onFail?.Invoke(bro.GetMessage());
-        }
+        else onFail?.Invoke(bro.GetMessage());
     }
 
     public string GetNickname() => Backend.UserNickName;

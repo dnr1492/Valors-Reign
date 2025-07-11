@@ -201,7 +201,7 @@ public class UIEditorDeckPhase3 : UIPopupBase
                         inputFieldDeckName.DeactivateInputField();
                         inputFieldDeckName.interactable = false;
 
-                        // ======= 이 씨발 여기가 false로 리턴을 못 시켜서 중복 검사가 안됨 ============ //
+                        // ======= 여기가 false로 리턴을 못 시켜서 중복 검사가 안됨 ============ //
                         return;
                     }
                 }
