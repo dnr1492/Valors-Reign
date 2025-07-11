@@ -130,7 +130,8 @@ public class UIEditorDeckPhase3 : UIPopupBase
 
         //DeckPack 생성 및 저장
         DeckPack deckPack = GridManager.Instance.CreateDeckPack(currentDeckName);
-        DeckHandler.Save(deckPack);
+        //DeckHandler.Save(deckPack);  //로컬 저장
+        BackendManager.Instance.SaveDeck(deckPack);  //서버 저장
 
         //UIEditorDeckPhase1에 DeckPack 전달
         var phase1Popup = UIManager.Instance.GetPopup<UIEditorDeckPhase1>("UIEditorDeckPhase1");
@@ -178,30 +179,59 @@ public class UIEditorDeckPhase3 : UIPopupBase
             return false;
         }
 
+        //서버에서 모든 덱 불러오기
         //덱 이름 중복 검사 + 현재 편집 중인 덱은 예외
-        var allDecks = DeckHandler.LoadAll();
-        foreach (var (guid, pack) in allDecks)
+        BackendManager.Instance.LoadAllDecks(result =>
         {
-            if (pack.deckName == currentDeckName)
+            foreach (var (guid, pack) in result)
             {
-                //같은 이름의 다른 덱이 이미 존재한다면
-                var phase1Popup = UIManager.Instance.GetPopup<UIEditorDeckPhase1>("UIEditorDeckPhase1");
-                var currentDeckPack = phase1Popup?.GetCurrentDeckPack();
-                if (currentDeckPack == null || currentDeckPack.guid != guid)
+                if (pack.deckName == currentDeckName)
                 {
-                    UIManager.Instance.ShowPopup<UIModalPopup>("UIModalPopup", false)
-                        .Set("중복된 덱 이름", "이미 존재하는 덱 이름입니다. 다른 이름을 입력해주세요.");
+                    //같은 이름의 다른 덱이 이미 존재한다면
+                    var phase1Popup = UIManager.Instance.GetPopup<UIEditorDeckPhase1>("UIEditorDeckPhase1");
+                    var currentDeckPack = phase1Popup?.GetCurrentDeckPack();
+                    if (currentDeckPack == null || currentDeckPack.guid != guid)
+                    {
+                        UIManager.Instance.ShowPopup<UIModalPopup>("UIModalPopup", false)
+                            .Set("중복된 덱 이름", "이미 존재하는 덱 이름입니다. 다른 이름을 입력해주세요.");
 
-                    //기존 설정된 덱 이름으로 되돌리기
-                    inputFieldDeckName.text = previousDeckName;
-                    currentDeckName = previousDeckName;
-                    inputFieldDeckName.DeactivateInputField();
-                    inputFieldDeckName.interactable = false;
+                        //기존 설정된 덱 이름으로 되돌리기
+                        inputFieldDeckName.text = previousDeckName;
+                        currentDeckName = previousDeckName;
+                        inputFieldDeckName.DeactivateInputField();
+                        inputFieldDeckName.interactable = false;
 
-                    return false;
+                        // ======= 이 씨발 여기가 false로 리턴을 못 시켜서 중복 검사가 안됨 ============ //
+                        return;
+                    }
                 }
             }
-        }
+        });
+
+        ////로컬에서 모든 덱 불러오기
+        //var allDecks = DeckHandler.LoadAll();
+        //foreach (var (guid, pack) in allDecks)
+        //{
+        //    if (pack.deckName == currentDeckName)
+        //    {
+        //        //같은 이름의 다른 덱이 이미 존재한다면
+        //        var phase1Popup = UIManager.Instance.GetPopup<UIEditorDeckPhase1>("UIEditorDeckPhase1");
+        //        var currentDeckPack = phase1Popup?.GetCurrentDeckPack();
+        //        if (currentDeckPack == null || currentDeckPack.guid != guid)
+        //        {
+        //            UIManager.Instance.ShowPopup<UIModalPopup>("UIModalPopup", false)
+        //                .Set("중복된 덱 이름", "이미 존재하는 덱 이름입니다. 다른 이름을 입력해주세요.");
+
+        //            //기존 설정된 덱 이름으로 되돌리기
+        //            inputFieldDeckName.text = previousDeckName;
+        //            currentDeckName = previousDeckName;
+        //            inputFieldDeckName.DeactivateInputField();
+        //            inputFieldDeckName.interactable = false;
+
+        //            return false;
+        //        }
+        //    }
+        //}
 
         return true;
     }
