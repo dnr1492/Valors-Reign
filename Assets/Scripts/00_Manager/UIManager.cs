@@ -31,7 +31,7 @@ public class UIManager : Singleton<UIManager>
     {
         base.Awake();
 
-        if (mainCanvas == null) mainCanvas = FindObjectOfType<Canvas>();
+        if (mainCanvas == null) mainCanvas = GameObject.Find("MainCanvas").GetComponent<Canvas>();
 
         LoadAllPopups();
     }

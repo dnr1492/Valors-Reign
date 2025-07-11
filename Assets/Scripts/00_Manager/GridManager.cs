@@ -34,6 +34,11 @@ public class GridManager : Singleton<GridManager>
     private readonly Dictionary<int, (int col, int row)> tokenPosMap = new();  //토큰의 고유 Key(id)와 좌표를 매핑
     private readonly Dictionary<(int col, int row), HexTile> hexTileMap = new();  //좌표에 해당하는 좌표의 HexTile 컴포넌트
 
+    protected override void Awake()
+    {
+        base.Awake();
+    }
+
     #region 그리드 생성
     public void CreateHexGrid(RectTransform battleFieldRt, GameObject hexPrefab, RectTransform parant)
     {
