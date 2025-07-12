@@ -146,5 +146,33 @@ public class BackendManager : Singleton<BackendManager>
             onLoaded?.Invoke(result);
         });
     }
+
+    public async UniTask<List<(string guid, DeckPack)>> LoadAllDecksAsync()
+    {
+        var tcs = new UniTaskCompletionSource<List<(string, DeckPack)>>();
+
+        Backend.GameData.GetMyData(TableName, new Where(), callback =>
+        {
+            List<(string guid, DeckPack)> result = new();
+
+            if (callback.IsSuccess())
+            {
+                foreach (LitJson.JsonData row in callback.Rows())
+                {
+                    string guid = row["guid"].ToString();
+                    string json = row["jsonData"].ToString();
+
+                    DeckPack pack = JsonUtility.FromJson<DeckPack>(json);
+                    if (pack != null && !string.IsNullOrEmpty(guid))
+                        result.Add((guid, pack));
+                }
+            }
+            else Debug.LogError($"[서버 LoadAll 실패]: {callback.GetMessage()}");
+
+            tcs.TrySetResult(result);
+        });
+
+        return await tcs.Task;
+    }
     #endregion
 }
