@@ -81,13 +81,26 @@ public class UIEditorDeckPhase3 : UIPopupBase
         skillSlotCollection.Refresh();
     }
 
-    public void SetMaxCost(int cost)
+    public void SetCost(int cost)
     {
         int newCost = sumCost + cost;
         if (newCost < 0 || newCost > maxCost) return;
 
         sumCost = newCost;
         sliCost.value = sumCost;
+    }
+
+    public bool CheckCost(CharacterToken clickedToken)
+    {
+        int clickedTokenCost = (int)clickedToken.Tier;
+
+        if (sumCost + clickedTokenCost > maxCost) {
+            UIManager.Instance.ShowPopup<UIModalPopup>("UIModalPopup", false)
+                .Set("코스트 초과", $"현재 코스트: {sumCost} + {clickedTokenCost} > 최대 코스트 {maxCost}");
+            return false;
+        }
+
+        return true;
     }
 
     private void StartInputDeckName()

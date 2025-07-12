@@ -54,11 +54,11 @@ public class CharacterToken : MonoBehaviour
 
         //Confirm 상태에서 Cancel 또는 Select로 바뀔 때 비용 차감
         if (State == CharacterTokenState.Confirm && newState != CharacterTokenState.Confirm && Cost != 0)
-            uiCreateDeckPhase2.SetMaxCost(-Cost);
+            uiCreateDeckPhase2.SetCost(-Cost);
 
         //Confirm이 아닌 상태에서 Confirm으로 바뀔 때 비용 추가
         if (newState == CharacterTokenState.Confirm && State != CharacterTokenState.Confirm && Cost != 0)
-            uiCreateDeckPhase2.SetMaxCost(Cost);
+            uiCreateDeckPhase2.SetCost(Cost);
 
         //Select로 바뀔 때 스킬 개수 초기화
         if (newState == CharacterTokenState.Select)

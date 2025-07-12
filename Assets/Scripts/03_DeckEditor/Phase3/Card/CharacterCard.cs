@@ -27,6 +27,10 @@ public class CharacterCard : Card
 
         btnConfirm.onClick.RemoveAllListeners();
         btnConfirm.onClick.AddListener(() => {
+            if (curClickedToken.State != CharacterTokenState.Confirm) {
+                bool canConfirm = UIManager.Instance.GetPopup<UIEditorDeckPhase3>("UIEditorDeckPhase3").CheckCost(curClickedToken);
+                if (!canConfirm) return;
+            }
             SaveCurrentSkillCountsToToken();
             ControllerRegister.Get<CharacterTokenController>().OnClickConfirm(clickedToken);
             skillSlotCollection.Refresh();
