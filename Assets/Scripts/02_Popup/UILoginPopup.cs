@@ -46,8 +46,7 @@ public class UILoginPopup : UIPopupBase
 
     private void OnLoginComplete()
     {
-        // ===== 임시로 덱 편집으로 진입 중. 추후 로비 화면으로 진입으로 변경하기 ===== //
-        UIManager.Instance.ShowPopup<UIEditorDeckPhase1>("UIEditorDeckPhase1");
+        UIManager.Instance.ShowPopup<UILobbyPopup>("UILobbyPopup");
     }
 
     private async void ConnectNetwork()

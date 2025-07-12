@@ -49,7 +49,8 @@ public class UIManager : Singleton<UIManager>
             "UIModalPopup",
             "UISkillInfoPopup",
             "UIFilterPopup",
-            "UILoginPopup"
+            "UILoginPopup",
+            "UILobbyPopup",
         };
 
         foreach (string name in popupNames)

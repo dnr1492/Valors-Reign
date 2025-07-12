@@ -22,7 +22,7 @@ public class UIEditorDeckPhase1 : UIPopupBase
 
     private void OnClickBack()
     {
-        UIManager.Instance.ShowPopup<UILoginPopup>("UILoginPopup");
+        UIManager.Instance.ShowPopup<UILobbyPopup>("UILobbyPopup");
     }
 
     private void LoadSavedDecks()

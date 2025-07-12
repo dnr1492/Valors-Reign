@@ -4,7 +4,6 @@ using UnityEngine;
 using BackEnd;
 using System;
 using Cysharp.Threading.Tasks;
-using UnityEditor;
 
 public class BackendManager : Singleton<BackendManager>
 {
