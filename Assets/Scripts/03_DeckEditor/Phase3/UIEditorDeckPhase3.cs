@@ -92,7 +92,7 @@ public class UIEditorDeckPhase3 : UIPopupBase
 
     public bool CheckCost(CharacterToken clickedToken)
     {
-        int clickedTokenCost = (int)clickedToken.Tier;
+        int clickedTokenCost = clickedToken.Tier != CharacterTierAndCost.Boss ? (int)clickedToken.Tier : 0;
 
         if (sumCost + clickedTokenCost > maxCost) {
             UIManager.Instance.ShowPopup<UIModalPopup>("UIModalPopup", false)
@@ -164,11 +164,14 @@ public class UIEditorDeckPhase3 : UIPopupBase
     {
         var tokens = ControllerRegister.Get<CharacterTokenController>().GetAllCharacterToken();
         int confirmTokenCount = 0;
+        int bossCount = 0;
         List<string> invalidCharacters = new();
         foreach (var token in tokens)
         {
             if (token.State != CharacterTokenState.Confirm) continue;
             confirmTokenCount++;
+
+            if (token.Tier == CharacterTierAndCost.Boss) bossCount++;
 
             int skillCount = 0;
             foreach (var count in token.GetAllSkillCounts().Values) skillCount += count;
@@ -178,6 +181,19 @@ public class UIEditorDeckPhase3 : UIPopupBase
                     ? cardData.name : $"ID: {token.Key}";
                 invalidCharacters.Add($"{charName} ({skillCount}개)");
             }
+        }
+
+        if (bossCount == 0)
+        {
+            UIManager.Instance.ShowPopup<UIModalPopup>("UIModalPopup", false)
+                .Set("보스 캐릭터 누락", "덱에는 반드시 Boss 티어 캐릭터가 1명 포함되어야 합니다.");
+            return false;
+        }
+        else if (bossCount > 1)
+        {
+            UIManager.Instance.ShowPopup<UIModalPopup>("UIModalPopup", false)
+                .Set("보스 캐릭터 중복", $"Boss 티어 캐릭터가 {bossCount}명 배치되어 있습니다.\nBoss는 1명만 포함해야 합니다.");
+            return false;
         }
 
         if (invalidCharacters.Count > 0)
