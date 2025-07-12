@@ -164,25 +164,34 @@ public class UIEditorDeckPhase3 : UIPopupBase
     {
         var tokens = ControllerRegister.Get<CharacterTokenController>().GetAllCharacterToken();
         int confirmTokenCount = 0;
-        int totalSkillCount = 0;
+        List<string> invalidCharacters = new();
         foreach (var token in tokens)
         {
             if (token.State != CharacterTokenState.Confirm) continue;
             confirmTokenCount++;
-            foreach (var count in token.GetAllSkillCounts().Values) totalSkillCount += count;
+
+            int skillCount = 0;
+            foreach (var count in token.GetAllSkillCounts().Values) skillCount += count;
+
+            if (skillCount != 4) {
+                string charName = DataManager.Instance.dicCharacterCardData.TryGetValue(token.Key, out var cardData)
+                    ? cardData.name : $"ID: {token.Key}";
+                invalidCharacters.Add($"{charName} ({skillCount}개)");
+            }
+        }
+
+        if (invalidCharacters.Count > 0)
+        {
+            string joined = string.Join("\n", invalidCharacters);
+            UIManager.Instance.ShowPopup<UIModalPopup>("UIModalPopup", false)
+                .Set("스킬 설정 오류", $"다음 캐릭터들의 스킬 수가 4개가 아닙니다:\n{joined}");
+            return false;
         }
 
         if (confirmTokenCount == 0)
         {
             UIManager.Instance.ShowPopup<UIModalPopup>("UIModalPopup", false)
                 .Set("저장 오류", "하나 이상의 캐릭터를 배치해주세요.");
-            return false;
-        }
-
-        int maxSkillCount = confirmTokenCount * 4;
-        if (totalSkillCount > maxSkillCount) {
-            UIManager.Instance.ShowPopup<UIModalPopup>("UIModalPopup", false)
-                .Set("스킬 개수 초과", $"확정된 캐릭터 {confirmTokenCount}개 x 4 = {maxSkillCount}개 이하로 설정해주세요.");
             return false;
         }
 
