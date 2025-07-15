@@ -46,7 +46,7 @@ public class UILoginPopup : UIPopupBase
 
     private void OnLoginComplete()
     {
-        UIManager.Instance.ShowPopup<UILobbyPopup>("UILobbyPopup");
+        UIManager.Instance.ShowPopup<UILobbyPopup>("UILobbyPopup").Init();
     }
 
     private async void ConnectNetwork()
