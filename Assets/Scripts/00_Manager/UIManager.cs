@@ -60,7 +60,7 @@ public class UIManager : Singleton<UIManager>
                 prefab = Resources.Load<GameObject>($"Prefabs/Popup/{name}");
                 if (prefab == null)
                 {
-                    Debug.LogError($"UIManager '{name}' 프리팹 로드 실패");
+                    Debug.Log($"UIManager '{name}' 프리팹 로드 실패");
                     continue;
                 }
                 prefabCache.Add(name, prefab);
@@ -136,7 +136,7 @@ public class UIManager : Singleton<UIManager>
             prefab = Resources.Load<GameObject>($"Prefabs/Popup/{popupName}");
             if (prefab == null)
             {
-                Debug.LogError($"UIManager '{popupName}'프리팹 로드 실패");
+                Debug.Log($"UIManager '{popupName}'프리팹 로드 실패");
                 return null;
             }
             prefabCache.Add(popupName, prefab);

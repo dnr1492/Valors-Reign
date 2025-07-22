@@ -4,6 +4,7 @@ using UnityEngine;
 using BackEnd;
 using System;
 using Cysharp.Threading.Tasks;
+using System.Linq;
 
 public class BackendManager : Singleton<BackendManager>
 {
@@ -19,7 +20,7 @@ public class BackendManager : Singleton<BackendManager>
     {
         try
         {
-            var bro = Backend.Initialize(true);
+            var bro = Backend.Initialize();
             await UniTask.DelayFrame(1);  //안정화 대기 (프레임 기준)
 
             if (bro.IsSuccess()) {
@@ -36,7 +37,7 @@ public class BackendManager : Singleton<BackendManager>
 
     public void LoginGuest(Action onSuccess = null, Action<string> onFail = null)
     {
-        //uuid 가져오기 (없으면 새로 생성)
+        //guest_uuid 가져오기 (없으면 새로 생성)
         string guestUuid = PlayerPrefs.GetString(GUEST_UUID_KEY, "");
         if (string.IsNullOrEmpty(guestUuid))
         {
@@ -80,11 +81,8 @@ public class BackendManager : Singleton<BackendManager>
     public string GetNickname() => Backend.UserNickName;
 
     #region 덱 저장
-    public void SaveDeck(DeckPack pack)
+    public void SaveDeck(DeckPack pack, bool isNewSave)
     {
-        if (string.IsNullOrEmpty(pack.guid))
-            pack.guid = Guid.NewGuid().ToString();
-
         string json = JsonUtility.ToJson(pack, true);
         Param param = new Param
         {
@@ -93,22 +91,25 @@ public class BackendManager : Singleton<BackendManager>
             { "jsonData", json }
         };
 
-        Backend.GameData.Insert(TableName, param, callback =>
-        {
-            if (callback.IsSuccess()) Debug.Log($"[서버 저장] 성공: {pack.deckName}");
-            else if (callback.GetStatusCode() == "409")
+        if (isNewSave) {
+            //신규 저장
+            Backend.GameData.Insert(TableName, param, callback =>
             {
-                //중복 시 Update
-                Where where = new Where();
-                where.Equal("guid", pack.guid);
-                Backend.GameData.Update(TableName, where, param, updateCallback =>
-                {
-                    if (updateCallback.IsSuccess()) Debug.Log($"[서버 업데이트] 성공: {pack.deckName}");
-                    else Debug.LogError($"[서버 업데이트] 실패: {updateCallback.GetMessage()}");
-                });
-            }
-            else Debug.LogError($"[서버 저장] 실패: {callback.GetMessage()}");
-        });
+                if (callback.IsSuccess()) Debug.Log($"[서버 저장] 신규 저장 성공: {pack.deckName}");
+                else Debug.LogError($"[서버 저장] 신규 저장 실패: {callback.GetStatusCode()} / {callback.GetMessage()}");
+            });
+        }
+        else {
+            //수정 (덮어쓰기)
+            Where where = new Where();
+            where.Equal("guid", pack.guid);
+
+            Backend.GameData.Update(TableName, where, param, callback =>
+            {
+                if (callback.IsSuccess()) Debug.Log($"[서버 업데이트] 덮어쓰기 성공: {pack.deckName}");
+                else Debug.LogError($"[서버 업데이트] 덮어쓰기 실패: {callback.GetStatusCode()} / {callback.GetMessage()}");
+            });
+        }
     }
     #endregion
 
@@ -140,23 +141,34 @@ public class BackendManager : Singleton<BackendManager>
     {
         Backend.GameData.GetMyData(TableName, new Where(), callback =>
         {
-            List<(string guid, DeckPack)> result = new();
+            List<(string guid, DeckPack, DateTime inDate)> temp = new();
 
             if (callback.IsSuccess())
             {
                 foreach (LitJson.JsonData row in callback.Rows())
                 {
-                    string guid = row["guid"].ToString();
-                    string json = row["jsonData"].ToString();
+                    string guid = row["guid"]["S"].ToString();
+                    string json = row["jsonData"]["S"].ToString();
+                    string inDateStr = row["inDate"]["S"].ToString();
+                    DateTime inDate = DateTimeOffset.Parse(inDateStr).UtcDateTime;
 
                     DeckPack pack = JsonUtility.FromJson<DeckPack>(json);
                     if (pack != null && !string.IsNullOrEmpty(guid))
-                        result.Add((guid, pack));
+                        temp.Add((guid, pack, inDate));
                 }
-            }
-            else Debug.LogError($"[서버 LoadAll 실패]: {callback.GetMessage()}");
 
-            onLoaded?.Invoke(result);
+                //inDate 오름차순 정렬 (ex) 1,2,3,4 순)
+                var sorted = temp.OrderBy(x => x.inDate)
+                                 .Select(x => (x.guid, x.Item2))
+                                 .ToList();
+
+                onLoaded?.Invoke(sorted);
+            }
+            else
+            {
+                Debug.Log($"[서버 LoadAll 실패]: {callback.GetMessage()}");
+                onLoaded?.Invoke(new List<(string, DeckPack)>());
+            }
         });
     }
 
@@ -166,23 +178,34 @@ public class BackendManager : Singleton<BackendManager>
 
         Backend.GameData.GetMyData(TableName, new Where(), callback =>
         {
-            List<(string guid, DeckPack)> result = new();
+            List<(string guid, DeckPack, DateTime inDate)> temp = new();
 
             if (callback.IsSuccess())
             {
                 foreach (LitJson.JsonData row in callback.Rows())
                 {
-                    string guid = row["guid"].ToString();
-                    string json = row["jsonData"].ToString();
+                    string guid = row["guid"]["S"].ToString();
+                    string json = row["jsonData"]["S"].ToString();
+                    string inDateStr = row["inDate"]["S"].ToString();
+                    DateTime inDate = DateTimeOffset.Parse(inDateStr).UtcDateTime;
 
                     DeckPack pack = JsonUtility.FromJson<DeckPack>(json);
                     if (pack != null && !string.IsNullOrEmpty(guid))
-                        result.Add((guid, pack));
+                        temp.Add((guid, pack, inDate));
                 }
-            }
-            else Debug.LogError($"[서버 LoadAll 실패]: {callback.GetMessage()}");
 
-            tcs.TrySetResult(result);
+                //inDate 오름차순 정렬 (ex) 1,2,3,4 순)
+                var sorted = temp.OrderBy(x => x.inDate)
+                                 .Select(x => (x.guid, x.Item2))
+                                 .ToList();
+
+                tcs.TrySetResult(sorted);
+            }
+            else
+            {
+                Debug.Log($"[서버 LoadAll 실패]: {callback.GetMessage()}");
+                tcs.TrySetResult(new List<(string, DeckPack)>());
+            }
         });
 
         return await tcs.Task;

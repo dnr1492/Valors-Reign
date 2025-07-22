@@ -1,2 +1,5 @@
 *GPGS 연동
 https://developer.android.com/games/pgs/unity/unity-start?hl=ko
+
+*뒤끝 SDK
+Backend-5.18.0

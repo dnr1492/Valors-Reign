@@ -35,12 +35,12 @@ public class UILoginPopup : UIPopupBase
                             OnLoginComplete();
                         },
                         onFail: err => {
-                            Debug.LogError($"닉네임 설정 실패: {err}");
+                            Debug.Log($"닉네임 설정 실패: {err}");
                         });
                 }
                 else OnLoginComplete();
             },
-            onFail: err => Debug.LogError($"게스트 로그인 실패: {err}")
+            onFail: err => Debug.Log($"게스트 로그인 실패: {err}")
         );
     }
 

@@ -49,7 +49,7 @@ public class CharacterCard : Card
         if (txtNames.Length < maxSkillCardCount || txtCounts.Length < maxSkillCardCount ||
             btnCounts.Length < maxSkillCardCount || btnSkills.Length < maxSkillCardCount)
         {
-            Debug.LogError("스킬 슬롯 UI 배열이 maxSkillCardCount보다 작습니다.");
+            Debug.Log("스킬 슬롯 UI 배열이 maxSkillCardCount보다 작습니다.");
             return;
         }
 

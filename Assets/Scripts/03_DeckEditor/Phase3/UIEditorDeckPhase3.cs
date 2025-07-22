@@ -25,6 +25,7 @@ public class UIEditorDeckPhase3 : UIPopupBase
     [SerializeField] Button btnDeckNameEditor;
     private string currentDeckName = "";
     private string previousDeckName = "";
+    private bool isNewSave = true;
 
     private void Awake()
     {
@@ -144,9 +145,9 @@ public class UIEditorDeckPhase3 : UIPopupBase
 
         //DeckPack 생성 및 저장
         DeckPack deckPack = GridManager.Instance.CreateDeckPack(currentDeckName);
-        BackendManager.Instance.SaveDeck(deckPack);  //서버 저장
+        BackendManager.Instance.SaveDeck(deckPack, isNewSave);  //서버 저장
         //DeckHandler.Save(deckPack);  //로컬 저장
-        
+
         //UIEditorDeckPhase1에 DeckPack 전달
         var phase1Popup = UIManager.Instance.GetPopup<UIEditorDeckPhase1>("UIEditorDeckPhase1");
         phase1Popup.OnClickSave(deckPack);
@@ -220,27 +221,25 @@ public class UIEditorDeckPhase3 : UIPopupBase
 
         //서버에서 모든 덱 불러오기
         //덱 이름 중복 검사 + 현재 편집 중인 덱은 예외
+        var phase1Popup = UIManager.Instance.GetPopup<UIEditorDeckPhase1>("UIEditorDeckPhase1");
+        var currentDeckPack = phase1Popup?.GetCurrentDeckPack();
+        string currentGuid = currentDeckPack?.guid;
         var allDecks = await BackendManager.Instance.LoadAllDecksAsync();
         foreach (var (guid, pack) in allDecks)
         {
-            if (pack.deckName == currentDeckName)
+            if (pack.deckName == currentDeckName && guid != currentGuid)
             {
-                var phase1Popup = UIManager.Instance.GetPopup<UIEditorDeckPhase1>("UIEditorDeckPhase1");
-                var currentDeckPack = phase1Popup?.GetCurrentDeckPack();
+                UIManager.Instance.ShowPopup<UIModalPopup>("UIModalPopup", false)
+                    .Set("중복된 덱 이름", "이미 존재하는 덱 이름입니다. 다른 이름을 입력해주세요.");
 
-                if (currentDeckPack == null || currentDeckPack.guid != guid)
-                {
-                    UIManager.Instance.ShowPopup<UIModalPopup>("UIModalPopup", false)
-                        .Set("중복된 덱 이름", "이미 존재하는 덱 이름입니다. 다른 이름을 입력해주세요.");
-
-                    inputFieldDeckName.text = previousDeckName;
-                    currentDeckName = previousDeckName;
-                    inputFieldDeckName.DeactivateInputField();
-                    inputFieldDeckName.interactable = false;
-                    return false;
-                }
+                inputFieldDeckName.text = previousDeckName;
+                currentDeckName = previousDeckName;
+                inputFieldDeckName.DeactivateInputField();
+                inputFieldDeckName.interactable = false;
+                return false;
             }
         }
+        isNewSave = string.IsNullOrEmpty(currentGuid);
 
         ////로컬에서 모든 덱 불러오기
         //var allDecks = DeckHandler.LoadAll();

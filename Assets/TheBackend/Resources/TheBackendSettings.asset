@@ -15,10 +15,10 @@ MonoBehaviour:
   clientAppID: 3271b170-19a7-11f0-b16c-3951274966e69653
   signatureKey: 3271d880-19a7-11f0-b16c-3951274966e69653
   functionAuthKey: 
-  packageName: com.DefaultCompany.BarrelsLane
+  packageName: com.HealthyCode.BarrelsLane
   sendLogReport: 1
   timeOutSec: 100
-  Version: 5.16.2
+  Version: 5.18.0
   autoRefreshToken: 1
   retryWhenClientRequestFailError: 1
   retryWhenServerError: 1

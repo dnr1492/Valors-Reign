@@ -16,8 +16,7 @@ public class UIEditorDeckPhase1 : UIPopupBase
 
     private void Start()
     {
-        LoadSavedDecks();  //저장된 덱들을 모두 생성
-        EnsureNewDeckSlot();
+        LoadSavedDecks();  //최초 저장된 덱들을 모두 생성
     }
 
     private void OnClickBack()
@@ -46,6 +45,8 @@ public class UIEditorDeckPhase1 : UIPopupBase
                 deck.InitSavedDeck(pack);
                 deck.OnApplyDeck += OnApplyDeck;
             }
+
+            EnsureNewDeckSlot();
         });
     }
 
@@ -85,7 +86,6 @@ public class UIEditorDeckPhase1 : UIPopupBase
         {
             currentDeck.InitSavedDeck(deckPack);
             currentDeck.OnApplyDeck += OnApplyDeck;
-            currentDeck = null;
 
             EnsureNewDeckSlot();  //새 덱 슬롯이 없으면 하나 추가
         }
