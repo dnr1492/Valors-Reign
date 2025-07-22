@@ -7,6 +7,7 @@ using Cysharp.Threading.Tasks;
 
 public class BackendManager : Singleton<BackendManager>
 {
+    private const string GUEST_UUID_KEY = "guest_uuid";
     private const string TableName = "Deck";
 
     protected override void Awake()
@@ -35,19 +36,32 @@ public class BackendManager : Singleton<BackendManager>
 
     public void LoginGuest(Action onSuccess = null, Action<string> onFail = null)
     {
-        BackendReturnObject bro = Backend.BMember.LoginWithTheBackendToken();
-        if (bro.IsSuccess()) {
+        //uuid 가져오기 (없으면 새로 생성)
+        string guestUuid = PlayerPrefs.GetString(GUEST_UUID_KEY, "");
+        if (string.IsNullOrEmpty(guestUuid))
+        {
+            guestUuid = Guid.NewGuid().ToString();
+            PlayerPrefs.SetString(GUEST_UUID_KEY, guestUuid);
+            PlayerPrefs.Save();
+        }
+
+        //GuestLogin (customId 방식)
+        var bro = Backend.BMember.GuestLogin(guestUuid);
+        if (bro.IsSuccess())
+        {
             Debug.Log($"게스트 로그인 성공: {bro}");
             onSuccess?.Invoke();
         }
-        else {
-            //새로 가입 시도
-            bro = Backend.BMember.GuestLogin();
-            if (bro.IsSuccess()) {
-                Debug.Log("게스트 계정 생성 및 로그인 성공");
-                onSuccess?.Invoke();
+        else
+        {
+            //guest_uuid 꼬임 대응
+            if (bro.GetStatusCode() == "403" && bro.GetMessage().Contains("customId is invalid")) {
+                PlayerPrefs.DeleteKey(GUEST_UUID_KEY);
+                //재시도
+                LoginGuest(onSuccess, onFail);
             }
             else {
+                Debug.Log($"게스트 로그인 실패: {bro.GetMessage()}");
                 onFail?.Invoke(bro.GetMessage());
             }
         }
