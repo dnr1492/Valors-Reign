@@ -1,7 +1,6 @@
 using Cysharp.Threading.Tasks;
 using System.Collections;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -59,32 +58,25 @@ public class UILoginPopup : UIPopupBase
 
     private void OnClickLoginGuest()
     {
-        BackendManager.Instance.LoginGuest(
-            onSuccess: () =>
-            {
-                string nickname = BackendManager.Instance.GetNickname();
-                if (string.IsNullOrEmpty(nickname))
-                {
-                    //자동 닉네임 생성
-                    string guestNickname = $"게스트{Random.Range(1000, 9999)}";
-                    BackendManager.Instance.SetNickname(guestNickname,
-                        onSuccess: () => {
-                            Debug.Log($"닉네임 자동 설정: {guestNickname}");
-                            OnLoginComplete();
-                        },
-                        onFail: err => {
-                            Debug.Log($"닉네임 설정 실패: {err}");
-                        });
-                }
-                else OnLoginComplete();
-            },
-            onFail: err => Debug.Log($"게스트 로그인 실패: {err}")
-        );
+        BackendManager.Instance.OnLoginCompleteCallback = () =>
+        {
+            UIManager.Instance.ShowPopup<UILobbyPopup>("UILobbyPopup").Init();
+        };
+
+        BackendManager.Instance.LoginGuest(err =>
+        {
+            Debug.Log($"게스트 로그인 실패: {err}");
+        });
     }
 
     private void OnClickLoginGoogle()
     {
+        BackendManager.Instance.OnLoginCompleteCallback = () =>
+        {
+            UIManager.Instance.ShowPopup<UILobbyPopup>("UILobbyPopup").Init();
+        };
 
+        TheBackend.ToolKit.GoogleLogin.Android.GoogleLogin(BackendManager.Instance.LoginGoogle);
     }
 
     private void OnLoginComplete()

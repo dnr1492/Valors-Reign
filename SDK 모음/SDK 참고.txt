@@ -2,10 +2,10 @@
 https://developer.android.com/games/pgs/unity/unity-start?hl=ko
 
 *뒤끝 SDK
-Backend-5.18.0
+- Backend-5.18.0
 
 *뒤끝에서 GPGS 연동하기 위한 SDK
-BackendGoogleLogin-Android-3.0.1
-BackendGoogleLogin-extra-plugins
-external-dependency-manager-1.2.186
+- BackendGoogleLogin-Android-3.0.1
+- BackendGoogleLogin-extra-plugins
+- external-dependency-manager-1.2.186
 https://docs.backnd.com/sdk-docs/backend/toolkit/google-login/android/unity-settings

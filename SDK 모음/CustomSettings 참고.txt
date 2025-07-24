@@ -1,0 +1,6 @@
+- gradle-8.1.1-bin
+- OpenJDK17U-jdk_x64_windows_hotspot_17.0.16_8
+
+해당 Setting의 문제로 빌드가 안될 시 
+   각 폴더의 하위에 파일들이 비어있는 문제가 발생할 수도 있으니 확인 필요!
+       (feat.빌드 실패 시 Console 맨 위 빈칸으로 나오는 에러의 내용 중 "Wrong" 부분 잘 확인하기)

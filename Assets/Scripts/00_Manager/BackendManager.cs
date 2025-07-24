@@ -11,6 +11,8 @@ public class BackendManager : Singleton<BackendManager>
     private const string GUEST_UUID_KEY = "guest_uuid";
     private const string TableName = "Deck";
 
+    public Action OnLoginCompleteCallback;
+
     protected override void Awake()
     {
         base.Awake();
@@ -35,9 +37,8 @@ public class BackendManager : Singleton<BackendManager>
         }
     }
 
-    public void LoginGuest(Action onSuccess = null, Action<string> onFail = null)
+    public void LoginGuest(Action<string> onFail = null)
     {
-        //guest_uuid 가져오기 (없으면 새로 생성)
         string guestUuid = PlayerPrefs.GetString(GUEST_UUID_KEY, "");
         if (string.IsNullOrEmpty(guestUuid))
         {
@@ -46,20 +47,17 @@ public class BackendManager : Singleton<BackendManager>
             PlayerPrefs.Save();
         }
 
-        //GuestLogin (customId 방식)
         var bro = Backend.BMember.GuestLogin(guestUuid);
         if (bro.IsSuccess())
         {
             Debug.Log($"게스트 로그인 성공: {bro}");
-            onSuccess?.Invoke();
+            HandleLoginComplete();
         }
         else
         {
-            //guest_uuid 꼬임 대응
             if (bro.GetStatusCode() == "403" && bro.GetMessage().Contains("customId is invalid")) {
                 PlayerPrefs.DeleteKey(GUEST_UUID_KEY);
-                //재시도
-                LoginGuest(onSuccess, onFail);
+                LoginGuest(onFail);  //재시도
             }
             else {
                 Debug.Log($"게스트 로그인 실패: {bro.GetMessage()}");
@@ -68,7 +66,42 @@ public class BackendManager : Singleton<BackendManager>
         }
     }
 
-    public void SetNickname(string nickname, Action onSuccess = null, Action<string> onFail = null)
+    public void LoginGoogle(bool isSuccess, string errorMessage, string token)
+    {
+        if (!isSuccess) {
+            Debug.Log(errorMessage);
+            return;
+        }
+
+        Debug.Log("구글 토큰 : " + token);
+        var bro = Backend.BMember.AuthorizeFederation(token, FederationType.Google);
+        Debug.Log("페데레이션 로그인 결과 : " + bro);
+
+        if (bro.IsSuccess()) HandleLoginComplete();
+        else Debug.Log($"구글 로그인 실패: {bro.GetMessage()}");
+    }
+
+    private void HandleLoginComplete()
+    {
+        string nickname = GetNickname();
+        if (string.IsNullOrEmpty(nickname))
+        {
+            string generatedName = $"유저 {UnityEngine.Random.Range(1000, 9999)}";
+            SetNickname(generatedName,
+                onSuccess: () =>
+                {
+                    Debug.Log($"닉네임 자동 설정: {generatedName}");
+                    OnLoginCompleteCallback?.Invoke();
+                },
+                onFail: err =>
+                {
+                    Debug.Log($"닉네임 설정 실패: {err}");
+                });
+        }
+        else OnLoginCompleteCallback?.Invoke();
+    }
+
+    private void SetNickname(string nickname, Action onSuccess = null, Action<string> onFail = null)
     {
         var bro = Backend.BMember.UpdateNickname(nickname);
         if (bro.IsSuccess()) {
@@ -96,7 +129,7 @@ public class BackendManager : Singleton<BackendManager>
             Backend.GameData.Insert(TableName, param, callback =>
             {
                 if (callback.IsSuccess()) Debug.Log($"[서버 저장] 신규 저장 성공: {pack.deckName}");
-                else Debug.LogError($"[서버 저장] 신규 저장 실패: {callback.GetStatusCode()} / {callback.GetMessage()}");
+                else Debug.Log($"[서버 저장] 신규 저장 실패: {callback.GetStatusCode()} / {callback.GetMessage()}");
             });
         }
         else {
@@ -107,7 +140,7 @@ public class BackendManager : Singleton<BackendManager>
             Backend.GameData.Update(TableName, where, param, callback =>
             {
                 if (callback.IsSuccess()) Debug.Log($"[서버 업데이트] 덮어쓰기 성공: {pack.deckName}");
-                else Debug.LogError($"[서버 업데이트] 덮어쓰기 실패: {callback.GetStatusCode()} / {callback.GetMessage()}");
+                else Debug.Log($"[서버 업데이트] 덮어쓰기 실패: {callback.GetStatusCode()} / {callback.GetMessage()}");
             });
         }
     }

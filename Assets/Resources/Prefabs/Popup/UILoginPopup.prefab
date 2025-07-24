@@ -50,8 +50,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c7748385c4252404abf05a0f57315e69, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  btn_loginGuest: {fileID: 5129121558040660544}
   btn_retry: {fileID: 6263760558681176532}
+  btn_loginGuest: {fileID: 5129121558040660544}
+  btn_loginGoogle: {fileID: 7664164424401742545}
 --- !u!1 &255257418848979039
 GameObject:
   m_ObjectHideFlags: 0
