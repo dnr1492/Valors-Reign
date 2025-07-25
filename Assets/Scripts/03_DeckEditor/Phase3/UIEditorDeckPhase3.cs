@@ -154,7 +154,8 @@ public class UIEditorDeckPhase3 : UIPopupBase
         
         skillSlotCollection.Refresh();
 
-        Debug.Log($"덱 저장 완료: {deckPack.deckName} / {deckPack.guid}");
+        UIManager.Instance.ShowPopup<UIModalPopup>("UIModalPopup", false)
+                .Set("덱 저장 완료", $"덱 이름: {deckPack.deckName}");
     }
 
     /// <summary>
