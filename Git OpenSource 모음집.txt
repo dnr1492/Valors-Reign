@@ -1,2 +1,0 @@
-*SoftMask
-https://github.com/mob-sakai/SoftMaskForUGUI.git?path=Packages/src
