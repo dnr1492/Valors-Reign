@@ -27,6 +27,9 @@ public class UIEditorDeckPhase3 : UIPopupBase
     private string previousDeckName = "";
     private bool isNewSave = true;
 
+    [Header("Deck Cancel")]
+    [SerializeField] GameObject cancelZoneObj;
+
     private void Awake()
     {
         btn_back.onClick.AddListener(() => {
@@ -269,5 +272,7 @@ public class UIEditorDeckPhase3 : UIPopupBase
 
         return true;
     }
+
+    public GameObject GetCancelZone() => cancelZoneObj;
 }
 

@@ -90,4 +90,10 @@ public class CharacterToken : MonoBehaviour
         //깊은 복사
         return new Dictionary<int, int>(selectedSkillCounts);  
     }
+
+    //캐릭터 카드의 상태를 Back으로 설정
+    public void SetCardToBack()
+    {
+        characterCard.SetCardState(CardState.Back);
+    }
 }

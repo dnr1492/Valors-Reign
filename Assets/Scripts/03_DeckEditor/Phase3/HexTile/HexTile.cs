@@ -11,6 +11,7 @@ public class HexTile : MonoBehaviour
 
     public (int col, int row) GridPosition { get; private set; }
     public Nullable<int> AssignedTokenKey { get; private set; } = null;
+    public CharacterToken AssignedToken { get; private set; }
     public CharacterTokenDirection CharacterTokenDirection { get; private set; }  //캐릭터 토큰 방향 저장
 
     //헥스 타일 초기화
@@ -21,10 +22,11 @@ public class HexTile : MonoBehaviour
     }
 
     //토큰 할당
-    public void AssignToken(int tokenKey)
+    public void AssignToken(int tokenKey, CharacterToken token)
     {
         ShowDecorations(true);
         AssignedTokenKey = tokenKey;
+        AssignedToken = token;
     }
 
     //토큰 제거

@@ -208,8 +208,10 @@ public class GridManager : Singleton<GridManager>
         imgCharacterMap[pos].sprite = sprite;
         imgCharacterMap[pos].enabled = true;
 
-        //HexTile에 해당 토큰 Key를 할당
-        hexTile.AssignToken(tokenKey);
+        //HexTile에 할당
+        var token = ControllerRegister.Get<CharacterTokenController>().GetAllCharacterToken()
+            .FirstOrDefault(t => t.Key == tokenKey);
+        hexTile.AssignToken(tokenKey, token);
 
         //위치 매핑
         tokenPosMap[tokenKey] = pos;
@@ -275,22 +277,18 @@ public class GridManager : Singleton<GridManager>
     /// <param name="from"></param>
     /// <param name="to"></param>
     /// <param name="tile"></param>
-    public void MoveToken((int col, int row) from, (int col, int row) to, HexTile tile)
+    public bool MoveToken((int col, int row) from, (int col, int row) to, HexTile tile)
     {
-        if (from == to || !tile.AssignedTokenKey.HasValue) return;
+        if (from == to || !tile.AssignedTokenKey.HasValue) return false;
 
         int fromKey = tile.AssignedTokenKey.Value;
-        if (!txtMap.TryGetValue(to, out string dropSlotType)) return;
 
+        if (!txtMap.TryGetValue(to, out string dropSlotType)) return false;
         char dropSlotChar = dropSlotType[0];
-        var fromToken = ControllerRegister.Get<CharacterTokenController>().GetAllCharacterToken()
-            .FirstOrDefault(t => t.Key == fromKey);
 
-        if (fromToken == null || fromToken.Tier.ToString()[0] != dropSlotChar)
-        {
-            //드롭 위치의 티어와 토큰의 티어가 다르면 이동 (이동 불가)
-            return;
-        }
+        var allTokens = ControllerRegister.Get<CharacterTokenController>().GetAllCharacterToken();
+        var fromToken = allTokens.FirstOrDefault(t => t.Key == fromKey);
+        if (fromToken == null || fromToken.Tier.ToString()[0] != dropSlotChar) return false;
 
         var fromImg = imgCharacterMap[from];
         var toImg = imgCharacterMap[to];
@@ -302,36 +300,38 @@ public class GridManager : Singleton<GridManager>
         {
             tokenPosMap[fromKey] = to;
             fromTile.ClearToken();
-            toTile.AssignToken(fromKey);
+            toTile.AssignToken(fromKey, fromToken);
 
             toImg.sprite = fromImg.sprite;
             toImg.enabled = true;
             fromImg.sprite = null;
             fromImg.enabled = false;
-            return;
+            return true;
         }
 
+        //자리 교환
         int toKey = toTile.AssignedTokenKey.Value;
-        var toToken = ControllerRegister.Get<CharacterTokenController>().GetAllCharacterToken()
-            .FirstOrDefault(t => t.Key == toKey);
+        var toToken = allTokens.FirstOrDefault(t => t.Key == toKey);
+        if (toToken == null) return false;
 
-        if (fromToken.Tier == toToken?.Tier)
+        if (fromToken.Tier == toToken.Tier)
         {
             tokenPosMap[fromKey] = to;
             tokenPosMap[toKey] = from;
 
-            fromTile.AssignToken(toKey);
-            toTile.AssignToken(fromKey);
+            fromTile.AssignToken(toKey, toToken);
+            toTile.AssignToken(fromKey, fromToken);
 
             (fromImg.sprite, toImg.sprite) = (toImg.sprite, fromImg.sprite);
             fromImg.enabled = fromImg.sprite != null;
             toImg.enabled = toImg.sprite != null;
+            return true;
         }
-        else
-        {
-            tile.transform.SetParent(fromTile.transform, false);
-            tile.GetComponent<RectTransform>().anchoredPosition = Vector2.zero;
-        }
+
+        //티어 불일치 -> 되돌리기
+        tile.transform.SetParent(fromTile.transform, false);
+        tile.GetComponent<RectTransform>().anchoredPosition = Vector2.zero;
+        return false;
     }
 
     /// <summary>
@@ -454,7 +454,8 @@ public class GridManager : Singleton<GridManager>
             }
         }
 
-        ////필터 초기화
+        //필터 초기화
+        //===== 덱을 구성할 때마다 필터를 초기화할 필요가 있을까??? =====//
         //ControllerRegister.Get<FilterController>().ResetFilter();
 
         //캐릭터 카드 숨김상태로 변경
