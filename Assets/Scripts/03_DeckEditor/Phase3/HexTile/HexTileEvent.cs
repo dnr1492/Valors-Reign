@@ -4,7 +4,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using static EnumClass;
 
-public class HexTileDraggable : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
+public class HexTileEvent : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerClickHandler
 {
     private Canvas canvas;
     private HexTile hexTile;
@@ -56,7 +56,7 @@ public class HexTileDraggable : MonoBehaviour, IBeginDragHandler, IDragHandler, 
         ghostRect.sizeDelta = GetComponent<RectTransform>().sizeDelta;
 
         //복제된 오브젝트에서 필요 없는 컴포넌트 제거
-        Destroy(dragGhost.GetComponent<HexTileDraggable>());
+        Destroy(dragGhost.GetComponent<HexTileEvent>());
 
         //원래 위치랑 겹치지 않게 UI 제일 위로 보정
         ghostRect.SetAsLastSibling();
@@ -109,5 +109,12 @@ public class HexTileDraggable : MonoBehaviour, IBeginDragHandler, IDragHandler, 
             var fromPos = hexTile.GridPosition;
             GridManager.Instance.MoveToken(fromPos, dropPos, hexTile);
         }
+    }
+
+    //캐릭터 토큰 클릭 시 정보 표시
+    public void OnPointerClick(PointerEventData eventData)
+    {
+        if (hexTile.AssignedToken != null)
+            hexTile.AssignedToken.ShowTokenInfo();
     }
 }

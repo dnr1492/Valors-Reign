@@ -47,6 +47,14 @@ public class CharacterToken : MonoBehaviour
         });
     }
 
+    //캐릭터 토큰 정보 표시
+    public void ShowTokenInfo()
+    {
+        if (DataManager.Instance.dicCharacterCardData.TryGetValue(Key, out var characterCardData)) {
+            characterCard.InitCardData(this, imgCharacter.sprite, characterCardData, CardState.Front, CardType.CharacterCard);
+        }
+    }
+
     //토큰 상태 설정
     public void SetTokenState(CharacterTokenState newState)
     {

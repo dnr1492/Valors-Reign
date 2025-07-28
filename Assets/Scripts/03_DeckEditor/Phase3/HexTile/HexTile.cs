@@ -34,6 +34,7 @@ public class HexTile : MonoBehaviour
     {
         ShowDecorations(false);
         AssignedTokenKey = null;
+        AssignedToken = null;
     }
 
     //장식 요소 표시/숨김 (아웃라인, 방향 표시)
