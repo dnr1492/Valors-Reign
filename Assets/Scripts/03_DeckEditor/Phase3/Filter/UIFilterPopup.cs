@@ -36,7 +36,7 @@ public class UIFilterPopup : UIPopupBase
 
         foreach (var token in tokens)
         {
-            if (token.Tier == CharacterTierAndCost.None)
+            if (token.Tier == CharacterTier.None)
             {
                 token.gameObject.SetActive(false);
                 continue;

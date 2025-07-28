@@ -15,6 +15,8 @@ public class CharacterCard : Card
     [SerializeField] Button[] btnCounts, btnSkills;
     [SerializeField] Image imgCharacter;
     [SerializeField] Button btnConfirm;
+    [SerializeField] GameObject cost;
+    [SerializeField] TextMeshProUGUI txtCost;
 
     private int[] skillCardCounts;
     private const int maxSkillCardCount = 4;  //최대 개수
@@ -40,6 +42,9 @@ public class CharacterCard : Card
         txtHp.text = characterCardData.hp.ToString();
         txtMp.text = characterCardData.mp.ToString();
         imgCharacter.sprite = sprite;
+
+        cost.SetActive(true);
+        txtCost.text = curClickedToken.Cost.ToString();
 
         var skillCardData = DataManager.Instance.dicSkillCardData;
         List<SkillCardData> skillDataList = new();

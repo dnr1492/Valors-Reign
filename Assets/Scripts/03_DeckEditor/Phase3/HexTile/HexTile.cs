@@ -3,11 +3,14 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 using static EnumClass;
 
 public class HexTile : MonoBehaviour
 {
     [SerializeField] Image imgCharacter, outline, direction;
+    [SerializeField] GameObject cost;
+    [SerializeField] TextMeshProUGUI txtCost;
 
     public (int col, int row) GridPosition { get; private set; }
     public Nullable<int> AssignedTokenKey { get; private set; } = null;
@@ -19,6 +22,7 @@ public class HexTile : MonoBehaviour
     {
         ShowDecorations(false);
         GridPosition = pos;
+        SetCost(false);
     }
 
     //토큰 할당
@@ -27,6 +31,7 @@ public class HexTile : MonoBehaviour
         ShowDecorations(true);
         AssignedTokenKey = tokenKey;
         AssignedToken = token;
+        SetCost(true, token.Cost);
     }
 
     //토큰 제거
@@ -35,6 +40,7 @@ public class HexTile : MonoBehaviour
         ShowDecorations(false);
         AssignedTokenKey = null;
         AssignedToken = null;
+        SetCost(false);
     }
 
     //장식 요소 표시/숨김 (아웃라인, 방향 표시)
@@ -57,5 +63,12 @@ public class HexTile : MonoBehaviour
         float[] angles = { 0f, 60f, 120f, 180f, 240f, 300f };
         int index = Mathf.Clamp((int)direction, 0, 5);
         imgCharacter.rectTransform.rotation = Quaternion.Euler(0, 0, -angles[index]);  //시계방향 회전
+    }
+
+    //캐릭터 토큰의 Cost 설정
+    private void SetCost(bool isActive, int cost = 0)
+    {
+        this.cost.SetActive(isActive);
+        txtCost.text = cost.ToString();
     }
 }

@@ -18,7 +18,7 @@ public class CharacterToken : MonoBehaviour
 
     public CharacterTokenState State { get; private set; } = CharacterTokenState.Cancel;
     public int Key { get; private set; }
-    public CharacterTierAndCost Tier { get; private set; } = CharacterTierAndCost.None;
+    public CharacterTier Tier { get; private set; } = CharacterTier.None;
     public int Cost { get; private set; }
 
     private void Start()
@@ -33,7 +33,7 @@ public class CharacterToken : MonoBehaviour
     {
         Key = characterCardData.id;
         Tier = characterCardData.tier;
-        Cost = characterCardData.tier == CharacterTierAndCost.Boss ? 0 : (int)characterCardData.tier;
+        Cost = characterCardData.cost;
         imgCharacter.sprite = sprite;
 
         btn.onClick.RemoveAllListeners();

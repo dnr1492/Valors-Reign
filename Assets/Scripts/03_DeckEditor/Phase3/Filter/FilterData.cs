@@ -9,7 +9,7 @@ public class FilterData : MonoBehaviour
 
     //Enum 기반 필터용
     public CharacterJob job;
-    public CharacterTierAndCost tier;
+    public CharacterTier tier;
     public SkillCardRankAndMpConsum skillCardRank;
     public SkillCardType skillCardType;
 

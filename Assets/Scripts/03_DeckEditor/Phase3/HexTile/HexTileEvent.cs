@@ -37,7 +37,7 @@ public class HexTileEvent : MonoBehaviour, IBeginDragHandler, IDragHandler, IEnd
             .GetAllCharacterToken()
             .FirstOrDefault(t => t.Key == key.Value);
 
-        return token != null && token.Tier == CharacterTierAndCost.Boss;
+        return token != null && token.Tier == CharacterTier.Boss;
     }
 
     public void OnBeginDrag(PointerEventData eventData)

@@ -96,7 +96,7 @@ public class UIEditorDeckPhase3 : UIPopupBase
 
     public bool CheckCost(CharacterToken clickedToken)
     {
-        int clickedTokenCost = clickedToken.Tier != CharacterTierAndCost.Boss ? (int)clickedToken.Tier : 0;
+        int clickedTokenCost = clickedToken.Cost;
 
         if (sumCost + clickedTokenCost > maxCost) {
             UIManager.Instance.ShowPopup<UIModalPopup>("UIModalPopup", false)
@@ -176,7 +176,7 @@ public class UIEditorDeckPhase3 : UIPopupBase
             if (token.State != CharacterTokenState.Confirm) continue;
             confirmTokenCount++;
 
-            if (token.Tier == CharacterTierAndCost.Boss) bossCount++;
+            if (token.Tier == CharacterTier.Boss) bossCount++;
 
             int skillCount = 0;
             foreach (var count in token.GetAllSkillCounts().Values) skillCount += count;
