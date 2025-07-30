@@ -5,7 +5,7 @@ using TMPro;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 
-public class LodingManager : Singleton<LodingManager>
+public class LoadingManager : Singleton<LoadingManager>
 {
     [SerializeField] GameObject root;  //전체 로딩 패널
     [SerializeField] TextMeshProUGUI loadingText;  //메시지 출력용

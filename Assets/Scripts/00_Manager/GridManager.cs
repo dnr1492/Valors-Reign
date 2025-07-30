@@ -328,7 +328,7 @@ public class GridManager : Singleton<GridManager>
             return true;
         }
 
-        //티어 불일치 -> 되돌리기
+        //티어 불일치 → 되돌리기
         tile.transform.SetParent(fromTile.transform, false);
         tile.GetComponent<RectTransform>().anchoredPosition = Vector2.zero;
         return false;
@@ -387,7 +387,7 @@ public class GridManager : Singleton<GridManager>
         }
         finally
         {
-            //모든 토큰 상태 초기화 (Select/Confirm -> Cancel)
+            //모든 토큰 상태 초기화 (Select/Confirm → Cancel)
             var allTokens = ControllerRegister.Get<CharacterTokenController>().GetAllCharacterToken();
             foreach (var token in allTokens)
             {

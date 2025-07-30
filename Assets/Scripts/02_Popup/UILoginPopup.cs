@@ -6,20 +6,23 @@ public class UILoginPopup : UIPopupBase
 {
     [SerializeField] Button btn_retry, btn_loginGuest, btn_loginGoogle;
 
-    private bool isLoggingOut = false;  //로그아웃 클릭 연타 방지
+    private void Awake()
+    {
+        btn_loginGuest.onClick.AddListener(() => TryLogin("guest", false));
+        btn_loginGoogle.onClick.AddListener(() => TryLogin("google", false));
+    }
 
     private void Start()
     {
         btn_retry.gameObject.SetActive(false);
         btn_loginGuest.gameObject.SetActive(false);
         btn_loginGoogle.gameObject.SetActive(false);
-
-        LodingManager.Instance.Show("서버에 연결 중입니다...");
-        ConnectNetwork().Forget();
     }
 
-    private async UniTaskVoid ConnectNetwork()
+    public async UniTask ConnectNetwork()
     {
+        LoadingManager.Instance.Show("서버에 연결 중입니다...");
+
         const int maxRetry = 3;
         bool success = false;
 
@@ -30,7 +33,7 @@ public class UILoginPopup : UIPopupBase
             await UniTask.Delay(2000);
         }
 
-        LodingManager.Instance.Hide();
+        LoadingManager.Instance.Hide();
 
         if (!success)
         {
@@ -38,105 +41,83 @@ public class UILoginPopup : UIPopupBase
             btn_retry.onClick.RemoveAllListeners();
             btn_retry.onClick.AddListener(() =>
             {
-                LodingManager.Instance.Show("서버에 연결 중입니다...");
+                LoadingManager.Instance.Show("서버에 연결 중입니다...");
                 btn_retry.gameObject.SetActive(false);
                 ConnectNetwork().Forget();
             });
             return;
         }
+    }
 
+    public async UniTask<bool> AttemptAutoLogin()
+    {
+        //내부 세션 기반 자동 로그인
+        if (await BackendManager.Instance.TryAutoLoginWithBackendTokenAsync())
+        {
+            HandleLoginSuccess();
+            return true;
+        }
+
+        //세션 기반 자동 로그인 실패 시
+        //저장된 로그인 타입에 따라 게스트 또는 구글 로그인 재시도
+        //fallback
         string loginType = BackendManager.Instance.GetLoginType();
         bool googleAuto = BackendManager.Instance.IsGoogleAutoLogin();
-
-        if (loginType == "guest") TryAutoGuestLogin();
-        else if (loginType == "google" && googleAuto) TryAutoGoogleLogin();
+        if (loginType == "guest") TryLogin("guest", true);
+        else if (loginType == "google" && googleAuto) TryLogin("google", true);
         else ShowLoginButtons();
+        return false;
     }
 
-    private void TryAutoGuestLogin()
+    private void TryLogin(string type, bool isAuto)
     {
         HideLoginButtons();
-        LodingManager.Instance.Show("게스트 자동 로그인 중...");
-
-        BackendManager.Instance.OnLoginCompleteCallback = HandleLoginSuccess;
-
-        BackendManager.Instance.LoginGuest(err =>
-        {
-            LodingManager.Instance.Hide();
-            Debug.Log($"게스트 자동 로그인 실패: {err}");
-            ShowLoginButtons();
-        });
-    }
-
-    private void TryAutoGoogleLogin()
-    {
-        HideLoginButtons();
-        LodingManager.Instance.Show("구글 자동 로그인 중...");
-
-        BackendManager.Instance.OnLoginCompleteCallback = HandleLoginSuccess;
-
-        TheBackend.ToolKit.GoogleLogin.Android.GoogleLogin((isSuccess, errMsg, token) =>
-        {
-            BackendManager.Instance.LoginGoogle(isSuccess, errMsg, token);
-        });
-    }
-
-    private void OnClickGuestLogin()
-    {
-        HideLoginButtons();
-        LodingManager.Instance.Show("게스트 로그인 중...");
+        string loginText = (isAuto ? "자동 " : "") + (type == "guest" ? "게스트" : "구글") + " 로그인 중...";
+        LoadingManager.Instance.Show(loginText);
 
         BackendManager.Instance.OnLoginCompleteCallback = () =>
         {
-            //게스트 로그인 시 구글 자동 로그인 비활성화
-            BackendManager.Instance.SetLoginType("guest");
-            BackendManager.Instance.SetAutoGoogleLogin(false);
+            BackendManager.Instance.SetLoginType(type);
+            BackendManager.Instance.SetAutoGoogleLogin(type == "google" && !isAuto);
             HandleLoginSuccess();
         };
 
-        BackendManager.Instance.LoginGuest(err =>
+        if (type == "guest")
         {
-            LodingManager.Instance.Hide();
-            Debug.Log($"게스트 로그인 실패: {err}");
-            ShowLoginButtons();
-        });
-    }
-
-    private void OnClickGoogleLogin()
-    {
-        HideLoginButtons();
-        LodingManager.Instance.Show("구글 로그인 중...");
-
-        BackendManager.Instance.OnLoginCompleteCallback = () =>
+            BackendManager.Instance.LoginGuest(err =>
+            {
+                LoadingManager.Instance.Hide();
+                Debug.Log($"{loginText} 실패: {err}");
+                ShowLoginButtons();
+            });
+        }
+        else if (type == "google")
         {
-            BackendManager.Instance.SetLoginType("google");
-            BackendManager.Instance.SetAutoGoogleLogin(true);
-            HandleLoginSuccess();
-        };
+            TheBackend.ToolKit.GoogleLogin.Android.GoogleLogin((isSuccess, errMsg, token) =>
+            {
+                if (!isSuccess)
+                {
+                    LoadingManager.Instance.Hide();
+                    Debug.Log($"구글 로그인 실패: {errMsg}");
+                    ShowLoginButtons();
+                    return;
+                }
 
-        TheBackend.ToolKit.GoogleLogin.Android.GoogleLogin((isSuccess, errMsg, token) =>
-        {
-            BackendManager.Instance.LoginGoogle(isSuccess, errMsg, token);
-        });
+                BackendManager.Instance.LoginGoogle(true, errMsg, token);
+            });
+        }
     }
 
     public void OnClickLogout()
     {
-        if (isLoggingOut) return;
-        isLoggingOut = true;
-
-        HideLoginButtons();
-
         UIManager.Instance.ShowPopup<UIModalPopup>("UIModalPopup", false)
             .Set("로그아웃 확인", "정말 로그아웃하시겠습니까?", () =>
             {
-                LodingManager.Instance.Show("로그아웃 중입니다...");
+                LoadingManager.Instance.Show("로그아웃 중입니다...");
 
                 BackendManager.Instance.Logout(() =>
                 {
-                    isLoggingOut = false;
-
-                    LodingManager.Instance.Hide();
+                    LoadingManager.Instance.Hide();
                     UIManager.Instance.ShowPopup<UILoginPopup>("UILoginPopup");
                     ShowLoginButtons();
                 });
@@ -145,7 +126,7 @@ public class UILoginPopup : UIPopupBase
 
     private void HandleLoginSuccess()
     {
-        LodingManager.Instance.Hide();
+        LoadingManager.Instance.Hide();
         UIManager.Instance.ShowPopup<UILobbyPopup>("UILobbyPopup").Init();
     }
 
@@ -153,21 +134,12 @@ public class UILoginPopup : UIPopupBase
     {
         btn_loginGuest.gameObject.SetActive(true);
         btn_loginGoogle.gameObject.SetActive(true);
-
-        btn_loginGuest.onClick.RemoveAllListeners();
-        btn_loginGoogle.onClick.RemoveAllListeners();
-
-        btn_loginGuest.onClick.AddListener(OnClickGuestLogin);
-        btn_loginGoogle.onClick.AddListener(OnClickGoogleLogin);
     }
 
     private void HideLoginButtons()
     {
         btn_loginGuest.gameObject.SetActive(false);
         btn_loginGoogle.gameObject.SetActive(false);
-
-        btn_loginGuest.onClick.RemoveAllListeners();
-        btn_loginGoogle.onClick.RemoveAllListeners();
     }
 
     protected override void ResetUI() { }
