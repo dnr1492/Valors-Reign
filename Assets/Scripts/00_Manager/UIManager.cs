@@ -86,6 +86,7 @@ public class UIManager : Singleton<UIManager>
 
         //활성화
         if (activePopups.TryGetValue(popupName, out UIPopupBase cached)) {
+            cached.transform.SetAsLastSibling();  //렌더링 맨 위로
             cached.Open();
             return cached as T;
         }

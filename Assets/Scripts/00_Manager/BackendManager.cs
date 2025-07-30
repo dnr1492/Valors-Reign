@@ -9,7 +9,9 @@ using System.Linq;
 public class BackendManager : Singleton<BackendManager>
 {
     private const string GUEST_UUID_KEY = "guest_uuid";
-    private const string TableName = "Deck";
+    private const string TABLE_NAME = "Deck";
+    private const string LOGIN_TYPE_KEY = "login_type";
+    private const string GOOGLE_AUTOLOGIN_KEY = "google_autologin";
 
     public Action OnLoginCompleteCallback;
 
@@ -37,7 +39,8 @@ public class BackendManager : Singleton<BackendManager>
         }
     }
 
-    public void LoginGuest(Action<string> onFail = null)
+    #region 게스트/구글 자동/수동 로그인
+    public void LoginGuest(Action<string> onFail = null, bool allowRetry = true)
     {
         string guestUuid = PlayerPrefs.GetString(GUEST_UUID_KEY, "");
         if (string.IsNullOrEmpty(guestUuid))
@@ -55,9 +58,11 @@ public class BackendManager : Singleton<BackendManager>
         }
         else
         {
-            if (bro.GetStatusCode() == "403" && bro.GetMessage().Contains("customId is invalid")) {
+            if (bro.GetStatusCode() == "403" 
+                && bro.GetMessage().Contains("customId is invalid") 
+                && allowRetry) {
                 PlayerPrefs.DeleteKey(GUEST_UUID_KEY);
-                LoginGuest(onFail);  //재시도
+                LoginGuest(onFail, false);  //재시도 1회
             }
             else {
                 Debug.Log($"게스트 로그인 실패: {bro.GetMessage()}");
@@ -68,8 +73,12 @@ public class BackendManager : Singleton<BackendManager>
 
     public void LoginGoogle(bool isSuccess, string errorMessage, string token)
     {
-        if (!isSuccess) {
-            Debug.Log(errorMessage);
+        if (!isSuccess)
+        {
+            Debug.Log($"[구글 로그인 실패: 토큰 획득 실패] {errorMessage}");
+            LodingManager.Instance.Hide();
+            UIManager.Instance.GetPopup<UILoginPopup>("UILoginPopup").ShowLoginButtons();
+            OnLoginCompleteCallback = null;
             return;
         }
 
@@ -78,7 +87,12 @@ public class BackendManager : Singleton<BackendManager>
         Debug.Log("페데레이션 로그인 결과 : " + bro);
 
         if (bro.IsSuccess()) HandleLoginComplete();
-        else Debug.Log($"구글 로그인 실패: {bro.GetMessage()}");
+        else
+        {
+            Debug.Log($"구글 로그인 실패: {bro.GetMessage()}");
+            LodingManager.Instance.Hide();
+            OnLoginCompleteCallback = null;
+        }
     }
 
     private void HandleLoginComplete()
@@ -88,23 +102,66 @@ public class BackendManager : Singleton<BackendManager>
         {
             string generatedName = $"유저 {UnityEngine.Random.Range(1000, 9999)}";
             SetNickname(generatedName,
-                onSuccess: () =>
-                {
+                onSuccess: () => {
                     Debug.Log($"닉네임 자동 설정: {generatedName}");
                     OnLoginCompleteCallback?.Invoke();
                 },
-                onFail: err =>
-                {
+                onFail: err => {
                     Debug.Log($"닉네임 설정 실패: {err}");
                 });
         }
         else OnLoginCompleteCallback?.Invoke();
     }
 
+    public void SetLoginType(string type)
+    {
+        PlayerPrefs.SetString(LOGIN_TYPE_KEY, type);
+        PlayerPrefs.Save();
+    }
+
+    public string GetLoginType() => PlayerPrefs.GetString(LOGIN_TYPE_KEY, "");
+
+    public void ClearLoginType()
+    {
+        PlayerPrefs.DeleteKey(LOGIN_TYPE_KEY);
+        PlayerPrefs.DeleteKey(GOOGLE_AUTOLOGIN_KEY);
+        PlayerPrefs.Save();
+    }
+
+    public void SetAutoGoogleLogin(bool enabled)
+    {
+        PlayerPrefs.SetInt(GOOGLE_AUTOLOGIN_KEY, enabled ? 1 : 0);
+        PlayerPrefs.Save();
+    }
+
+    public bool IsGoogleAutoLogin() => PlayerPrefs.GetInt(GOOGLE_AUTOLOGIN_KEY, 0) == 1;
+    #endregion
+
+    #region 로그아웃
+    public void Logout(System.Action onComplete = null)
+    {
+        PlayerPrefs.DeleteKey(LOGIN_TYPE_KEY);
+        PlayerPrefs.DeleteKey(GOOGLE_AUTOLOGIN_KEY);
+        PlayerPrefs.Save();
+
+        //구글 로그아웃
+#if UNITY_ANDROID
+        TheBackend.ToolKit.GoogleLogin.Android.GoogleSignOut((isSuccess, msg) => {
+            Debug.Log($"[구글 로그아웃] 성공 여부: {isSuccess}, 메시지: {msg}");
+            onComplete?.Invoke();
+        });
+#else
+        onComplete?.Invoke();
+#endif
+    }
+    #endregion
+
+    #region 닉네임 처리
     private void SetNickname(string nickname, Action onSuccess = null, Action<string> onFail = null)
     {
         var bro = Backend.BMember.UpdateNickname(nickname);
-        if (bro.IsSuccess()) {
+        if (bro.IsSuccess())
+        {
             Debug.Log("닉네임 설정 성공");
             onSuccess?.Invoke();
         }
@@ -112,6 +169,7 @@ public class BackendManager : Singleton<BackendManager>
     }
 
     public string GetNickname() => Backend.UserNickName;
+    #endregion
 
     #region 덱 저장
     public void SaveDeck(DeckPack pack, bool isNewSave)
@@ -126,7 +184,7 @@ public class BackendManager : Singleton<BackendManager>
 
         if (isNewSave) {
             //신규 저장
-            Backend.GameData.Insert(TableName, param, callback =>
+            Backend.GameData.Insert(TABLE_NAME, param, callback =>
             {
                 if (callback.IsSuccess()) Debug.Log($"[서버 저장] 신규 저장 성공: {pack.deckName}");
                 else Debug.Log($"[서버 저장] 신규 저장 실패: {callback.GetStatusCode()} / {callback.GetMessage()}");
@@ -137,7 +195,7 @@ public class BackendManager : Singleton<BackendManager>
             Where where = new Where();
             where.Equal("guid", pack.guid);
 
-            Backend.GameData.Update(TableName, where, param, callback =>
+            Backend.GameData.Update(TABLE_NAME, where, param, callback =>
             {
                 if (callback.IsSuccess()) Debug.Log($"[서버 업데이트] 덮어쓰기 성공: {pack.deckName}");
                 else Debug.Log($"[서버 업데이트] 덮어쓰기 실패: {callback.GetStatusCode()} / {callback.GetMessage()}");
@@ -152,7 +210,7 @@ public class BackendManager : Singleton<BackendManager>
         Where where = new Where();
         where.Equal("guid", guid);
 
-        Backend.GameData.Get(TableName, where, callback =>
+        Backend.GameData.Get(TABLE_NAME, where, callback =>
         {
             if (callback.IsSuccess() && callback.Rows().Count > 0)
             {
@@ -172,7 +230,7 @@ public class BackendManager : Singleton<BackendManager>
     #region 모든 덱 불러오기
     public void LoadAllDecks(Action<List<(string guid, DeckPack)>> onLoaded)
     {
-        Backend.GameData.GetMyData(TableName, new Where(), callback =>
+        Backend.GameData.GetMyData(TABLE_NAME, new Where(), callback =>
         {
             List<(string guid, DeckPack, DateTime inDate)> temp = new();
 
@@ -209,7 +267,7 @@ public class BackendManager : Singleton<BackendManager>
     {
         var tcs = new UniTaskCompletionSource<List<(string, DeckPack)>>();
 
-        Backend.GameData.GetMyData(TableName, new Where(), callback =>
+        Backend.GameData.GetMyData(TABLE_NAME, new Where(), callback =>
         {
             List<(string guid, DeckPack, DateTime inDate)> temp = new();
 

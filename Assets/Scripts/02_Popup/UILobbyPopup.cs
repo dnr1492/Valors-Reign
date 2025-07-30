@@ -7,12 +7,14 @@ using TMPro;
 public class UILobbyPopup : UIPopupBase
 {
     [SerializeField] Button btn_battle, btn_editorDeck;
+    [SerializeField] Button btn_logout;
     [SerializeField] TextMeshProUGUI txt_userName;
 
     private void Awake()
     {
         btn_battle.onClick.AddListener(OnClickBattle);
         btn_editorDeck.onClick.AddListener(OnClickEditorDeck);
+        btn_logout.onClick.AddListener(UIManager.Instance.GetPopup<UILoginPopup>("UILoginPopup").OnClickLogout);
     }
 
     public void Init()
