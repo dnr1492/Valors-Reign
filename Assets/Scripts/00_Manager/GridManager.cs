@@ -378,8 +378,7 @@ public class GridManager : Singleton<GridManager>
     /// DeckPack 적용
     /// </summary>
     /// <param name="deckPack"></param>
-    /// <param name="characterCard"></param>
-    public async UniTask ApplyDeckPack(DeckPack deckPack, CharacterCard characterCard)
+    public async UniTask ApplyDeckPack(DeckPack deckPack)
     {
         try
         {
@@ -400,6 +399,7 @@ public class GridManager : Singleton<GridManager>
             {
                 var token = allTokens.FirstOrDefault(t => t.Key == slot.tokenKey);
                 if (token == null) continue;
+                token.SetCardToBack();  //캐릭터 카드 숨김상태로 변경
 
                 PlaceToken((slot.col, slot.row), token.Key, token.GetCharacterSprite());  //위치 계산해서 배치
                 token.SetTokenState(CharacterTokenState.Confirm);  //상태를 Confirm으로 변경
@@ -411,16 +411,13 @@ public class GridManager : Singleton<GridManager>
                         token.SetSkillCount(skill.skillId, skill.count);
                 }
             }
-
-            //캐릭터 카드 숨김상태로 변경
-            characterCard.SetCardState(CardState.Back);
         }
     }
 
     /// <summary>
     /// UIDeckPhase3 Popup 초기화
     /// </summary>
-    public void ResetUIDeckPhase3(CharacterCard characterCard)
+    public void ResetUIDeckPhase3()
     {
         //모든 토큰 이미지 제거
         foreach (var img in imgCharacterMap.Values)
@@ -452,13 +449,13 @@ public class GridManager : Singleton<GridManager>
                     token.SetSkillCount(skillId, 0);
                 }
             }
+
+            //캐릭터 카드 숨김상태로 변경
+            token.SetCardToBack();
         }
 
         //필터 초기화
         //===== 덱을 구성할 때마다 필터를 초기화할 필요가 있을까??? =====//
         //ControllerRegister.Get<FilterController>().ResetFilter();
-
-        //캐릭터 카드 숨김상태로 변경
-        characterCard.SetCardState(CardState.Back);
     }
 }

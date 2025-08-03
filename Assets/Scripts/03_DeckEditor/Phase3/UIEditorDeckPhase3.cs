@@ -9,7 +9,6 @@ using Cysharp.Threading.Tasks;
 public class UIEditorDeckPhase3 : UIPopupBase
 {
     [SerializeField] Button btn_back, btn_filter, btn_save, btn_reset;
-    [SerializeField] CharacterCard characterCard;
     [SerializeField] SkillSlotCollection skillSlotCollection; 
 
     [Header("Hex Grid")]
@@ -43,7 +42,7 @@ public class UIEditorDeckPhase3 : UIPopupBase
         btn_save.onClick.AddListener(() => { UniTask.Void(OnClickSaveAsync); });
 
         btn_reset.onClick.AddListener(() => {
-            GridManager.Instance.ResetUIDeckPhase3(characterCard);
+            GridManager.Instance.ResetUIDeckPhase3();
             skillSlotCollection.Refresh();
             ResetDeckName();
         });
@@ -70,14 +69,14 @@ public class UIEditorDeckPhase3 : UIPopupBase
 
     protected override void ResetUI()
     {
-        GridManager.Instance.ResetUIDeckPhase3(characterCard);
+        GridManager.Instance.ResetUIDeckPhase3();
         ResetDeckName();
         skillSlotCollection.Refresh();
     }
 
     public async void ApplyDeckPack(DeckPack deckPack)
     {
-        await GridManager.Instance.ApplyDeckPack(deckPack, characterCard);
+        await GridManager.Instance.ApplyDeckPack(deckPack);
 
         currentDeckName = deckPack.deckName;
         inputFieldDeckName.text = currentDeckName;

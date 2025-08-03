@@ -20,7 +20,7 @@ public class Deck : MonoBehaviour
         btn_deck.onClick.AddListener(() =>
         {
             if (deckPack == null) OnCreateNewDeck?.Invoke();  //새 덱 슬롯 클릭
-            else OnApplyDeck?.Invoke(this);                 //저장된 덱 클릭
+            else OnApplyDeck?.Invoke(this);                   //저장된 덱 클릭
         });
     }
 

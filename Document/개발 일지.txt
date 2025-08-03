@@ -1,5 +1,5 @@
 ***구현 및 수정
-1. 드래그 확정 취소 아이콘 할당하기
+1. 게스트/구글 로그인이 서로 연동되는 문제 해결하기 (feat.ChatGPT의 카드 게임 - 로그인 프로젝트 확인)
 2. 게임 플레이 구현하기
 3. 캐릭터 및 스킬 curCount / maxCount로 표시
 4. 스킬 데이터만 연동하기 (조건, 효과 등에 따른 Action은 추후에...)
@@ -16,5 +16,8 @@
 
 ***참고
 - 서버 관련 로직을 변경 또는 뒤끝 콘솔에서 데이터를 변경한 경우
-  => C:\Users\FORYOUCOM\AppData\LocalLow\HealthyCode\BarrelsLane 경로의 backend.dat을 삭제해야 함
-  => ex) 유저데이터 삭제, 키스토어 변경, ~키 변경 등
+  	=> C:\Users\FORYOUCOM\AppData\LocalLow\HealthyCode\BarrelsLane 경로의 backend.dat을 삭제해야 함
+  	=> ex) 유저데이터 삭제, 키스토어 변경, ~키 변경 등
+- Popup Prefab
+  	=> SafeArea가 들어간 팝업은 전체 stretch로 설정
+  	=> 그렇지 않은 팝업은 정중앙 stretch로 설정 (※스크립트가 할당된 게임 오브젝트 외에 팝업 내부에 적용)

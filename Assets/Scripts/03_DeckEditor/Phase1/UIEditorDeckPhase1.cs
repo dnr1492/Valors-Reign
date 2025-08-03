@@ -7,7 +7,9 @@ public class UIEditorDeckPhase1 : UIPopupBase
     [SerializeField] GameObject deckPrefab;
     [SerializeField] Transform deckContainer;
 
-    private Deck currentDeck = null;  //현재 작업 중인 덱
+    private Deck currentDeck = null;  //현재 덱
+    private bool isEditMode = true;
+    private GameObject newDeckSlotObj;  //새 덱 슬롯
 
     private void Awake()
     {
@@ -47,6 +49,8 @@ public class UIEditorDeckPhase1 : UIPopupBase
             }
 
             EnsureNewDeckSlot();
+
+            ActiveNewDeckSlot();
         });
     }
 
@@ -78,6 +82,8 @@ public class UIEditorDeckPhase1 : UIPopupBase
             currentDeck = deck;
             UIManager.Instance.ShowPopup<UIEditorDeckPhase2>("UIEditorDeckPhase2");
         });
+
+        newDeckSlotObj = obj;
     }
 
     public void OnClickSave(DeckPack deckPack)
@@ -93,14 +99,34 @@ public class UIEditorDeckPhase1 : UIPopupBase
 
     private void OnApplyDeck(Deck deck)
     {
-        if (deck?.GetDeckPack() != null) {
-            currentDeck = deck;
+        if (deck == null || deck.GetDeckPack() == null) return;
+
+        currentDeck = deck;
+
+        if (isEditMode) {
             var popup = UIManager.Instance.ShowPopup<UIEditorDeckPhase3>("UIEditorDeckPhase3");
             popup.ApplyDeckPack(deck.GetDeckPack());
         }
+        else UIManager.Instance.ShowPopup<UIBattleReady>("UIBattleReady");
     }
 
-    public DeckPack GetCurrentDeckPack() => currentDeck?.GetDeckPack();
+    public DeckPack GetCurrentDeckPack() => currentDeck.GetDeckPack();
+
+    public void SetEditMode(bool edit)
+    {
+        isEditMode = edit;
+
+        ActiveNewDeckSlot();
+    }
+
+    /// <summary>
+    /// 새 덱 슬롯의 활성화 또는 비활성화
+    /// </summary>
+    private void ActiveNewDeckSlot()
+    {
+        if (newDeckSlotObj != null)
+            newDeckSlotObj.SetActive(isEditMode);
+    }
 
     protected override void ResetUI() { }
 }

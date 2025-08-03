@@ -41,7 +41,8 @@ public class CharacterToken : MonoBehaviour
             Debug.Log($"OnClick Event: {characterCardData.name}의 카드 표시");
 
             //캐릭터 카드 정보 표시
-            characterCard.InitCardData(this, sprite, characterCardData, CardState.Front, CardType.CharacterCard);
+            characterCard.SetCharacterCard(this, sprite, characterCardData);
+            //SetCardToFront();
 
             ControllerRegister.Get<CharacterTokenController>().OnClickToken(this, characterCard);
         });
@@ -51,7 +52,8 @@ public class CharacterToken : MonoBehaviour
     public void ShowTokenInfo()
     {
         if (DataManager.Instance.dicCharacterCardData.TryGetValue(Key, out var characterCardData)) {
-            characterCard.InitCardData(this, imgCharacter.sprite, characterCardData, CardState.Front, CardType.CharacterCard);
+            characterCard.SetCharacterCard(this, imgCharacter.sprite, characterCardData);
+            //SetCardToFront();
         }
     }
 
@@ -97,6 +99,12 @@ public class CharacterToken : MonoBehaviour
     {
         //깊은 복사
         return new Dictionary<int, int>(selectedSkillCounts);  
+    }
+
+    //캐릭터 카드의 상태를 Front로 설정
+    public void SetCardToFront()
+    {
+        characterCard.SetCardState(CardState.Front);
     }
 
     //캐릭터 카드의 상태를 Back으로 설정

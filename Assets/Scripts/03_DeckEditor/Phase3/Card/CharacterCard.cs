@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using static EnumClass;
 
-public class CharacterCard : Card
+public class CharacterCard : MonoBehaviour
 {
     [SerializeField] SkillSlotCollection skillSlotCollection;
     [SerializeField] TextMeshProUGUI txtName;
@@ -17,15 +17,17 @@ public class CharacterCard : Card
     [SerializeField] Button btnConfirm;
     [SerializeField] GameObject cost;
     [SerializeField] TextMeshProUGUI txtCost;
+    [SerializeField] GameObject front, back;
 
     private int[] skillCardCounts;
     private const int maxSkillCardCount = 4;  //최대 개수
     private CharacterToken curClickedToken;  //현재 선택된 토큰
 
-    protected override void SetCharacterCard(CharacterToken clickedToken, Sprite sprite, CharacterCardData characterCardData)
+    public void SetCharacterCard(CharacterToken clickedToken, Sprite sprite, CharacterCardData characterCardData)
     {
         ResetUI();
         curClickedToken = clickedToken;
+        curClickedToken.SetCardToFront();
 
         btnConfirm.onClick.RemoveAllListeners();
         btnConfirm.onClick.AddListener(() => {
@@ -172,6 +174,13 @@ public class CharacterCard : Card
                 return;
             }
         }
+    }
+
+    //카드 상태를 설정
+    public void SetCardState(CardState curCardState)
+    {
+        front.SetActive(curCardState == CardState.Front);
+        back.SetActive(curCardState == CardState.Back);
     }
 
     private void ResetUI()

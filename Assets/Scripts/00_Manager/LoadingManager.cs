@@ -1,14 +1,17 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using TMPro;
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using UnityEngine.Events;
 
 public class LoadingManager : Singleton<LoadingManager>
 {
     [SerializeField] GameObject root;  //전체 로딩 패널
     [SerializeField] TextMeshProUGUI loadingText;  //메시지 출력용
+    [SerializeField] Button btn_cancel;
 
     [Header("로딩 이미지 애니메이션")]
     [SerializeField] GameObject[] loadingRotateImages;  //Loading_rotate_00 ~ 11
@@ -30,10 +33,18 @@ public class LoadingManager : Singleton<LoadingManager>
     /// <summary>
     /// 로딩 UI 표시
     /// </summary>
-    public void Show(string message)
+    /// <param name="message"></param>
+    /// <param name="onCancel"></param>
+    public void Show(string message, UnityAction onCancel = null)
     {
         if (root != null)
             root.SetActive(true);
+
+        btn_cancel.gameObject.SetActive(onCancel != null);
+        if (onCancel != null) {
+            btn_cancel.onClick.RemoveAllListeners();
+            btn_cancel.onClick.AddListener(onCancel);
+        }
 
         //점 개수 감지
         int dotStart = message.LastIndexOf('.');

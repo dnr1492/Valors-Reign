@@ -22,14 +22,15 @@ public class UILobbyPopup : UIPopupBase
         txt_userName.text = BackendManager.Instance.GetNickname();
     }
 
-    private void OnClickBattle()
+    public void OnClickBattle()
     {
-        Debug.Log("===== Battle ¹Ì±¸Çö =====");
+        UIManager.Instance.ShowPopup<UIBattleReady>("UIBattleReady");
     }
 
     private void OnClickEditorDeck()
     {
-        UIManager.Instance.ShowPopup<UIEditorDeckPhase1>("UIEditorDeckPhase1");
+        UIEditorDeckPhase1 popup = UIManager.Instance.ShowPopup<UIEditorDeckPhase1>("UIEditorDeckPhase1");
+        popup.SetEditMode(true);
     }
 
     protected override void ResetUI() { }
