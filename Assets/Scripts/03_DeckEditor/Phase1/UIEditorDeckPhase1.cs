@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -10,6 +11,8 @@ public class UIEditorDeckPhase1 : UIPopupBase
     private Deck currentDeck = null;  //현재 덱
     private bool isEditMode = true;
     private GameObject newDeckSlotObj;  //새 덱 슬롯
+
+    public Action onApplyBattleDeck;
 
     private void Awake()
     {
@@ -91,9 +94,12 @@ public class UIEditorDeckPhase1 : UIPopupBase
 
         if (isEditMode) {
             var popup = UIManager.Instance.ShowPopup<UIEditorDeckPhase3>("UIEditorDeckPhase3");
-            popup.ApplyDeckPack(deck.GetDeckPack());
+            popup.ApplyDeckPack(GetCurrentDeckPack());
         }
-        else UIManager.Instance.ShowPopup<UIBattleReady>("UIBattleReady");
+        else {
+            onApplyBattleDeck?.Invoke();
+            UIManager.Instance.ShowPopup<UIBattleReady>("UIBattleReady");
+        }
     }
 
     public DeckPack GetCurrentDeckPack() => currentDeck.GetDeckPack();

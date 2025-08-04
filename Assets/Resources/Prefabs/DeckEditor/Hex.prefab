@@ -97,6 +97,7 @@ MonoBehaviour:
   outline: {fileID: 4606679375936390088}
   direction: {fileID: 1633192807213314273}
   cost: {fileID: 8369420971010710068}
+  txtTier: {fileID: 1049561976026430025}
   txtCost: {fileID: 2106476917233986727}
 --- !u!114 &6724838091860125002
 MonoBehaviour:
@@ -273,7 +274,7 @@ GameObject:
   - component: {fileID: 6712603182073689746}
   - component: {fileID: 2106476917233986727}
   m_Layer: 5
-  m_Name: Text (TMP)
+  m_Name: txt_cost
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -507,7 +508,7 @@ GameObject:
   - component: {fileID: 8634377661700280594}
   - component: {fileID: 1049561976026430025}
   m_Layer: 5
-  m_Name: Text (TMP)
+  m_Name: txt_tier
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

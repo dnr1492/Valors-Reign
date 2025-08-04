@@ -52,8 +52,6 @@ public class UIEditorDeckPhase3 : UIPopupBase
 
     private void Start()
     {
-        GridManager.Instance.CreateHexGrid(battleFieldRt, hexPrefab, hexParantRt);
-
         maxCost = DataManager.Instance.gamePlayData.maxCost;
         sliCost.value = 0;
         sliCost.maxValue = maxCost;
@@ -76,6 +74,8 @@ public class UIEditorDeckPhase3 : UIPopupBase
 
     public async void ApplyDeckPack(DeckPack deckPack)
     {
+        GridManager.Instance.CreateHexGrid(battleFieldRt, hexPrefab, hexParantRt, 45, 13);
+
         await GridManager.Instance.ApplyDeckPack(deckPack);
 
         currentDeckName = deckPack.deckName;

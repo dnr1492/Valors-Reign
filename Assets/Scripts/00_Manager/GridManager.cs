@@ -40,8 +40,14 @@ public class GridManager : Singleton<GridManager>
     }
 
     #region 그리드 생성
-    public void CreateHexGrid(RectTransform battleFieldRt, GameObject hexPrefab, RectTransform parant)
+    public void CreateHexGrid(RectTransform battleFieldRt, GameObject hexPrefab, RectTransform parant, float tierFontSize, float costFontSize, bool enableHexEvents = true)
     {
+        //초기화
+        imgCharacterMap.Clear();
+        tokenPosMap.Clear();
+        hexTileMap.Clear();
+        foreach (Transform child in parant) Destroy(child.gameObject);
+
         ResizeHexGrid(battleFieldRt);
 
         float gridWidth = (columns - 1) * hexWidth * 0.75f + hexWidth;
@@ -62,6 +68,10 @@ public class GridManager : Singleton<GridManager>
             for (int row = 0; row < maxRow; row++)
             {
                 GameObject hex = Instantiate(hexPrefab, parant);
+                if (!enableHexEvents) {
+                    var hexEvent = hex.GetComponent<HexTileEvent>();
+                    if (hexEvent != null) hexEvent.enabled = false;
+                }
                 RectTransform rt = hex.GetComponent<RectTransform>();
                 hexTransforms.Add(rt);
 
@@ -74,15 +84,15 @@ public class GridManager : Singleton<GridManager>
 
                 rt.anchoredPosition = new Vector2(x + startOffset.x, -(y - startOffset.y));
 
-                if (txtMap.TryGetValue((col, row), out string textValue))
-                {
-                    var textComponent = hex.GetComponentInChildren<TextMeshProUGUI>();
-                    if (textComponent != null) textComponent.text = textValue;
-                }
-
                 var hexTile = hex.GetComponent<HexTile>();
                 hexTile.Init((col, row));
                 hexTileMap[(col, row)] = hexTile;
+
+                if (txtMap.TryGetValue((col, row), out string textValue))
+                {
+                    hexTile.DisplayTierText(textValue);
+                    hexTile.SetFontSize(tierFontSize, costFontSize);
+                }
 
                 //좌표의 이미지 컴포넌트 참조
                 var image = hexTile.transform.Find("mask").transform.Find("imgCharacter").GetComponent<Image>();
@@ -375,7 +385,7 @@ public class GridManager : Singleton<GridManager>
     }
 
     /// <summary>
-    /// DeckPack 적용
+    /// 덱 구성 화면에 DeckPack을 적용
     /// </summary>
     /// <param name="deckPack"></param>
     public async UniTask ApplyDeckPack(DeckPack deckPack)
@@ -405,14 +415,99 @@ public class GridManager : Singleton<GridManager>
                 token.SetTokenState(CharacterTokenState.Confirm);  //상태를 Confirm으로 변경
 
                 //스킬 개수 복원
-                if (slot.skillCounts != null)
-                {
+                if (slot.skillCounts != null) {
                     foreach (var skill in slot.skillCounts)
                         token.SetSkillCount(skill.skillId, skill.count);
                 }
             }
         }
     }
+
+    #region 전장에 내 덱(필수)과 상대 덱(선택)을 표시
+    /// <summary>
+    /// 필드에 내 덱(필수)과 상대 덱(선택)을 표시
+    /// </summary>
+    /// <param name="myDeck"></param>
+    /// <param name="opponentDeck"></param>
+    /// <returns></returns>
+    public async void ShowDecksOnField(DeckPack myDeck, DeckPack opponentDeck = null)
+    {
+        try
+        {
+            await ControllerRegister.Get<FilterController>().InitFilterAsync(myDeck.race);
+        }
+        finally
+        {
+            var allTokens = ControllerRegister.Get<CharacterTokenController>().GetAllCharacterToken();
+
+            //내 덱 표시
+            foreach (var slot in myDeck.tokenSlots)
+            {
+                var token = allTokens.FirstOrDefault(t => t.Key == slot.tokenKey);
+                if (token == null) continue;
+
+                PlaceToken((slot.col, slot.row), token.Key, token.GetCharacterSprite());
+
+                //스킬 수량 반영
+                if (slot.skillCounts != null) {
+                    foreach (var skill in slot.skillCounts) {
+                        token.SetSkillCount(skill.skillId, skill.count);
+                    }
+                }
+            }
+
+            //상대 덱 표시
+            if (opponentDeck != null)
+            {
+                foreach (var slot in opponentDeck.tokenSlots)
+                {
+                    int col = MirrorCol(slot.col);
+                    int row = MirrorRow(col, slot.row);  //보정된 col을 넘겨야 시각 offset 일치
+
+                    var token = allTokens.FirstOrDefault(t => t.Key == slot.tokenKey);
+                    if (token == null) continue;
+
+                    PlaceToken((col, row), token.Key, token.GetCharacterSprite());
+
+                    //스킬 수량 반영
+                    if (slot.skillCounts != null) {
+                        foreach (var skill in slot.skillCounts) {
+                            token.SetSkillCount(skill.skillId, skill.count);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// 상하 대칭
+    /// </summary>
+    /// <param name="col"></param>
+    /// <param name="row"></param>
+    /// <returns></returns>
+    private int MirrorRow(int col, int row)
+    {
+        int totalRows = rows;
+        int mirroredRow = totalRows - 1 - row;
+
+        //홀수 열(col)은 offset이 반 칸 아래로 내려가 있으므로 보정
+        if ((col & 1) == 1) mirroredRow = Mathf.Max(0, mirroredRow - 1);
+
+        return mirroredRow;
+    }
+
+    /// <summary>
+    /// 좌우 대칭
+    /// </summary>
+    /// <param name="col"></param>
+    /// <returns></returns>
+    private int MirrorCol(int col)
+    {
+        int totalCols = columns;
+        return totalCols - 1 - col;
+    }
+    #endregion
 
     /// <summary>
     /// UIDeckPhase3 Popup 초기화
@@ -454,8 +549,8 @@ public class GridManager : Singleton<GridManager>
             token.SetCardToBack();
         }
 
-        //필터 초기화
-        //===== 덱을 구성할 때마다 필터를 초기화할 필요가 있을까??? =====//
+        ////필터 초기화
+        // ===== 덱을 구성할 때마다 필터를 초기화할 필요가 있을까??? ===== //
         //ControllerRegister.Get<FilterController>().ResetFilter();
     }
 }

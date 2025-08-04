@@ -10,7 +10,7 @@ public class HexTile : MonoBehaviour
 {
     [SerializeField] Image imgCharacter, outline, direction;
     [SerializeField] GameObject cost;
-    [SerializeField] TextMeshProUGUI txtCost;
+    [SerializeField] TextMeshProUGUI txtTier, txtCost;
 
     public (int col, int row) GridPosition { get; private set; }
     public Nullable<int> AssignedTokenKey { get; private set; } = null;
@@ -65,10 +65,23 @@ public class HexTile : MonoBehaviour
         imgCharacter.rectTransform.rotation = Quaternion.Euler(0, 0, -angles[index]);  //시계방향 회전
     }
 
+    //티어별 텍스트를 표시
+    public void DisplayTierText(string txt)
+    {
+        txtTier.text = txt;
+    }
+
     //캐릭터 토큰의 Cost 설정
     private void SetCost(bool isActive, int cost = 0)
     {
         this.cost.SetActive(isActive);
         txtCost.text = cost.ToString();
+    }
+
+    //텍스트의 폰트 크기를 설정
+    public void SetFontSize(float tierFontSize, float costFontSize)
+    {
+        txtTier.fontSize = tierFontSize;
+        txtCost.fontSize = costFontSize;
     }
 }

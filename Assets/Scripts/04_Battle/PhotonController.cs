@@ -16,6 +16,9 @@ public class PhotonController : MonoBehaviourPunCallbacks
     private bool isMyDeckSent = false;
     private bool isOpponentDeckReceived = false;
 
+    private DeckPack opponentDeckPack;
+    public DeckPack GetOpponentDeckPack() => opponentDeckPack;
+
     private void Awake()
     {
         ControllerRegister.Register(this);
@@ -99,7 +102,7 @@ public class PhotonController : MonoBehaviourPunCallbacks
     }
     #endregion
 
-    #region AI 대전으로 전환
+    #region [AI 대전] AI 덱으로 변경
     private async UniTaskVoid WaitForOpponentThenStartAI()
     {
         await UniTask.Delay(3000);
@@ -109,16 +112,13 @@ public class PhotonController : MonoBehaviourPunCallbacks
             Debug.Log("상대 없음 → AI 대전 시작");
             isMyDeckSent = true;
 
-            var aiDeck = AIBattleHelper.GetRandomAIDeck();
-            if (aiDeck != null) {
-                await GridManager.Instance.ApplyDeckPack(aiDeck);
-                OnOpponentDeckReceived();
-            }
+            opponentDeckPack = AIBattleHelper.GetRandomAIDeck();
+            OnOpponentDeckReceived();
         }
     }
     #endregion
 
-    #region 덱 공유 처리 (실제 대전)
+    #region [유저 대전] 덱 공유 처리
     public void StartDeckExchange(DeckPack deckPack)
     {
         string json = JsonUtility.ToJson(deckPack);
@@ -136,19 +136,17 @@ public class PhotonController : MonoBehaviourPunCallbacks
 
     public void OnEvent(EventData photonEvent)
     {
-        HandlePhotonEvent(photonEvent).Forget();
+        HandlePhotonEvent(photonEvent);
     }
 
-    private async UniTaskVoid HandlePhotonEvent(EventData photonEvent)
+    private void HandlePhotonEvent(EventData photonEvent)
     {
         if (photonEvent.Code == (byte)PhotonEventCode.SendDeck)
         {
             object[] data = (object[])photonEvent.CustomData;
             string json = (string)data[0];
 
-            var opponentDeck = JsonUtility.FromJson<DeckPack>(json);
-
-            await GridManager.Instance.ApplyDeckPack(opponentDeck);
+            opponentDeckPack = JsonUtility.FromJson<DeckPack>(json);
             OnOpponentDeckReceived();
         }
     }
