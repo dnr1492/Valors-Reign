@@ -28,30 +28,16 @@ public class UIEditorDeckPhase1 : UIPopupBase
 
     private void LoadSavedDecks()
     {
-        ////로컬에서 모든 덱 불러오기
-        //foreach (var (_, pack) in DeckHandler.LoadAll())
-        //{
-        //    GameObject obj = Instantiate(deckPrefab, deckContainer);
-        //    Deck deck = obj.GetComponent<Deck>();
-        //    deck.InitSavedDeck(pack);
-        //    deck.OnApplyDeck += OnApplyDeck;
-        //}
-
-        //서버에서 모든 덱 불러오기
-        BackendManager.Instance.LoadAllDecks(result =>
+        foreach (var (guid, pack) in BackendManager.Instance.GetSortedDecks())
         {
-            foreach (var (_, pack) in result)
-            {
-                GameObject obj = Instantiate(deckPrefab, deckContainer);
-                Deck deck = obj.GetComponent<Deck>();
-                deck.InitSavedDeck(pack);
-                deck.OnApplyDeck += OnApplyDeck;
-            }
+            GameObject obj = Instantiate(deckPrefab, deckContainer);
+            Deck deck = obj.GetComponent<Deck>();
+            deck.InitSavedDeck(pack);
+            deck.OnApplyDeck += OnApplyDeck;
+        }
 
-            EnsureNewDeckSlot();
-
-            ActiveNewDeckSlot();
-        });
+        EnsureNewDeckSlot();
+        ActiveNewDeckSlot();
     }
 
     /// <summary>

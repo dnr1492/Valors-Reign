@@ -109,11 +109,11 @@ public class PhotonController : MonoBehaviourPunCallbacks
             Debug.Log("상대 없음 → AI 대전 시작");
             isMyDeckSent = true;
 
-            // ===== TODO: 실제 AI 덱 생성 로직으로 교체 ===== //
-            var aiDeck = new DeckPack();  
-            await GridManager.Instance.ApplyDeckPack(aiDeck);
-
-            OnOpponentDeckReceived();
+            var aiDeck = AIBattleHelper.GetRandomAIDeck();
+            if (aiDeck != null) {
+                await GridManager.Instance.ApplyDeckPack(aiDeck);
+                OnOpponentDeckReceived();
+            }
         }
     }
     #endregion

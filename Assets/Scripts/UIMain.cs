@@ -6,10 +6,10 @@ public class UIMain : MonoBehaviour
 {
     private void Start()
     {
-        InitApp().Forget();
+        StartApp().Forget();
     }
 
-    private async UniTaskVoid InitApp()
+    private async UniTaskVoid StartApp()
     {
         //1. UILoginPopup 프리팹이 반드시 Instantiate되도록 ShowPopup 호출
         UIManager.Instance.ShowPopup<UILoginPopup>("UILoginPopup", false);

@@ -399,7 +399,7 @@ public class GridManager : Singleton<GridManager>
             {
                 var token = allTokens.FirstOrDefault(t => t.Key == slot.tokenKey);
                 if (token == null) continue;
-                token.SetCardToBack();  //캐릭터 카드 숨김상태로 변경
+                token.SetCardToBack();  //캐릭터 카드를 숨김 상태로 변경
 
                 PlaceToken((slot.col, slot.row), token.Key, token.GetCharacterSprite());  //위치 계산해서 배치
                 token.SetTokenState(CharacterTokenState.Confirm);  //상태를 Confirm으로 변경

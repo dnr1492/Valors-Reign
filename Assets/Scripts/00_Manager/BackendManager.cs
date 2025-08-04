@@ -14,6 +14,8 @@ public class BackendManager : Singleton<BackendManager>
 
     public Action OnLoginCompleteCallback;
 
+    private List<(string guid, DeckPack)> sortedDecks = new();
+
     #region 뒤끝 초기화
     public async UniTask<bool> InitBackendAsync()
     {
@@ -234,52 +236,9 @@ public class BackendManager : Singleton<BackendManager>
     #endregion
 
     #region 모든 덱 불러오기
-    /// <summary>
-    /// 동기 버전
-    /// </summary>
-    /// <param name="onLoaded"></param>
-    public void LoadAllDecks(Action<List<(string guid, DeckPack)>> onLoaded)
+    public void LoadAllDecks()
     {
-        Backend.GameData.GetMyData(TABLE_NAME, new Where(), callback =>
-        {
-            List<(string guid, DeckPack, DateTime inDate)> temp = new();
-
-            if (callback.IsSuccess())
-            {
-                foreach (LitJson.JsonData row in callback.Rows())
-                {
-                    string guid = row["guid"]["S"].ToString();
-                    string json = row["jsonData"]["S"].ToString();
-                    string inDateStr = row["inDate"]["S"].ToString();
-                    DateTime inDate = DateTimeOffset.Parse(inDateStr).UtcDateTime;
-
-                    DeckPack pack = JsonUtility.FromJson<DeckPack>(json);
-                    if (pack != null && !string.IsNullOrEmpty(guid))
-                        temp.Add((guid, pack, inDate));
-                }
-
-                //inDate 오름차순 정렬 (ex) 1,2,3,4 순)
-                var sorted = temp.OrderBy(x => x.inDate)
-                                 .Select(x => (x.guid, x.Item2))
-                                 .ToList();
-
-                onLoaded?.Invoke(sorted);
-            }
-            else
-            {
-                Debug.Log($"[서버 LoadAll 실패]: {callback.GetMessage()}");
-                onLoaded?.Invoke(new List<(string, DeckPack)>());
-            }
-        });
-    }
-
-    /// <summary>
-    /// 비동기 버전
-    /// </summary>
-    /// <returns></returns>
-    public async UniTask<List<(string guid, DeckPack)>> LoadAllDecksAsync()
-    {
-        var tcs = new UniTaskCompletionSource<List<(string, DeckPack)>>();
+        sortedDecks.Clear();
 
         Backend.GameData.GetMyData(TABLE_NAME, new Where(), callback =>
         {
@@ -300,20 +259,19 @@ public class BackendManager : Singleton<BackendManager>
                 }
 
                 //inDate 오름차순 정렬 (ex) 1,2,3,4 순)
-                var sorted = temp.OrderBy(x => x.inDate)
-                                 .Select(x => (x.guid, x.Item2))
-                                 .ToList();
-
-                tcs.TrySetResult(sorted);
+                sortedDecks = temp.OrderBy(x => x.inDate)
+                                   .Select(x => (x.guid, x.Item2))
+                                   .ToList();
             }
             else
             {
                 Debug.Log($"[서버 LoadAll 실패]: {callback.GetMessage()}");
-                tcs.TrySetResult(new List<(string, DeckPack)>());
             }
         });
-
-        return await tcs.Task;
     }
+    #endregion
+
+    #region 오름차순으로 정렬해서 캐싱해 둔 덱 목록 반환
+    public List<(string guid, DeckPack)> GetSortedDecks() => sortedDecks;
     #endregion
 }

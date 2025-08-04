@@ -20,6 +20,8 @@ public class UILobbyPopup : UIPopupBase
     public void Init()
     {
         txt_userName.text = BackendManager.Instance.GetNickname();
+
+        BackendManager.Instance.LoadAllDecks();
     }
 
     public void OnClickBattle()

@@ -42,7 +42,6 @@ public class CharacterToken : MonoBehaviour
 
             //캐릭터 카드 정보 표시
             characterCard.SetCharacterCard(this, sprite, characterCardData);
-            //SetCardToFront();
 
             ControllerRegister.Get<CharacterTokenController>().OnClickToken(this, characterCard);
         });
@@ -53,7 +52,6 @@ public class CharacterToken : MonoBehaviour
     {
         if (DataManager.Instance.dicCharacterCardData.TryGetValue(Key, out var characterCardData)) {
             characterCard.SetCharacterCard(this, imgCharacter.sprite, characterCardData);
-            //SetCardToFront();
         }
     }
 
@@ -61,6 +59,7 @@ public class CharacterToken : MonoBehaviour
     public void SetTokenState(CharacterTokenState newState)
     {
         if (State == newState) return;
+        if (uiCreateDeckPhase2 == null) return;
 
         //Confirm 상태에서 Cancel 또는 Select로 바뀔 때 비용 차감
         if (State == CharacterTokenState.Confirm && newState != CharacterTokenState.Confirm && Cost != 0)
@@ -104,12 +103,16 @@ public class CharacterToken : MonoBehaviour
     //캐릭터 카드의 상태를 Front로 설정
     public void SetCardToFront()
     {
+        if (characterCard == null) return;
+
         characterCard.SetCardState(CardState.Front);
     }
 
     //캐릭터 카드의 상태를 Back으로 설정
     public void SetCardToBack()
     {
+        if (characterCard == null) return;
+
         characterCard.SetCardState(CardState.Back);
     }
 }
