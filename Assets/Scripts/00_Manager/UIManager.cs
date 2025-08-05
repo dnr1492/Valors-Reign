@@ -52,6 +52,7 @@ public class UIManager : Singleton<UIManager>
             "UILoginPopup",
             "UILobbyPopup",
             "UIBattleReady",
+            "UIBattleSetting",
         };
 
         foreach (string name in popupNames)

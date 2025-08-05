@@ -224,7 +224,7 @@ public class UIEditorDeckPhase3 : UIPopupBase
         //서버에서 모든 덱 불러오기
         //덱 이름 중복 검사 + 현재 편집 중인 덱은 예외
         var phase1Popup = UIManager.Instance.GetPopup<UIEditorDeckPhase1>("UIEditorDeckPhase1");
-        var currentDeckPack = phase1Popup?.GetCurrentDeckPack();
+        var currentDeckPack = phase1Popup?.GetSelectedDeckPack();
         string currentGuid = currentDeckPack?.guid;
         var allDecks = BackendManager.Instance.GetSortedDecks();
         foreach (var (guid, pack) in allDecks)

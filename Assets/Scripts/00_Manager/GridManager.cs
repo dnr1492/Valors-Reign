@@ -40,13 +40,15 @@ public class GridManager : Singleton<GridManager>
     }
 
     #region 그리드 생성
-    public void CreateHexGrid(RectTransform battleFieldRt, GameObject hexPrefab, RectTransform parant, float tierFontSize, float costFontSize, bool enableHexEvents = true)
+    public void CreateHexGrid(RectTransform battleFieldRt, GameObject hexPrefab, RectTransform parant, float tierFontSize, float costFontSize, bool enableHexEvents = true, bool enableTierTextForOpponent = false)
     {
         //초기화
         imgCharacterMap.Clear();
         tokenPosMap.Clear();
         hexTileMap.Clear();
         foreach (Transform child in parant) Destroy(child.gameObject);
+
+        if (enableTierTextForOpponent) DuplicateTierTextForOpponent();
 
         ResizeHexGrid(battleFieldRt);
 
@@ -88,8 +90,8 @@ public class GridManager : Singleton<GridManager>
                 hexTile.Init((col, row));
                 hexTileMap[(col, row)] = hexTile;
 
-                if (txtMap.TryGetValue((col, row), out string textValue))
-                {
+                //TierText 표시
+                if (txtMap.TryGetValue((col, row), out string textValue)) {
                     hexTile.DisplayTierText(textValue);
                     hexTile.SetFontSize(tierFontSize, costFontSize);
                 }
@@ -352,7 +354,7 @@ public class GridManager : Singleton<GridManager>
     public DeckPack CreateDeckPack(string deckName)
     {
         var phase1Popup = UIManager.Instance.GetPopup<UIEditorDeckPhase1>("UIEditorDeckPhase1");
-        var currentDeckPack = phase1Popup?.GetCurrentDeckPack();
+        var currentDeckPack = phase1Popup?.GetSelectedDeckPack();
         var DeckPack = new DeckPack();
         DeckPack.guid = currentDeckPack?.guid ?? Guid.NewGuid().ToString();  //덱이 이미 존재하는 경우 기존 guid 재사용
         DeckPack.deckName = deckName;
@@ -506,6 +508,21 @@ public class GridManager : Singleton<GridManager>
     {
         int totalCols = columns;
         return totalCols - 1 - col;
+    }
+
+    /// <summary>
+    /// 상대 진영에도 동일한 티어 텍스트가 표시되도록 txtMap을 상하좌우 대칭 좌표로 복사 등록함
+    /// </summary>
+    public void DuplicateTierTextForOpponent()
+    {
+        var existing = txtMap.ToList();  //복사
+
+        foreach (var ((col, row), label) in existing)
+        {
+            int mirroredCol = MirrorCol(col);
+            int mirroredRow = MirrorRow(col, row);
+            txtMap[(mirroredCol, mirroredRow)] = label;
+        }
     }
     #endregion
 

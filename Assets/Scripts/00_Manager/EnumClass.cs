@@ -27,5 +27,5 @@ public class EnumClass
         Ring1,         //¿øÇü 1Ä­
         Custom
     }
-    public enum PhotonEventCode : byte { SendDeck = 1 }
+    public enum PhotonEventCode : byte { SendDeck = 1, CoinFlip = 2 }
 }

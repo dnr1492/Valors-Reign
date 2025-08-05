@@ -27,9 +27,15 @@ public class UIBattleReady : UIPopupBase
 
     private void OnClickStartMatching()
     {
+        var photon = ControllerRegister.Get<PhotonController>();
+
+        if (photon.MyDeckPack == null) {
+            UIManager.Instance.ShowPopup<UIModalPopup>("UIModalPopup", false).Set("덱 미선택", $"대전에 사용할 덱을 선택해주세요.");
+            return;
+        }
+
         LoadingManager.Instance.Show("상대방 입장 대기 중...", OnClickCancelMatching);
 
-        var photon = ControllerRegister.Get<PhotonController>();
         if (!PhotonController.IsConnected) photon.RequestJoinRoomAfterConnection();
         else photon.JoinOrCreateRoom();
     }
@@ -49,9 +55,10 @@ public class UIBattleReady : UIPopupBase
         UIEditorDeckPhase1 popup = UIManager.Instance.ShowPopup<UIEditorDeckPhase1>("UIEditorDeckPhase1");
         popup.SetEditMode(false);
         popup.onApplyBattleDeck = () => {
-            var pack = popup.GetCurrentDeckPack();
-            if (pack != null) GridManager.Instance.ShowDecksOnField(pack, ControllerRegister.Get<PhotonController>().GetOpponentDeckPack());
-            Debug.Log($"선택한 덱 이름: {pack.deckName}");
+            var photon = ControllerRegister.Get<PhotonController>();
+            photon.MyDeckPack = popup.GetSelectedDeckPack();
+            if (photon.MyDeckPack != null) GridManager.Instance.ShowDecksOnField(photon.MyDeckPack);
+            Debug.Log($"선택한 덱 이름: {photon.MyDeckPack.deckName}");
         };
     }
 

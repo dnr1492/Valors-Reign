@@ -8,7 +8,7 @@ public class UIEditorDeckPhase1 : UIPopupBase
     [SerializeField] GameObject deckPrefab;
     [SerializeField] Transform deckContainer;
 
-    private Deck currentDeck = null;  //현재 덱
+    private Deck selectedDeck = null;  //현재 선택된 덱
     private bool isEditMode = true;
     private GameObject newDeckSlotObj;  //새 덱 슬롯
 
@@ -68,7 +68,7 @@ public class UIEditorDeckPhase1 : UIPopupBase
         Deck deck = obj.GetComponent<Deck>();
         deck.InitNewDeck();
         deck.SetOnCreateNewDeck(() => {
-            currentDeck = deck;
+            selectedDeck = deck;
             UIManager.Instance.ShowPopup<UIEditorDeckPhase2>("UIEditorDeckPhase2");
         });
 
@@ -77,10 +77,10 @@ public class UIEditorDeckPhase1 : UIPopupBase
 
     public void OnClickSave(DeckPack deckPack)
     {
-        if (currentDeck != null)
+        if (selectedDeck != null)
         {
-            currentDeck.InitSavedDeck(deckPack);
-            currentDeck.OnApplyDeck += OnApplyDeck;
+            selectedDeck.InitSavedDeck(deckPack);
+            selectedDeck.OnApplyDeck += OnApplyDeck;
 
             EnsureNewDeckSlot();  //새 덱 슬롯이 없으면 하나 추가
         }
@@ -90,11 +90,11 @@ public class UIEditorDeckPhase1 : UIPopupBase
     {
         if (deck == null || deck.GetDeckPack() == null) return;
 
-        currentDeck = deck;
+        selectedDeck = deck;
 
         if (isEditMode) {
             var popup = UIManager.Instance.ShowPopup<UIEditorDeckPhase3>("UIEditorDeckPhase3");
-            popup.ApplyDeckPack(GetCurrentDeckPack());
+            popup.ApplyDeckPack(GetSelectedDeckPack());
         }
         else {
             onApplyBattleDeck?.Invoke();
@@ -102,7 +102,7 @@ public class UIEditorDeckPhase1 : UIPopupBase
         }
     }
 
-    public DeckPack GetCurrentDeckPack() => currentDeck.GetDeckPack();
+    public DeckPack GetSelectedDeckPack() => selectedDeck.GetDeckPack();
 
     public void SetEditMode(bool edit)
     {

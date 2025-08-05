@@ -16,8 +16,11 @@ public class PhotonController : MonoBehaviourPunCallbacks
     private bool isMyDeckSent = false;
     private bool isOpponentDeckReceived = false;
 
+    private DeckPack myDeckPack;
+    public DeckPack MyDeckPack { get => myDeckPack; set => myDeckPack = value; }
+
     private DeckPack opponentDeckPack;
-    public DeckPack GetOpponentDeckPack() => opponentDeckPack;
+    public DeckPack OpponentDeckPack { get => opponentDeckPack; }
 
     private void Awake()
     {
@@ -93,7 +96,7 @@ public class PhotonController : MonoBehaviourPunCallbacks
 
         if (PhotonNetwork.CurrentRoom.PlayerCount == 2) {
             Debug.Log("실제 상대 입장 → 나의 덱 전송");
-            StartDeckExchange(UIManager.Instance.GetPopup<UIEditorDeckPhase1>("UIEditorDeckPhase1").GetCurrentDeckPack());
+            StartDeckExchange(UIManager.Instance.GetPopup<UIEditorDeckPhase1>("UIEditorDeckPhase1").GetSelectedDeckPack());
         }
         else {
             Debug.Log("상대 대기 중... 3초 후 AI 대전 전환");
@@ -149,6 +152,14 @@ public class PhotonController : MonoBehaviourPunCallbacks
             opponentDeckPack = JsonUtility.FromJson<DeckPack>(json);
             OnOpponentDeckReceived();
         }
+        else if (photonEvent.Code == (byte)PhotonEventCode.CoinFlip)
+        {
+            object[] data = (object[])photonEvent.CustomData;
+            int result = (int)data[0];
+            int selected = (int)data[1];
+
+            HandleCoinFlipResult(result, selected);
+        }
     }
     #endregion
 
@@ -165,9 +176,37 @@ public class PhotonController : MonoBehaviourPunCallbacks
         {
             LoadingManager.Instance.Hide();
 
-            Debug.Log("양쪽 덱 적용 완료 → 동전 던지기 (선공/후공 결정) 단계로 진입");
-            // ===== TODO: UIManager.Instance.Get<UIBattleReady>().StartCoinFlip(); ===== //
+            Debug.Log("양쪽 덱 적용 완료 → 동전 던지기 (선공/후공 결정) 진입");
+            var popup = UIManager.Instance.ShowPopup<UIBattleSetting>("UIBattleSetting");
+            popup.Init();
         }
+    }
+    #endregion
+
+    #region 선공권 결정 (동전 던지기)
+    public void RequestCoinFlip(int myChoice)
+    {
+        int coinResult = Random.Range(0, 2);  //0: 앞면, 1: 뒷면
+
+        if (PhotonNetwork.IsMasterClient)
+        {
+            object[] content = { coinResult, myChoice };
+            PhotonNetwork.RaiseEvent((byte)PhotonEventCode.CoinFlip, content,
+                new RaiseEventOptions { Receivers = ReceiverGroup.All },
+                SendOptions.SendReliable);
+
+            HandleCoinFlipResult(coinResult, myChoice);
+        }
+    }
+
+    private void HandleCoinFlipResult(int result, int myChoice)
+    {
+        bool isMineFirst = (result == myChoice && PhotonNetwork.IsMasterClient) 
+                        || (result != myChoice && !PhotonNetwork.IsMasterClient);
+        Debug.Log($"{(isMineFirst ? "선공" : "후공")}");
+
+        var popup = UIManager.Instance.GetPopup<UIBattleSetting>("UIBattleSetting");
+        popup.ShowCoinFlipResult(result, isMineFirst);
     }
     #endregion
 
