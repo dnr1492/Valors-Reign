@@ -18,7 +18,7 @@ public class UIBattleSetting : UIPopupBase
 
     public void Init()
     {
-        GridManager.Instance.CreateHexGrid(battleFieldRt, hexPrefab, hexParantRt, 33, 9.5f, false, true);
+        GridManager.Instance.CreateHexGrid(battleFieldRt, hexPrefab, hexParantRt, false, true);
 
         UIEditorDeckPhase1 popup = UIManager.Instance.GetPopup<UIEditorDeckPhase1>("UIEditorDeckPhase1");
         var pack = popup.GetSelectedDeckPack();

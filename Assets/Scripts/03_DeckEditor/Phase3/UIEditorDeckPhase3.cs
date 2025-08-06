@@ -74,7 +74,7 @@ public class UIEditorDeckPhase3 : UIPopupBase
 
     public async void ApplyDeckPack(DeckPack deckPack)
     {
-        GridManager.Instance.CreateHexGrid(battleFieldRt, hexPrefab, hexParantRt, 45, 13);
+        GridManager.Instance.CreateHexGrid(battleFieldRt, hexPrefab, hexParantRt);
 
         await GridManager.Instance.ApplyDeckPack(deckPack);
 

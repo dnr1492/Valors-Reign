@@ -34,13 +34,20 @@ public class GridManager : Singleton<GridManager>
     private readonly Dictionary<int, (int col, int row)> tokenPosMap = new();  //토큰의 고유 Key(id)와 좌표를 매핑
     private readonly Dictionary<(int col, int row), HexTile> hexTileMap = new();  //좌표에 해당하는 좌표의 HexTile 컴포넌트
 
+    [Header("필드의 Width에 맞게 Tier/Cost FontSize 동적 설정")]
+    private const float BASE_WIDTH = 550f;
+    private const float BASE_TIER_FONT = 45f;
+    private const float BASE_COST_FONT = 13f;
+    private float tierFontSize;
+    private float costFontSize;
+
     protected override void Awake()
     {
         base.Awake();
     }
 
     #region 그리드 생성
-    public void CreateHexGrid(RectTransform battleFieldRt, GameObject hexPrefab, RectTransform parant, float tierFontSize, float costFontSize, bool enableHexEvents = true, bool enableTierTextForOpponent = false)
+    public void CreateHexGrid(RectTransform battleFieldRt, GameObject hexPrefab, RectTransform parant, bool enableHexEvents = true, bool enableTierTextForOpponent = false)
     {
         //초기화
         imgCharacterMap.Clear();
@@ -128,6 +135,11 @@ public class GridManager : Singleton<GridManager>
         //최종 계산된 hex 크기
         hexWidth = baseHexWidth * scaleFactor;
         hexHeight = baseHexHeight * scaleFactor;
+
+        //폰트 크기 자동 계산
+        float widthRatio = availableWidth / BASE_WIDTH;
+        tierFontSize = BASE_TIER_FONT * widthRatio;
+        costFontSize = BASE_COST_FONT * widthRatio;
     }
 
     private void FitHexGrid(List<RectTransform> hexTransforms, RectTransform parant)
