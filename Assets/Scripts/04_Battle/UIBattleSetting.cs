@@ -42,8 +42,14 @@ public class UIBattleSetting : UIPopupBase
     public void ShowCoinFlipResult(int result, bool hasFirstTurnChoice)
     {
         uiCoinFlip.PlayFlipAnimation(result, () => {
-            if (hasFirstTurnChoice) uiCoinFlip.ActiveTurnChoiceButton(true);  //선공 or 후공 선택 버튼 표시
-            else LoadingManager.Instance.Show("상대가 선공 또는 후공을 선택하는 중입니다...");
+            if (hasFirstTurnChoice) {
+                uiCoinFlip.ActiveTurnChoiceButton(true);  //선공 or 후공 선택 버튼 표시
+                uiCoinFlip.Invoke(nameof(UICoinFlip.AutoSelectTurnOrder), 3f);
+            }
+            else {
+                LoadingManager.Instance.Show("상대가 선공 또는 후공을 선택하는 중입니다...");
+                AIBattleHelper.AutoSelectTurnOrderAI(uiCoinFlip);
+            }
         });
     }
 

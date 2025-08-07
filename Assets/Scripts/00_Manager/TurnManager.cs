@@ -5,9 +5,11 @@ using UnityEngine;
 
 public class TurnManager : Singleton<TurnManager>
 {
-    private int trnIndex;
+    private int trnIndex = 0;
     private int roundIndex = 0;
     private bool isMyRound;
+
+    public int TurnIndex => trnIndex;
 
     protected override void Awake()
     {

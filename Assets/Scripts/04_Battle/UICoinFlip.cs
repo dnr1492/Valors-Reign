@@ -41,6 +41,7 @@ public class UICoinFlip : MonoBehaviour
     private void OnSelectTurnOrder(bool wantFirst)
     {
         ActiveTurnChoiceButton(false);
+        CancelInvoke(nameof(AutoSelectTurnOrder));
 
         ControllerRegister.Get<PhotonController>().SendTurnOrderChoice(wantFirst);
     }
@@ -124,6 +125,19 @@ public class UICoinFlip : MonoBehaviour
         await UniTask.Yield();
 
         onComplete?.Invoke();
+    }
+    #endregion
+
+    #region 선공 또는 후공 자동 선택
+    public void AutoSelectTurnOrder()
+    {
+        //이미 턴이 시작됐으면 패스 (상대가 선택 완료한 상태)
+        if (TurnManager.Instance.TurnIndex > 0) {
+            return;
+        }
+
+        bool randomChoice = UnityEngine.Random.value < 0.5f;
+        ControllerRegister.Get<PhotonController>().SendTurnOrderChoice(randomChoice, true);
     }
     #endregion
 }

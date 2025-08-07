@@ -116,7 +116,7 @@ public class PhotonController : MonoBehaviourPunCallbacks
             Debug.Log("상대 없음 → AI 대전 시작");
             isMyDeckSent = true;
 
-            opponentDeckPack = AIBattleHelper.GetRandomAIDeck();
+            opponentDeckPack = AIBattleHelper.GetRandomDeckAI();
             OnOpponentDeckReceived();
         }
     }
@@ -227,9 +227,10 @@ public class PhotonController : MonoBehaviourPunCallbacks
     #endregion
 
     #region (동전 던지기) 선공 or 후공 선택
-    public void SendTurnOrderChoice(bool wantFirst)
+    public void SendTurnOrderChoice(bool wantFirst, bool force = false)
     {
-        if (!hasFirstTurnChoice) return;
+        //선공 선택권 없는 유저가 보내는 경우 막기 (AI는 force = true로 통과시킴)
+        if (!hasFirstTurnChoice && !force) return;
 
         //내가 선택권 있을 때
         object[] content = { wantFirst };
