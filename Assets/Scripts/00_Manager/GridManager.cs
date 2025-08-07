@@ -9,6 +9,8 @@ using static EnumClass;
 
 public class GridManager : Singleton<GridManager>
 {
+    private bool isEditorMode;
+
     private float hexWidth;  //육각형의 가로 크기, 해당 육각형의 기본 크기 70
     private float hexHeight;  //육각형의 세로 크기 (육각형의 높이는 가로*√3/2), 해당 육각형의 기본 크기 60
 
@@ -47,8 +49,10 @@ public class GridManager : Singleton<GridManager>
     }
 
     #region 그리드 생성
-    public void CreateHexGrid(RectTransform battleFieldRt, GameObject hexPrefab, RectTransform parant, bool enableHexEvents = true, bool enableTierTextForOpponent = false)
+    public void CreateHexGrid(RectTransform battleFieldRt, GameObject hexPrefab, RectTransform parant, bool isEditorMode, bool enableTierTextForOpponent)
     {
+        this.isEditorMode = isEditorMode;
+
         //초기화
         imgCharacterMap.Clear();
         tokenPosMap.Clear();
@@ -77,7 +81,7 @@ public class GridManager : Singleton<GridManager>
             for (int row = 0; row < maxRow; row++)
             {
                 GameObject hex = Instantiate(hexPrefab, parant);
-                if (!enableHexEvents) {
+                if (!isEditorMode) {
                     var hexEvent = hex.GetComponent<HexTileEvent>();
                     if (hexEvent != null) hexEvent.enabled = false;
                 }
@@ -235,7 +239,7 @@ public class GridManager : Singleton<GridManager>
         //HexTile에 할당
         var token = ControllerRegister.Get<CharacterTokenController>().GetAllCharacterToken()
             .FirstOrDefault(t => t.Key == tokenKey);
-        hexTile.AssignToken(tokenKey, token);
+        hexTile.AssignToken(tokenKey, token, isEditorMode);
 
         //위치 매핑
         tokenPosMap[tokenKey] = pos;
@@ -324,7 +328,7 @@ public class GridManager : Singleton<GridManager>
         {
             tokenPosMap[fromKey] = to;
             fromTile.ClearToken();
-            toTile.AssignToken(fromKey, fromToken);
+            toTile.AssignToken(fromKey, fromToken, isEditorMode);
 
             toImg.sprite = fromImg.sprite;
             toImg.enabled = true;
@@ -343,8 +347,8 @@ public class GridManager : Singleton<GridManager>
             tokenPosMap[fromKey] = to;
             tokenPosMap[toKey] = from;
 
-            fromTile.AssignToken(toKey, toToken);
-            toTile.AssignToken(fromKey, fromToken);
+            fromTile.AssignToken(toKey, toToken, isEditorMode);
+            toTile.AssignToken(fromKey, fromToken, isEditorMode);
 
             (fromImg.sprite, toImg.sprite) = (toImg.sprite, fromImg.sprite);
             fromImg.enabled = fromImg.sprite != null;

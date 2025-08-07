@@ -50,7 +50,7 @@ public class UIBattleReady : UIPopupBase
 
     private void OnClickSelectBattleDeck()
     {
-        GridManager.Instance.CreateHexGrid(battleFieldRt, hexPrefab, hexParantRt, false);
+        GridManager.Instance.CreateHexGrid(battleFieldRt, hexPrefab, hexParantRt, false, false);
 
         UIEditorDeckPhase1 popup = UIManager.Instance.ShowPopup<UIEditorDeckPhase1>("UIEditorDeckPhase1");
         popup.SetEditMode(false);

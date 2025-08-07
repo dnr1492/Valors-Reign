@@ -26,12 +26,12 @@ public class HexTile : MonoBehaviour
     }
 
     //토큰 할당
-    public void AssignToken(int tokenKey, CharacterToken token)
+    public void AssignToken(int tokenKey, CharacterToken token, bool showCost)
     {
         ShowDecorations(true);
         AssignedTokenKey = tokenKey;
         AssignedToken = token;
-        SetCost(true, token.Cost);
+        SetCost(showCost, token.Cost);
     }
 
     //토큰 제거
@@ -44,7 +44,7 @@ public class HexTile : MonoBehaviour
     }
 
     //장식 요소 표시/숨김 (아웃라인, 방향 표시)
-    public void ShowDecorations(bool isShow)
+    private void ShowDecorations(bool isShow)
     {
         outline.gameObject.SetActive(isShow);
         direction.gameObject.SetActive(isShow);

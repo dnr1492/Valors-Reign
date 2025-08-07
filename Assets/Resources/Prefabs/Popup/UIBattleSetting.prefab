@@ -255,7 +255,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.8490566, g: 0.8490566, b: 0.8490566, a: 1}
+  m_Color: {r: 0.4056604, g: 0.39609292, b: 0.39609292, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -526,7 +526,7 @@ GameObject:
   - component: {fileID: 4805624362940249587}
   - component: {fileID: 3173160379896743695}
   m_Layer: 5
-  m_Name: btn_back
+  m_Name: btn_exit
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

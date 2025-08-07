@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -68,7 +69,18 @@ public class UIEditorDeckPhase1 : UIPopupBase
         Deck deck = obj.GetComponent<Deck>();
         deck.InitNewDeck();
         deck.SetOnCreateNewDeck(() => {
+            //빈 DeckPack 생성
+            DeckPack emptyDeckPack = new DeckPack {
+                deckName = "",
+                guid = Guid.NewGuid().ToString(),
+                tokenSlots = new List<TokenSlotData>()
+            };
+
+            var popup = UIManager.Instance.GetPopup<UIEditorDeckPhase3>("UIEditorDeckPhase3");
+            popup.ApplyDeckPack(emptyDeckPack);
+
             selectedDeck = deck;
+
             UIManager.Instance.ShowPopup<UIEditorDeckPhase2>("UIEditorDeckPhase2");
         });
 

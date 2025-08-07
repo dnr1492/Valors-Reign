@@ -38,8 +38,10 @@ public static class UISkillHexGridHelper
             for (int dr = -(halfRows + visualOffset); dr <= (halfRows + visualOffset); dr++)
             {
                 var hex = Object.Instantiate(prefab, container);
-                hex.GetComponent<HexTile>().ShowDecorations(false);
                 hexList.Add(hex);
+
+                var hexTile = hex.GetComponent<HexTile>();
+                hexTile.Init((dq, dr));
                 hexMap[(dq, dr)] = hex;
 
                 var rt = hex.GetComponent<RectTransform>();
