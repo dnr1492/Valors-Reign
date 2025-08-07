@@ -15,6 +15,7 @@ public class PhotonController : MonoBehaviourPunCallbacks
     private bool pendingJoinRequest = false;
     private bool isMyDeckSent = false;
     private bool isOpponentDeckReceived = false;
+    private bool hasFirstTurnChoice = false;  //내가 선공 선택권을 가졌는지
 
     private DeckPack myDeckPack;
     public DeckPack MyDeckPack { get => myDeckPack; set => myDeckPack = value; }
@@ -121,7 +122,7 @@ public class PhotonController : MonoBehaviourPunCallbacks
     }
     #endregion
 
-    #region [유저 대전] 덱 공유 처리
+    #region [유저 대전] 전투 준비 단계
     public void StartDeckExchange(DeckPack deckPack)
     {
         string json = JsonUtility.ToJson(deckPack);
@@ -144,6 +145,7 @@ public class PhotonController : MonoBehaviourPunCallbacks
 
     private void HandlePhotonEvent(EventData photonEvent)
     {
+        //덱 동기화
         if (photonEvent.Code == (byte)PhotonEventCode.SendDeck)
         {
             object[] data = (object[])photonEvent.CustomData;
@@ -152,6 +154,7 @@ public class PhotonController : MonoBehaviourPunCallbacks
             opponentDeckPack = JsonUtility.FromJson<DeckPack>(json);
             OnOpponentDeckReceived();
         }
+        //동전 던지기 - 선공 선택권
         else if (photonEvent.Code == (byte)PhotonEventCode.CoinFlip)
         {
             object[] data = (object[])photonEvent.CustomData;
@@ -159,6 +162,15 @@ public class PhotonController : MonoBehaviourPunCallbacks
             int selected = (int)data[1];
 
             HandleCoinFlipResult(result, selected);
+        }
+        //선공 or 후공 결정
+        else if (photonEvent.Code == (byte)PhotonEventCode.SendTurnOrderChoice)
+        {
+            object[] data = (object[])photonEvent.CustomData;
+            bool selectedFirst = (bool)data[0];
+
+            //내가 선택권이 없을때 동기화
+            TryFinalizeTurnOrder(selectedFirst);
         }
     }
     #endregion
@@ -176,50 +188,81 @@ public class PhotonController : MonoBehaviourPunCallbacks
         {
             LoadingManager.Instance.Hide();
 
-            Debug.Log("양쪽 덱 적용 완료 → 동전 던지기 (선공/후공 결정) 진입");
+            Debug.Log("양쪽 덱 적용 완료 → 동전 던지기 진입");
             var popup = UIManager.Instance.ShowPopup<UIBattleSetting>("UIBattleSetting");
             popup.Init();
         }
     }
     #endregion
 
-    #region 선공권 결정 (동전 던지기)
-    public void RequestCoinFlip(int myChoice)
+    #region (동전 던지기) 선공 선택권 결정
+    public void RequestCoinFlip(int myCoinDriection)
     {
-        int coinResult = Random.Range(0, 2);  //0: 앞면, 1: 뒷면
+        //int coinDirectionResult = Random.Range(0, 2);  //0: 앞면, 1: 뒷면
+        int coinDirectionResult = 0;  // ===== TODO: 임시로 앞면만 선공 선택권을 가지도록 구현 ===== //
 
         if (PhotonNetwork.IsMasterClient)
         {
-            object[] content = { coinResult, myChoice };
+            object[] content = { coinDirectionResult, myCoinDriection };
             PhotonNetwork.RaiseEvent((byte)PhotonEventCode.CoinFlip, content,
                 new RaiseEventOptions { Receivers = ReceiverGroup.All },
                 SendOptions.SendReliable);
 
-            HandleCoinFlipResult(coinResult, myChoice);
+            HandleCoinFlipResult(coinDirectionResult, myCoinDriection);
         }
     }
 
-    private void HandleCoinFlipResult(int result, int myChoice)
+    private void HandleCoinFlipResult(int result, int myCoinDriection)
     {
-        bool isMyRound = (result == myChoice && PhotonNetwork.IsMasterClient) 
-                        || (result != myChoice && !PhotonNetwork.IsMasterClient);
-        Debug.Log($"{(isMyRound ? "선공" : "후공")}");
+        bool hasFirstTurnChoice = (result == myCoinDriection && PhotonNetwork.IsMasterClient) 
+                        || (result != myCoinDriection && !PhotonNetwork.IsMasterClient);
+
+        Debug.Log($"{(hasFirstTurnChoice ? "선공 선택권 획득" : "선택권 없음")}");
+
+        this.hasFirstTurnChoice = hasFirstTurnChoice;
 
         var popup = UIManager.Instance.GetPopup<UIBattleSetting>("UIBattleSetting");
-        popup.ShowCoinFlipResult(result, isMyRound);
+        popup.ShowCoinFlipResult(result, hasFirstTurnChoice);
+    }
+    #endregion
+
+    #region (동전 던지기) 선공 or 후공 선택
+    public void SendTurnOrderChoice(bool wantFirst)
+    {
+        if (!hasFirstTurnChoice) return;
+
+        //내가 선택권 있을 때
+        object[] content = { wantFirst };
+        PhotonNetwork.RaiseEvent((byte)PhotonEventCode.SendTurnOrderChoice, content,
+            new RaiseEventOptions { Receivers = ReceiverGroup.All },
+            SendOptions.SendReliable);
+
+        TryFinalizeTurnOrder(wantFirst);
+    }
+
+    private void TryFinalizeTurnOrder(bool selectedFirst)
+    {
+        bool iAmFirst = hasFirstTurnChoice
+            ? selectedFirst
+            : !selectedFirst;
+
+        TurnManager.Instance.StartTurn(iAmFirst);
+
+        LoadingManager.Instance.Hide();
+
+        UIManager.Instance.GetPopup<UIBattleSetting>("UIBattleSetting")
+            .DestroyUICoinFlip();
     }
     #endregion
 
     #region 룸 취소
     public void LeaveRoom()
     {
-        if (PhotonNetwork.InRoom)
-        {
+        if (PhotonNetwork.InRoom) {
             Debug.Log("룸에서 나갑니다...");
             PhotonNetwork.LeaveRoom();
         }
-        else
-        {
+        else {
             Debug.Log("현재 룸에 있지 않음 → 매칭 예약만 취소");
             pendingJoinRequest = false;
         }

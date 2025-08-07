@@ -9,99 +9,121 @@ using UnityEngine.UI;
 public class UICoinFlip : MonoBehaviour
 {
     [SerializeField] Button btn_front, btn_back;
+    [SerializeField] Button btn_first, btn_second;
     [SerializeField] Image icon_coin;
     [SerializeField] Sprite spriteFront, spriteBack;
 
-    private Action<int> onCoinSelect;
+    private Action<int> onCoinDirectionSelect;
 
-    public void Init(Action<int> onSelectCoinCallback)
+    public void Init(Action<int> onSelectCoinDirectionCallback)
     {
         gameObject.SetActive(true);
 
-        SetCoinButtonsActive(true);
+        ActiveCoinDirectionButtons(true);
+        ActiveTurnChoiceButton(false);
 
-        onCoinSelect = onSelectCoinCallback;
+        onCoinDirectionSelect = onSelectCoinDirectionCallback;
 
-        btn_front.onClick.AddListener(() => OnSelect(0));
-        btn_back.onClick.AddListener(() => OnSelect(1));
+        btn_front.onClick.AddListener(() => OnSelectCoinDirection(0));
+        btn_back.onClick.AddListener(() => OnSelectCoinDirection(1));
+
+        btn_first.onClick.AddListener(() => OnSelectTurnOrder(true));
+        btn_second.onClick.AddListener(() => OnSelectTurnOrder(false));
     }
 
-    private void OnSelect(int selected)
+    private void OnSelectCoinDirection(int selected)
     {
-        SetCoinButtonsActive(false);
+        ActiveCoinDirectionButtons(false);
 
-        onCoinSelect?.Invoke(selected); 
+        onCoinDirectionSelect?.Invoke(selected); 
     }
 
-    private void SetCoinButtonsActive(bool isActive)
+    private void OnSelectTurnOrder(bool wantFirst)
+    {
+        ActiveTurnChoiceButton(false);
+
+        ControllerRegister.Get<PhotonController>().SendTurnOrderChoice(wantFirst);
+    }
+
+    private void ActiveCoinDirectionButtons(bool isActive)
     {
         btn_front.gameObject.SetActive(isActive);
         btn_back.gameObject.SetActive(isActive);
     }
 
+    public void ActiveTurnChoiceButton(bool isActive)
+    {
+        btn_first.gameObject.SetActive(isActive);
+        btn_second.gameObject.SetActive(isActive);
+    }
+
+    #region 동전 던지기 (feat.애니메이션)
     public void PlayFlipAnimation(int result, Action onComplete)
     {
         float duration = 2f;
-        float jumpHeight = 200f;  //던지는 높이
+        float jumpHeight = 200f;
 
         icon_coin.transform.localPosition = Vector3.zero;
         icon_coin.transform.localRotation = Quaternion.identity;
+        icon_coin.transform.localScale = Vector3.one;
 
+        //점프 애니메이션
         Sequence seq = DOTween.Sequence();
         seq.Append(icon_coin.transform.DOLocalMoveY(jumpHeight, duration / 2f).SetEase(Ease.OutQuad));
         seq.Append(icon_coin.transform.DOLocalMoveY(0, duration / 2f).SetEase(Ease.InQuad));
 
-        UniTask.Void(async () => {
-            await RotateAndFlipSprite(duration, result, onComplete);
-        });
+        //회전 애니메이션 실행
+        SimulateCoinSpin(duration, result, onComplete).Forget();
     }
 
-    private async UniTask RotateAndFlipSprite(float totalDuration, int result, Action onComplete)
+    private async UniTaskVoid SimulateCoinSpin(float duration, int result, Action onComplete)
     {
         float elapsed = 0f;
-        float startSpeed = 1000f;  //초기 회전 속도 (deg/sec)
-        float endSpeed = 360f;  //최종 회전 속도 (deg/sec)
         float currentRotation = 0f;
 
-        bool showFront = true;
-        float lastFlipped = 0f;
+        //회전 설정
+        int fullFlips = 6;
+        bool resultIsFront = result == 0;
+        if (!resultIsFront) fullFlips += 1;
 
-        while (elapsed < totalDuration)
+        float totalRotation = fullFlips * 180f;
+        float startRotation = 0f;
+        bool currentIsFront = true;
+
+        //초기 상태 설정
+        icon_coin.transform.localRotation = Quaternion.Euler(startRotation, 0f, 0f);
+        icon_coin.sprite = spriteFront;
+
+        //회전 루프
+        while (elapsed < duration)
         {
-            float t = elapsed / totalDuration;
+            float t = elapsed / duration;
+            float interpolatedRot = Mathf.Lerp(0, totalRotation, t);
+            currentRotation = startRotation + interpolatedRot;
 
-            //감속: 처음엔 빠르고 점점 느려짐
-            float rotationSpeed = Mathf.Lerp(startSpeed, endSpeed, t);
-            float deltaRotation = rotationSpeed * Time.deltaTime;
-            currentRotation += deltaRotation;
-
-            //실제 회전 적용
             icon_coin.transform.localRotation = Quaternion.Euler(currentRotation, 0f, 0f);
 
-            //180도마다 앞/뒤 전환
-            if (Mathf.Floor((currentRotation - lastFlipped) / 180f) >= 1f) {
-                showFront = !showFront;
-                icon_coin.sprite = showFront ? spriteFront : spriteBack;
-                lastFlipped = Mathf.Floor(currentRotation / 180f) * 180f;
+            int flipIndex = Mathf.FloorToInt(currentRotation / 180f);
+            bool isFront = flipIndex % 2 == 0;
+
+            if (isFront != currentIsFront)
+            {
+                currentIsFront = isFront;
+                icon_coin.sprite = currentIsFront ? spriteFront : spriteBack;
             }
 
             await UniTask.Yield();
             elapsed += Time.deltaTime;
         }
 
-        //결과 고정
-        SetCoinFlipResultImage(result);
+        //최종 회전 및 결과 정리
+        icon_coin.transform.localRotation = Quaternion.Euler(startRotation + totalRotation, 0f, 0f);
+        icon_coin.sprite = resultIsFront ? spriteFront : spriteBack;
+        icon_coin.transform.localScale = new Vector3(1f, resultIsFront ? 1f : -1f, 1f);
 
-        //회전도 스프라이트에 맞게 정면 값으로 고정
-        float finalX = (result == 0) ? 0f : 180f;
-        icon_coin.transform.localRotation = Quaternion.Euler(finalX, 0f, 0f);
+        await UniTask.Yield();
 
         onComplete?.Invoke();
-        Destroy(gameObject, 2f);
     }
-
-    private void SetCoinFlipResultImage(int result)
-    {
-        icon_coin.sprite = (result == 0) ? spriteFront : spriteBack;
-    }
+    #endregion
 }

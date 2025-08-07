@@ -66,6 +66,7 @@ public class TurnManager : Singleton<TurnManager>
         }
 
         isMyRound = IsMyRound(roundIndex);
+
         // =====  여기서 스킬카드 실행 로직 들어감 ===== //
     }
 

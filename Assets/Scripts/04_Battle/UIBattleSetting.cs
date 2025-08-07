@@ -19,7 +19,7 @@ public class UIBattleSetting : UIPopupBase
     [Header("Setting SkillCard")]
     [SerializeField] Transform skillCardZone;  //SkillCard의 Parant
     [SerializeField] GameObject skillCardPrefab;
-    private List<SkillCard> settingSkillCards = new();
+    private readonly List<SkillCard> settingSkillCards = new();
 
     public void Init()
     {
@@ -31,19 +31,28 @@ public class UIBattleSetting : UIPopupBase
 
         var go = Instantiate(uiCoinFlipPrefab, transform);
         uiCoinFlip = go.GetComponent<UICoinFlip>();
-        uiCoinFlip.Init(OnCoinSelected);
+        uiCoinFlip.Init(OnCoinDirectionSelected);
     }
 
-    private void OnCoinSelected(int myChoice)
+    private void OnCoinDirectionSelected(int myCoinDriection)
     {
-        ControllerRegister.Get<PhotonController>().RequestCoinFlip(myChoice);
+        ControllerRegister.Get<PhotonController>().RequestCoinFlip(myCoinDriection);
     }
 
-    public void ShowCoinFlipResult(int result, bool isMyRound)
+    public void ShowCoinFlipResult(int result, bool hasFirstTurnChoice)
     {
         uiCoinFlip.PlayFlipAnimation(result, () => {
-            TurnManager.Instance.StartTurn(isMyRound);
+            if (hasFirstTurnChoice) uiCoinFlip.ActiveTurnChoiceButton(true);  //선공 or 후공 선택 버튼 표시
+            else LoadingManager.Instance.Show("상대가 선공 또는 후공을 선택하는 중입니다...");
         });
+    }
+
+    public void DestroyUICoinFlip()
+    {
+        if (uiCoinFlip != null) {
+            Destroy(uiCoinFlip.gameObject);
+            uiCoinFlip = null;
+        }
     }
 
     #region 드로우한 스킬카드를 표시
