@@ -67,7 +67,9 @@ public class UIFilterPopup : UIPopupBase
                     var f = t.GetComponent<FilterData>();
                     if (f == null) return false;
 
-                    return f.filterType switch
+                    bool toggleMatch = false;
+
+                    toggleMatch = f.filterType switch
                     {
                         FilterType.Hp => data.hp == f.intValue,
                         FilterType.Mp => data.mp == f.intValue,
@@ -79,8 +81,9 @@ public class UIFilterPopup : UIPopupBase
                         FilterType.SkillCardType => data.skills.Any(skillId =>
                             DataManager.Instance.dicSkillCardData.TryGetValue(skillId, out var skillData) &&
                             skillData.cardType == f.skillCardType),
-                        _ => false
+                        _ => false,
                     };
+                    return toggleMatch;
                 });
 
                 if (!match) {
