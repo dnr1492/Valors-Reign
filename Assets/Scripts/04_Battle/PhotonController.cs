@@ -201,12 +201,12 @@ public class PhotonController : MonoBehaviourPunCallbacks
 
     private void HandleCoinFlipResult(int result, int myChoice)
     {
-        bool isMineFirst = (result == myChoice && PhotonNetwork.IsMasterClient) 
+        bool isMyRound = (result == myChoice && PhotonNetwork.IsMasterClient) 
                         || (result != myChoice && !PhotonNetwork.IsMasterClient);
-        Debug.Log($"{(isMineFirst ? "선공" : "후공")}");
+        Debug.Log($"{(isMyRound ? "선공" : "후공")}");
 
         var popup = UIManager.Instance.GetPopup<UIBattleSetting>("UIBattleSetting");
-        popup.ShowCoinFlipResult(result, isMineFirst);
+        popup.ShowCoinFlipResult(result, isMyRound);
     }
     #endregion
 
