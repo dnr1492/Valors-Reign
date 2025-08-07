@@ -46,7 +46,8 @@ public class UIBattleSetting : UIPopupBase
         });
     }
 
-    public void BeginSkillCardSetting(List<SkillCardData> drawnSkillCards)
+    #region 드로우한 스킬카드를 표시
+    public void DisplayDrawnSkillCard(List<SkillCardData> drawnSkillCards)
     {
         //이전 카드 정리
         foreach (var card in settingSkillCards) Destroy(card.gameObject);
@@ -129,6 +130,7 @@ public class UIBattleSetting : UIPopupBase
         var rt = skillCardZone.GetComponent<RectTransform>();
         rt.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, finalHeight);
     }
+    #endregion
 
     protected override void ResetUI() { }
 

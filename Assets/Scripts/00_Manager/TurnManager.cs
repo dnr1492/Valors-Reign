@@ -41,9 +41,9 @@ public class TurnManager : Singleton<TurnManager>
         //2. 카드 드로우
         CardManager.Instance.DrawSkillCards(aliveCharacterCount * 2);   //생존 캐릭터 수 × 2 장 드로우 + 기본 이동카드 1 장
 
-        //3. 스킬 카드 세팅
+        //3. 드로우한 스킬카드를 표시
         UIManager.Instance.GetPopup<UIBattleSetting>("UIBattleSetting")
-            .BeginSkillCardSetting(CardManager.Instance.GetDrawnSkillCards());
+            .DisplayDrawnSkillCard(CardManager.Instance.GetDrawnSkillCards());
 
         ////4. OnSkillCardSettingComplete
 
