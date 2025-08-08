@@ -70,24 +70,24 @@ public static class UISkillHexGridHelper
     {
         List<(int dq, int dr, Color color)> range = new();
 
-        switch (data.rangeType)
-        {
-            case SkillRangeType.LineForward1:
-                range.AddRange(SkillRangeHelper.GetLine((0, -1), 1, Color.red));
-                break;
-            case SkillRangeType.LineForward2:
-                range.AddRange(SkillRangeHelper.GetLine((0, -1), 2, Color.red));
-                break;
-            case SkillRangeType.LineForward3:
-                range.AddRange(SkillRangeHelper.GetLine((0, -1), 3, Color.red));
-                break;
-            case SkillRangeType.Ring1:
-                range.AddRange(SkillRangeHelper.GetRing(1, Color.green));  //1칸, ring은 초록
-                break;
-            case SkillRangeType.Custom:
-                range = data.customOffsetRange;
-                break;
-        }
+        //switch (data.rangeType)
+        //{
+        //    case SkillRangeType.LineForward1:
+        //        range.AddRange(SkillRangeHelper.GetLine((0, -1), 1, Color.red));
+        //        break;
+        //    case SkillRangeType.LineForward2:
+        //        range.AddRange(SkillRangeHelper.GetLine((0, -1), 2, Color.red));
+        //        break;
+        //    case SkillRangeType.LineForward3:
+        //        range.AddRange(SkillRangeHelper.GetLine((0, -1), 3, Color.red));
+        //        break;
+        //    case SkillRangeType.Ring1:
+        //        range.AddRange(SkillRangeHelper.GetRing(1, Color.green));  //1칸, ring은 초록
+        //        break;
+        //    case SkillRangeType.Custom:
+        //        range = data.customOffsetRange;
+        //        break;
+        //}
 
         //먼저 전체 범위 표시 (중심 제외)
         foreach (var (dq, dr, color) in range)
