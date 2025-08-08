@@ -89,14 +89,22 @@ public class UIBattleSetting : UIPopupBase
 
             //드래그 세팅 + 드롭 콜백
             var drag = go.GetComponent<SkillCardEvent>();
-            drag.Set(skillCardData, rootCanvas, roundSlots);
+            drag.Set(skillCardData, rootCanvas, roundSlots, skillCardZone, RefreshSkillCardZoneLayout);
             drag.onDropToRoundSlot = OnDropToRoundSlot;  //슬롯에 제대로 떨어졌을 때 처리
         }
 
-        SetLayoutSkillCards(settingSkillCards);
+        RefreshSkillCardZoneLayout();
         AdjustSkillCardZoonHeight(10, 10);
 
         Debug.Log($"[UIBattleSetting] 드로우 카드 {settingSkillCards.Count}장 UI에 세팅 완료");
+    }
+
+    /// <summary>
+    /// CardZone 새로고침
+    /// </summary>
+    public void RefreshSkillCardZoneLayout()
+    {
+        SetSkillCardZoneLayout(settingSkillCards);
     }
 
     /// <summary>
@@ -105,9 +113,12 @@ public class UIBattleSetting : UIPopupBase
     /// 카드 인덱스가 작을수록 화면에서 위로 보이도록 SiblingIndex()로 순서 지정
     /// </summary>
     /// <param name="cards"></param>
-    private void SetLayoutSkillCards(List<SkillCard> cards)
+    private void SetSkillCardZoneLayout(List<SkillCard> cards)
     {
-        int count = cards.Count;
+        var cardsInZone = cards
+            .Where(c => c != null && c.transform.parent == skillCardZone)
+            .ToList();
+        int count = cardsInZone.Count;
         if (count == 0) return;
 
         RectTransform zoneRt = skillCardZone.GetComponent<RectTransform>();
@@ -130,7 +141,7 @@ public class UIBattleSetting : UIPopupBase
 
         for (int i = 0; i < count; i++)
         {
-            var card = cards[i];
+            var card = cardsInZone[i];
             var rt = card.GetComponent<RectTransform>();
 
             float x = startX + i * (skillCardWidth + spacing);
@@ -164,12 +175,11 @@ public class UIBattleSetting : UIPopupBase
     {
         //슬롯의 자식으로 이동 + 배정
         slot.Assign(drag.SkillCardData, drag);
+
+        //CardZone만 재정렬
+        RefreshSkillCardZoneLayout();  
     }
     #endregion
 
     protected override void ResetUI() { }
-
-    // ================================ 구현 중 ================================ //
-    // ================================ 구현 중 ================================ //
-    // ================================ 구현 중 ================================ //
 }

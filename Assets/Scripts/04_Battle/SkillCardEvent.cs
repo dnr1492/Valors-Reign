@@ -7,6 +7,8 @@ public class SkillCardEvent : MonoBehaviour, IBeginDragHandler, IDragHandler, IE
 {
     private Canvas rootCanvas;
     private SkillCardRoundSlot[] allRoundSlots;
+    private Transform skillCardZoneParent;
+    private Action refreshSkillCardZoneLayout;
 
     private RectTransform skillCardRt;
     private CanvasGroup canvasGroup;
@@ -19,10 +21,16 @@ public class SkillCardEvent : MonoBehaviour, IBeginDragHandler, IDragHandler, IE
 
     public Action<SkillCardEvent, SkillCardRoundSlot> onDropToRoundSlot;
 
-    public void Set(SkillCardData skillCardData, Canvas rootCanvas, SkillCardRoundSlot[] allRoundSlots)
+    public void Set(SkillCardData skillCardData, 
+        Canvas rootCanvas, 
+        SkillCardRoundSlot[] allRoundSlots,
+        Transform skillCardZoneParent,
+        Action refreshSkillCardZoneLayout)
     {
         this.rootCanvas = rootCanvas;
         this.allRoundSlots = allRoundSlots;
+        this.skillCardZoneParent = skillCardZoneParent;
+        this.refreshSkillCardZoneLayout = refreshSkillCardZoneLayout;
 
         skillCardRt = (RectTransform)transform;
         canvasGroup = GetComponent<CanvasGroup>();
@@ -86,9 +94,24 @@ public class SkillCardEvent : MonoBehaviour, IBeginDragHandler, IDragHandler, IE
             onDropToRoundSlot?.Invoke(this, roundSlot);
         }
         else {
-            //실패 → 원위치
-            transform.SetParent(originalParent, false);
-            skillCardRt.anchoredPosition = originalAnchoredPos;
+            //RoundZone에서 CardZone으로 이동
+            bool droppedOnSkillZone = results.Any(r => r.gameObject.GetComponentInParent<SkillCardZone>() != null);
+            if (droppedOnSkillZone && skillCardZoneParent != null) {
+                //슬롯에서 빼고 CardZone으로 귀환
+                transform.SetParent(skillCardZoneParent, false);
+                skillCardRt.anchoredPosition = Vector2.zero;
+
+                //출발 슬롯 데이터 초기화
+                if (dragSlot != null) dragSlot.Clear();
+
+                //레이아웃 다시 깔기
+                refreshSkillCardZoneLayout?.Invoke();
+            }
+            else {
+                //실패 → 원위치
+                transform.SetParent(originalParent, false);
+                skillCardRt.anchoredPosition = originalAnchoredPos;
+            }
         }
 
         foreach (var slot in allRoundSlots)
@@ -122,9 +145,6 @@ public class SkillCardEvent : MonoBehaviour, IBeginDragHandler, IDragHandler, IE
     // ================================ 구현 중 ================================ //
     // ================================ 구현 중 ================================ //
 
-    
-
-    // ======================================================================== //
     public Action<SkillCardEvent> onSkillCardClick;
 
     public void OnPointerClick(PointerEventData e)
