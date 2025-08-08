@@ -5,8 +5,8 @@ using UnityEngine;
 
 public class CardManager : Singleton<CardManager>
 {
-    private readonly List<SkillCardData> totalSkillCards = new();     //전체 스킬카드
-    private readonly List<SkillCardData> drawnSkillCards = new();     //드로우된 스킬카드 (+기본 이동카드)
+    private readonly List<SkillCardData> totalSkillCards = new();  //전체 스킬카드
+    private readonly List<SkillCardData> drawnSkillCards = new();  //드로우된 스킬카드 (+기본 이동카드)
 
     public List<SkillCardData> GetDrawnSkillCards() => new(drawnSkillCards);
 

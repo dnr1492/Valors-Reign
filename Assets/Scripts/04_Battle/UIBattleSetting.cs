@@ -10,19 +10,28 @@ public class UIBattleSetting : UIPopupBase
     [SerializeField] GameObject uiCoinFlipPrefab;
     [SerializeField] Button btn_back;
 
+    private Canvas rootCanvas;
     private UICoinFlip uiCoinFlip;
 
     [Header("Hex Grid")]
     [SerializeField] RectTransform hexParantRt /*map*/, battleFieldRt;
     [SerializeField] GameObject hexPrefab;  //육각형 모양의 이미지가 있는 UI 프리팹
 
-    [Header("Setting SkillCard")]
+    [Header("Setting SkillCardZone")]
     [SerializeField] Transform skillCardZone;  //SkillCard의 Parant
     [SerializeField] GameObject skillCardPrefab;
     private readonly List<SkillCard> settingSkillCards = new();
+    private readonly float skillCardWidth = 130f;
+    private readonly float horizontalPadding = 10f;
+    private readonly float minVisiblePixelsWhenOverlapping = 10f;
+
+    [Header("Setting SkillCardRoundZone")]
+    [SerializeField] SkillCardRoundSlot[] roundSlots = new SkillCardRoundSlot[4];  //SkillCardRoundSlot 4칸 연결
 
     public void Init()
     {
+        rootCanvas = GetComponentInParent<Canvas>();
+
         GridManager.Instance.CreateHexGrid(battleFieldRt, hexPrefab, hexParantRt, false, true);
 
         UIEditorDeckPhase1 popup = UIManager.Instance.GetPopup<UIEditorDeckPhase1>("UIEditorDeckPhase1");
@@ -61,8 +70,8 @@ public class UIBattleSetting : UIPopupBase
         }
     }
 
-    #region 드로우한 스킬카드를 표시
-    public void DisplayDrawnSkillCard(List<SkillCardData> drawnSkillCards)
+    #region 드로우한 스킬카드를 CardZone에 셋팅
+    public void SetDrawnSkillCard(List<SkillCardData> drawnSkillCards)
     {
         //이전 카드 정리
         foreach (var card in settingSkillCards) Destroy(card.gameObject);
@@ -71,11 +80,17 @@ public class UIBattleSetting : UIPopupBase
         //새로 생성
         foreach (var skillCardData in drawnSkillCards)
         {
+            //SkillCardZone에 생성
             var go = Instantiate(skillCardPrefab, skillCardZone);
             var sprite = SpriteManager.Instance.dicSkillSprite.TryGetValue(skillCardData.name, out var sp) ? sp : null;
             var skillCard = go.GetComponent<SkillCard>();
             skillCard.Set(sprite, skillCardData);
             settingSkillCards.Add(skillCard);
+
+            //드래그 세팅 + 드롭 콜백
+            var drag = go.GetComponent<SkillCardEvent>();
+            drag.Set(skillCardData, rootCanvas, roundSlots);
+            drag.onDropToRoundSlot = OnDropToRoundSlot;  //슬롯에 제대로 떨어졌을 때 처리
         }
 
         SetLayoutSkillCards(settingSkillCards);
@@ -92,15 +107,11 @@ public class UIBattleSetting : UIPopupBase
     /// <param name="cards"></param>
     private void SetLayoutSkillCards(List<SkillCard> cards)
     {
-        float skillCardWidth = 130f;
-        float padding = 10f;
-        float paddingOverlap = 10f;
-
         int count = cards.Count;
         if (count == 0) return;
 
         RectTransform zoneRt = skillCardZone.GetComponent<RectTransform>();
-        float availableWidth = zoneRt.rect.width - padding * 2;
+        float availableWidth = zoneRt.rect.width - horizontalPadding * 2;
 
         //spacing을 조절해서 카드들이 영역 안에 딱 맞도록 하기
         float spacing;
@@ -110,7 +121,8 @@ public class UIBattleSetting : UIPopupBase
         {
             //전체 카드 + 간격 합이 availableWidth 안에 들어오게 spacing 계산
             spacing = (availableWidth - (skillCardWidth * count)) / (count - 1);
-            spacing = Mathf.Clamp(spacing, -skillCardWidth + paddingOverlap, skillCardWidth);  //과도한 겹침 방지
+            float minSpacing = -(skillCardWidth - minVisiblePixelsWhenOverlapping);
+            spacing = Mathf.Clamp(spacing, minSpacing, skillCardWidth);  //과도한 겹침 방지
         }
 
         float layoutWidth = (skillCardWidth * count) + (spacing * (count - 1));
@@ -124,7 +136,7 @@ public class UIBattleSetting : UIPopupBase
             float x = startX + i * (skillCardWidth + spacing);
             rt.anchoredPosition = new Vector2(x, 0);
 
-            //카드 순서 보정 (인덱스가 작을 수록 가장 위)
+            //카드 순서 보정 (작은 인덱스가 앞(화면 위)으로 오도록 역순 배치)
             rt.SetSiblingIndex(count - 1 - i);
         }
     }
@@ -144,6 +156,14 @@ public class UIBattleSetting : UIPopupBase
 
         var rt = skillCardZone.GetComponent<RectTransform>();
         rt.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, finalHeight);
+    }
+    #endregion
+
+    #region 드로우한 스킬카드를 Drag & Drop으로 RoundZone에 셋팅
+    private void OnDropToRoundSlot(SkillCardEvent drag, SkillCardRoundSlot slot)
+    {
+        //슬롯의 자식으로 이동 + 배정
+        slot.Assign(drag.SkillCardData, drag);
     }
     #endregion
 

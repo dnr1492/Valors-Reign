@@ -45,7 +45,7 @@ public class TurnManager : Singleton<TurnManager>
 
         //3. 드로우한 스킬카드를 표시
         UIManager.Instance.GetPopup<UIBattleSetting>("UIBattleSetting")
-            .DisplayDrawnSkillCard(CardManager.Instance.GetDrawnSkillCards());
+            .SetDrawnSkillCard(CardManager.Instance.GetDrawnSkillCards());
 
         ////4. OnSkillCardSettingComplete
 
