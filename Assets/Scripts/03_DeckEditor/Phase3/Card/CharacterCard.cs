@@ -31,7 +31,8 @@ public class CharacterCard : MonoBehaviour
 
         btnConfirm.onClick.RemoveAllListeners();
         btnConfirm.onClick.AddListener(() => {
-            if (curClickedToken.State != CharacterTokenState.Confirm) {
+            if (curClickedToken.State != CharacterTokenState.Confirm)
+            {
                 bool canConfirm = UIManager.Instance.GetPopup<UIEditorDeckPhase3>("UIEditorDeckPhase3").CheckCost(curClickedToken);
                 if (!canConfirm) return;
             }
@@ -60,65 +61,164 @@ public class CharacterCard : MonoBehaviour
             return;
         }
 
+        //모든 슬롯을 초기 상태로 세팅 ("-")
         for (int i = 0; i < maxSkillCardCount; i++)
         {
-            if (i < characterCardData.skills.Count)
+            txtNames[i].gameObject.SetActive(true);
+            txtNames[i].text = "-";
+
+            txtCounts[i].gameObject.SetActive(true);
+            txtCounts[i].text = "-";
+
+            btnCounts[i].onClick.RemoveAllListeners();
+            btnCounts[i].interactable = false;
+
+            btnSkills[i].onClick.RemoveAllListeners();
+            btnSkills[i].interactable = false;
+        }
+
+        //UI 슬롯 인덱스
+        int uiIndex = 0;
+
+        //캐릭터 스킬을 순회하며 이동카드 제외 후 UI 슬롯 채우기
+        foreach (var skillId in characterCardData.skills)
+        {
+            if (skillId == 1000) continue;  //이동카드 스킵
+
+            if (!skillCardData.TryGetValue(skillId, out SkillCardData skillData) || skillData == null)
+                continue;
+
+            skillDataList.Add(skillData);
+
+            int savedCount = clickedToken.GetSkillCount(skillId);  //토큰에 저장된 스킬 매수 불러오기 (확정 상태가 아니어도 저장된 값 사용)
+            skillCardCounts[uiIndex] = savedCount;
+
+            txtNames[uiIndex].text = skillData.name;
+            txtCounts[uiIndex].text = savedCount.ToString();
+
+            //버튼 초기화: 클릭 시 스킬 개수 증가 & 토큰에 반영
+            int capturedIndex = uiIndex;
+            btnCounts[uiIndex].interactable = true;
+            btnCounts[uiIndex].onClick.AddListener(() =>
             {
-                var skillId = characterCardData.skills[i];
-                skillCardData.TryGetValue(skillId, out SkillCardData skillData);
-                if (skillData == null) continue;
-                skillDataList.Add(skillData);
+                skillCardCounts[capturedIndex] = (skillCardCounts[capturedIndex] + 1) % (maxSkillCardCount + 1);
+                txtCounts[capturedIndex].text = skillCardCounts[capturedIndex].ToString();
 
-                int index = i;
-                int savedCount = clickedToken.GetSkillCount(skillId);  //토큰에 저장된 스킬 매수 불러오기 (확정 상태가 아니어도 저장된 값 사용)
-                skillCardCounts[index] = savedCount;
+                if (clickedToken.State == CharacterTokenState.Confirm)
+                    clickedToken.SetSkillCount(skillId, skillCardCounts[capturedIndex]);
 
-                txtNames[index].gameObject.SetActive(true);
-                txtNames[index].text = skillData.name;
+                skillSlotCollection.Refresh();
+            });
 
-                txtCounts[index].gameObject.SetActive(true);
-                txtCounts[index].text = savedCount.ToString();
-
-                //버튼 초기화: 클릭 시 스킬 개수 증가 & 토큰에 반영
-                btnCounts[index].onClick.RemoveAllListeners();
-                btnCounts[index].interactable = true;
-                btnCounts[index].onClick.AddListener(() =>
-                {
-                    skillCardCounts[index] = (skillCardCounts[index] + 1) % (maxSkillCardCount + 1);
-                    txtCounts[index].text = skillCardCounts[index].ToString();
-
-                    if (clickedToken.State == CharacterTokenState.Confirm)
-                        clickedToken.SetSkillCount(skillId, skillCardCounts[index]);
-
-                    skillSlotCollection.Refresh();
-                });
-
-                //어떤 스킬 버튼을 클릭하든지 모든 스킬을 스킬 정보 팝업에 표시
-                btnSkills[index].onClick.RemoveAllListeners();
-                btnSkills[index].interactable = true;
-                btnSkills[index].onClick.AddListener(() =>
-                {
-                    UIManager.Instance.ShowPopup<UISkillInfoPopup>("UISkillInfoPopup", false)
-                        .Init(skillDataList, this);
-                });
-            }
-            else
+            //어떤 스킬 버튼을 클릭하든지 모든 스킬을 스킬 정보 팝업에 표시
+            btnSkills[uiIndex].interactable = true;
+            btnSkills[uiIndex].onClick.AddListener(() =>
             {
-                //존재하지 않는 슬롯은 "-"로 표시하고 비활성화
-                txtNames[i].gameObject.SetActive(true);
-                txtNames[i].text = "-";
+                UIManager.Instance.ShowPopup<UISkillInfoPopup>("UISkillInfoPopup", false)
+                    .Init(skillDataList, this);
+            });
 
-                txtCounts[i].gameObject.SetActive(true);
-                txtCounts[i].text = "-";
-
-                btnCounts[i].onClick.RemoveAllListeners();
-                btnCounts[i].interactable = false;
-
-                btnSkills[i].onClick.RemoveAllListeners();
-                btnSkills[i].interactable = false;
-            }
+            uiIndex++;
+            if (uiIndex >= maxSkillCardCount) break;  //슬롯 초과 방지
         }
     }
+
+    //public void SetCharacterCard(CharacterToken clickedToken, Sprite sprite, CharacterCardData characterCardData)
+    //{
+    //    ResetUI();
+    //    curClickedToken = clickedToken;
+    //    curClickedToken.SetCardToFront();
+
+    //    btnConfirm.onClick.RemoveAllListeners();
+    //    btnConfirm.onClick.AddListener(() => {
+    //        if (curClickedToken.State != CharacterTokenState.Confirm) {
+    //            bool canConfirm = UIManager.Instance.GetPopup<UIEditorDeckPhase3>("UIEditorDeckPhase3").CheckCost(curClickedToken);
+    //            if (!canConfirm) return;
+    //        }
+    //        SaveCurrentSkillCountsToToken();
+    //        ControllerRegister.Get<CharacterTokenController>().OnClickConfirm(clickedToken);
+    //        skillSlotCollection.Refresh();
+    //    });
+
+    //    txtName.text = characterCardData.name;
+    //    txtHp.text = characterCardData.hp.ToString();
+    //    txtMp.text = characterCardData.mp.ToString();
+    //    imgCharacter.sprite = sprite;
+
+    //    cost.SetActive(true);
+    //    txtCost.text = curClickedToken.Cost.ToString();
+
+    //    var skillCardData = DataManager.Instance.dicSkillCardData;
+    //    List<SkillCardData> skillDataList = new();
+    //    skillCardCounts = new int[maxSkillCardCount];
+
+    //    //배열 길이 확인 (안전 체크)
+    //    if (txtNames.Length < maxSkillCardCount || txtCounts.Length < maxSkillCardCount ||
+    //        btnCounts.Length < maxSkillCardCount || btnSkills.Length < maxSkillCardCount)
+    //    {
+    //        Debug.Log("스킬 슬롯 UI 배열이 maxSkillCardCount보다 작습니다.");
+    //        return;
+    //    }
+
+    //    for (int i = 0; i < maxSkillCardCount; i++)
+    //    {
+    //        if (i < characterCardData.skills.Count)
+    //        {
+    //            var skillId = characterCardData.skills[i];
+    //            skillCardData.TryGetValue(skillId, out SkillCardData skillData);
+    //            if (skillData == null) continue;
+    //            skillDataList.Add(skillData);
+
+    //            int index = i;
+    //            int savedCount = clickedToken.GetSkillCount(skillId);  //토큰에 저장된 스킬 매수 불러오기 (확정 상태가 아니어도 저장된 값 사용)
+    //            skillCardCounts[index] = savedCount;
+
+    //            txtNames[index].gameObject.SetActive(true);
+    //            txtNames[index].text = skillData.name;
+
+    //            txtCounts[index].gameObject.SetActive(true);
+    //            txtCounts[index].text = savedCount.ToString();
+
+    //            //버튼 초기화: 클릭 시 스킬 개수 증가 & 토큰에 반영
+    //            btnCounts[index].onClick.RemoveAllListeners();
+    //            btnCounts[index].interactable = true;
+    //            btnCounts[index].onClick.AddListener(() =>
+    //            {
+    //                skillCardCounts[index] = (skillCardCounts[index] + 1) % (maxSkillCardCount + 1);
+    //                txtCounts[index].text = skillCardCounts[index].ToString();
+
+    //                if (clickedToken.State == CharacterTokenState.Confirm)
+    //                    clickedToken.SetSkillCount(skillId, skillCardCounts[index]);
+
+    //                skillSlotCollection.Refresh();
+    //            });
+
+    //            //어떤 스킬 버튼을 클릭하든지 모든 스킬을 스킬 정보 팝업에 표시
+    //            btnSkills[index].onClick.RemoveAllListeners();
+    //            btnSkills[index].interactable = true;
+    //            btnSkills[index].onClick.AddListener(() =>
+    //            {
+    //                UIManager.Instance.ShowPopup<UISkillInfoPopup>("UISkillInfoPopup", false)
+    //                    .Init(skillDataList, this);
+    //            });
+    //        }
+    //        else
+    //        {
+    //            //존재하지 않는 슬롯은 "-"로 표시하고 비활성화
+    //            txtNames[i].gameObject.SetActive(true);
+    //            txtNames[i].text = "-";
+
+    //            txtCounts[i].gameObject.SetActive(true);
+    //            txtCounts[i].text = "-";
+
+    //            btnCounts[i].onClick.RemoveAllListeners();
+    //            btnCounts[i].interactable = false;
+
+    //            btnSkills[i].onClick.RemoveAllListeners();
+    //            btnSkills[i].interactable = false;
+    //        }
+    //    }
+    //}
 
     //현재 UI에 표시된 스킬 매수를 토큰에 저장
     private void SaveCurrentSkillCountsToToken()
