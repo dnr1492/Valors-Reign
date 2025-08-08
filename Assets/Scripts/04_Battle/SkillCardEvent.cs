@@ -132,11 +132,21 @@ public class SkillCardEvent : MonoBehaviour, IBeginDragHandler, IDragHandler, IE
             //슬롯에 카드가 존재한다면
             if (existingCard != null)
             {
-                if (dragSlot == null) return;
+                if (dragSlot != null) {
+                    //드래그를 시작한 슬롯에 스왑한 다른 카드를 배치하고,
+                    //그 슬롯의 데이터도 스왑한 다른 카드 데이터로 동기화
+                    dragSlot.Assign(existingCard.SkillCardData, existingCard);
+                }
+                else {
+                    //CardZone → RoundZone의 슬롯 스왑
+                    //1. 기존 슬롯의 카드를 CardZone으로 보냄
+                    existingCard.transform.SetParent(skillCardZoneParent, false);
+                    var exRt = (RectTransform)existingCard.transform;
+                    exRt.anchoredPosition = Vector2.zero;
 
-                //드래그를 시작한 슬롯에 스왑한 다른 카드를 배치하고,
-                //그 슬롯의 데이터도 스왑한 다른 카드 데이터로 동기화
-                dragSlot.Assign(existingCard.SkillCardData, existingCard);
+                    //2. CardZone 새로고침
+                    refreshSkillCardZoneLayout?.Invoke();
+                }
             }
         }
     }

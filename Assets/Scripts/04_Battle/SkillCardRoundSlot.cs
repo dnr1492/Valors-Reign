@@ -19,6 +19,7 @@ public class SkillCardRoundSlot : MonoBehaviour
     public void Assign(SkillCardData data, SkillCardEvent drag = null)
     {
         AssignedSkillCardData = data;
+        TestSkillCardData_Delete = data;
 
         if (drag != null) {
             //드래그된 카드를 이 슬롯 아래로 붙인다 (원본 카드를 그대로 옮기는 방식)
@@ -52,11 +53,14 @@ public class SkillCardRoundSlot : MonoBehaviour
     public void Clear()
     {
         AssignedSkillCardData = null;
+        TestSkillCardData_Delete = null;
     }
 
     // ================================ 구현 중 ================================ //
     // ================================ 구현 중 ================================ //
     // ================================ 구현 중 ================================ //
+
+    public SkillCardData TestSkillCardData_Delete;
 
     public bool CanAccept()
     {
