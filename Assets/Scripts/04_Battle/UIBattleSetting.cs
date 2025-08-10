@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,10 +15,10 @@ public class UIBattleSetting : UIPopupBase
 
     [Header("Hex Grid")]
     [SerializeField] RectTransform hexParantRt /*map*/, battleFieldRt;
-    [SerializeField] GameObject hexPrefab;  //À°°¢Çü ¸ğ¾çÀÇ ÀÌ¹ÌÁö°¡ ÀÖ´Â UI ÇÁ¸®ÆÕ
+    [SerializeField] GameObject hexPrefab;  //ìœ¡ê°í˜• ëª¨ì–‘ì˜ ì´ë¯¸ì§€ê°€ ìˆëŠ” UI í”„ë¦¬íŒ¹
 
     [Header("Setting SkillCardZone")]
-    [SerializeField] Transform skillCardZone;  //SkillCardÀÇ Parant
+    [SerializeField] Transform skillCardZone;  //SkillCardì˜ Parant
     [SerializeField] GameObject skillCardPrefab;
     private readonly List<SkillCard> settingSkillCards = new();
     private readonly float skillCardWidth = 130f;
@@ -26,7 +26,10 @@ public class UIBattleSetting : UIPopupBase
     private readonly float minVisiblePixelsWhenOverlapping = 10f;
 
     [Header("Setting SkillCardRoundZone")]
-    [SerializeField] SkillCardRoundSlot[] roundSlots = new SkillCardRoundSlot[4];  //SkillCardRoundSlot 4Ä­ ¿¬°á
+    [SerializeField] SkillCardRoundSlot[] roundSlots = new SkillCardRoundSlot[4];  //SkillCardRoundSlot 4ì¹¸ ì—°ê²°
+
+    private int GetAliveCharacterCount() => CombatManager.Instance.GetAliveCharacterCount();
+    private int GetBasicMoveCardCountInRoundZone() => roundSlots.Count(s => s.AssignedSkillCardData != null && s.AssignedSkillCardData.id == 1000);
 
     public void Init()
     {
@@ -52,11 +55,11 @@ public class UIBattleSetting : UIPopupBase
     {
         uiCoinFlip.PlayFlipAnimation(result, () => {
             if (hasFirstTurnChoice) {
-                uiCoinFlip.ActiveTurnChoiceButton(true);  //¼±°ø or ÈÄ°ø ¼±ÅÃ ¹öÆ° Ç¥½Ã
+                uiCoinFlip.ActiveTurnChoiceButton(true);  //ì„ ê³µ or í›„ê³µ ì„ íƒ ë²„íŠ¼ í‘œì‹œ
                 uiCoinFlip.Invoke(nameof(UICoinFlip.AutoSelectTurnOrder), 3f);
             }
             else {
-                LoadingManager.Instance.Show("»ó´ë°¡ ¼±°ø ¶Ç´Â ÈÄ°øÀ» ¼±ÅÃÇÏ´Â ÁßÀÔ´Ï´Ù...");
+                LoadingManager.Instance.Show("ìƒëŒ€ê°€ ì„ ê³µ ë˜ëŠ” í›„ê³µì„ ì„ íƒí•˜ëŠ” ì¤‘ì…ë‹ˆë‹¤...");
                 AIBattleHelper.AutoSelectTurnOrderAI(uiCoinFlip);
             }
         });
@@ -70,47 +73,53 @@ public class UIBattleSetting : UIPopupBase
         }
     }
 
-    #region µå·Î¿ìÇÑ ½ºÅ³Ä«µå¸¦ CardZone¿¡ ¼ÂÆÃ
+    #region ë“œë¡œìš°í•œ ìŠ¤í‚¬ì¹´ë“œë¥¼ CardZoneì— ì…‹íŒ…
     public void SetDrawnSkillCard(List<SkillCardData> drawnSkillCards)
     {
-        //ÀÌÀü Ä«µå Á¤¸®
+        //ì´ì „ ì¹´ë“œ ì •ë¦¬
         foreach (var card in settingSkillCards) Destroy(card.gameObject);
         settingSkillCards.Clear();
 
-        //»õ·Î »ı¼º
+        //ìƒˆë¡œ ìƒì„±
         foreach (var skillCardData in drawnSkillCards)
         {
-            //SkillCardZone¿¡ »ı¼º
+            //SkillCardZoneì— ìƒì„±
             var go = Instantiate(skillCardPrefab, skillCardZone);
             var sprite = SpriteManager.Instance.dicSkillSprite.TryGetValue(skillCardData.name, out var sp) ? sp : null;
             var skillCard = go.GetComponent<SkillCard>();
             skillCard.Set(sprite, skillCardData);
             settingSkillCards.Add(skillCard);
 
-            //µå·¡±× ¼¼ÆÃ + µå·Ó Äİ¹é
+            //ë“œë˜ê·¸ ì„¸íŒ… + ë“œë¡­ ì½œë°±
             var drag = go.GetComponent<SkillCardEvent>();
             drag.Set(skillCardData, rootCanvas, roundSlots, skillCardZone, RefreshSkillCardZoneLayout);
-            drag.onDropToRoundSlot = OnDropToRoundSlot;  //½½·Ô¿¡ Á¦´ë·Î ¶³¾îÁ³À» ¶§ Ã³¸®
+            drag.onDropToRoundSlot = OnDropToRoundSlot;  //ìŠ¬ë¡¯ì— ì œëŒ€ë¡œ ë–¨ì–´ì¡Œì„ ë•Œ ì²˜ë¦¬
         }
 
+        EnsureBasicMoveCardInCardZone();
         RefreshSkillCardZoneLayout();
         AdjustSkillCardZoonHeight(10, 10);
 
-        Debug.Log($"[UIBattleSetting] µå·Î¿ì Ä«µå {settingSkillCards.Count}Àå UI¿¡ ¼¼ÆÃ ¿Ï·á");
+        Debug.Log($"[UIBattleSetting] ë“œë¡œìš° ì¹´ë“œ {settingSkillCards.Count}ì¥ UIì— ì„¸íŒ… ì™„ë£Œ");
     }
 
     /// <summary>
-    /// CardZone »õ·Î°íÄ§
+    /// CardZone ìƒˆë¡œê³ ì¹¨
     /// </summary>
     public void RefreshSkillCardZoneLayout()
     {
-        SetSkillCardZoneLayout(settingSkillCards);
+        EnsureBasicMoveCardInCardZone();
+
+        SetSkillCardZoneLayout(settingSkillCards
+            .Where(c => c != null && c.transform.parent == skillCardZone)
+            .ToList());
     }
 
     /// <summary>
-    /// ½ºÅ³Ä«µå¸¦ skillCardZone ¾È¿¡¼­ °¡¿îµ¥ Á¤·ÄµÇµµ·Ï ¹èÄ¡
-    /// Ä«µå °³¼ö°¡ ¸¹À»¼ö·Ï °ãÃÄÁö¸ç, Zone ³Êºñ¸¦ ¹ş¾î³ªÁö ¾Êµµ·Ï spacingÀ» ÀÚµ¿ °è»ê
-    /// Ä«µå ÀÎµ¦½º°¡ ÀÛÀ»¼ö·Ï È­¸é¿¡¼­ À§·Î º¸ÀÌµµ·Ï SiblingIndex()·Î ¼ø¼­ ÁöÁ¤
+    /// ìŠ¤í‚¬ì¹´ë“œë¥¼ skillCardZone ì•ˆì—ì„œ ê°€ìš´ë° ì •ë ¬ë˜ë„ë¡ ë°°ì¹˜
+    /// ê¸°ë³¸ ì´ë™ì¹´ë“œ(1000)ë¥¼ í•­ìƒ ë§¨ ì™¼ìª½/ë§¨ ìœ„ë¡œ ì˜¤ë„ë¡ ì¬ì •ë ¬
+    /// ì¹´ë“œ ê°œìˆ˜ê°€ ë§ì„ìˆ˜ë¡ ê²¹ì³ì§€ë©°, Zone ë„ˆë¹„ë¥¼ ë²—ì–´ë‚˜ì§€ ì•Šë„ë¡ spacingì„ ìë™ ê³„ì‚°
+    /// ì¹´ë“œ ì¸ë±ìŠ¤ê°€ ì‘ì„ìˆ˜ë¡ í™”ë©´ì—ì„œ ìœ„ë¡œ ë³´ì´ë„ë¡ SiblingIndex()ë¡œ ìˆœì„œ ì§€ì •
     /// </summary>
     /// <param name="cards"></param>
     private void SetSkillCardZoneLayout(List<SkillCard> cards)
@@ -121,23 +130,29 @@ public class UIBattleSetting : UIPopupBase
         int count = cardsInZone.Count;
         if (count == 0) return;
 
+        //ê¸°ë³¸ ì´ë™ì¹´ë“œ(1000)ë¥¼ í•­ìƒ ë§¨ ì™¼ìª½/ë§¨ ìœ„ë¡œ ì˜¤ë„ë¡ ì¬ì •ë ¬
+        //ì¦‰, 1000ë²ˆ ì¹´ë“œë¥¼ ë¨¼ì €, ë‚˜ë¨¸ì§€ëŠ” ë’¤ë¡œ (ìƒëŒ€ì  ìˆœì„œëŠ” ìœ ì§€)
+        var moveCards = cardsInZone.Where(c => c.SkillCardData != null && c.SkillCardData.id == 1000).ToList();
+        var otherCards = cardsInZone.Where(c => c.SkillCardData == null || c.SkillCardData.id != 1000).ToList();
+        cardsInZone = moveCards.Concat(otherCards).ToList();
+
         RectTransform zoneRt = skillCardZone.GetComponent<RectTransform>();
         float availableWidth = zoneRt.rect.width - horizontalPadding * 2;
 
-        //spacingÀ» Á¶ÀıÇØ¼­ Ä«µåµéÀÌ ¿µ¿ª ¾È¿¡ µü ¸Âµµ·Ï ÇÏ±â
+        //spacingì„ ì¡°ì ˆí•´ì„œ ì¹´ë“œë“¤ì´ ì˜ì—­ ì•ˆì— ë”± ë§ë„ë¡ í•˜ê¸°
         float spacing;
 
         if (count == 1) spacing = 0f;
         else
         {
-            //ÀüÃ¼ Ä«µå + °£°İ ÇÕÀÌ availableWidth ¾È¿¡ µé¾î¿À°Ô spacing °è»ê
+            //ì „ì²´ ì¹´ë“œ + ê°„ê²© í•©ì´ availableWidth ì•ˆì— ë“¤ì–´ì˜¤ê²Œ spacing ê³„ì‚°
             spacing = (availableWidth - (skillCardWidth * count)) / (count - 1);
             float minSpacing = -(skillCardWidth - minVisiblePixelsWhenOverlapping);
-            spacing = Mathf.Clamp(spacing, minSpacing, skillCardWidth);  //°úµµÇÑ °ãÄ§ ¹æÁö
+            spacing = Mathf.Clamp(spacing, minSpacing, skillCardWidth);  //ê³¼ë„í•œ ê²¹ì¹¨ ë°©ì§€
         }
 
         float layoutWidth = (skillCardWidth * count) + (spacing * (count - 1));
-        float startX = -layoutWidth / 2f + skillCardWidth / 2f;  //Ã¹ Ä«µå Áß½ÉÀÌ ±âÁØ
+        float startX = -layoutWidth / 2f + skillCardWidth / 2f;  //ì²« ì¹´ë“œ ì¤‘ì‹¬ì´ ê¸°ì¤€
 
         for (int i = 0; i < count; i++)
         {
@@ -147,17 +162,17 @@ public class UIBattleSetting : UIPopupBase
             float x = startX + i * (skillCardWidth + spacing);
             rt.anchoredPosition = new Vector2(x, 0);
 
-            //Ä«µå ¼ø¼­ º¸Á¤ (ÀÛÀº ÀÎµ¦½º°¡ ¾Õ(È­¸é À§)À¸·Î ¿Àµµ·Ï ¿ª¼ø ¹èÄ¡)
+            //ì¹´ë“œ ìˆœì„œ ë³´ì • (ì‘ì€ ì¸ë±ìŠ¤ê°€ ì•(í™”ë©´ ìœ„)ìœ¼ë¡œ ì˜¤ë„ë¡ ì—­ìˆœ ë°°ì¹˜)
             rt.SetSiblingIndex(count - 1 - i);
         }
     }
 
     /// <summary>
-    /// ¸ğµç ½ºÅ³Ä«µå Áß °¡Àå ³ôÀº Ä«µå ±âÁØÀ¸·Î skillCardZoneÀÇ height¸¦ ÀÚµ¿ Á¶Á¤
-    /// À§, ¾Æ·¡ ¿©¹é(paddingTop, paddingBottom)Àº Ãß°¡ÀûÀ¸·Î ¼³Á¤
+    /// ëª¨ë“  ìŠ¤í‚¬ì¹´ë“œ ì¤‘ ê°€ì¥ ë†’ì€ ì¹´ë“œ ê¸°ì¤€ìœ¼ë¡œ skillCardZoneì˜ heightë¥¼ ìë™ ì¡°ì •
+    /// ìœ„, ì•„ë˜ ì—¬ë°±(paddingTop, paddingBottom)ì€ ì¶”ê°€ì ìœ¼ë¡œ ì„¤ì •
     /// </summary>
-    /// <param name="paddingTop">»ó´Ü ¿©¹é</param>
-    /// <param name="paddingBottom">ÇÏ´Ü ¿©¹é</param>
+    /// <param name="paddingTop">ìƒë‹¨ ì—¬ë°±</param>
+    /// <param name="paddingBottom">í•˜ë‹¨ ì—¬ë°±</param>
     private void AdjustSkillCardZoonHeight(float paddingTop, float paddingBottom)
     {
         float maxHeight = settingSkillCards.Max(card =>
@@ -170,16 +185,68 @@ public class UIBattleSetting : UIPopupBase
     }
     #endregion
 
-    #region µå·Î¿ìÇÑ ½ºÅ³Ä«µå¸¦ Drag & DropÀ¸·Î RoundZone¿¡ ¼ÂÆÃ
+    #region ë“œë¡œìš°í•œ ìŠ¤í‚¬ì¹´ë“œë¥¼ Drag & Dropìœ¼ë¡œ RoundZoneì— ì…‹íŒ…
     private void OnDropToRoundSlot(SkillCardEvent drag, SkillCardRoundSlot slot)
     {
-        //½½·ÔÀÇ ÀÚ½ÄÀ¸·Î ÀÌµ¿ + ¹èÁ¤
+        //ìŠ¬ë¡¯ì˜ ìì‹ìœ¼ë¡œ ì´ë™ + ë°°ì •
         slot.Assign(drag.SkillCardData, drag);
 
-        //CardZone¸¸ ÀçÁ¤·Ä
+        //CardZoneë§Œ ì¬ì •ë ¬
         RefreshSkillCardZoneLayout();  
     }
     #endregion
 
+    #region CardZoneì˜ ê¸°ë³¸ ì´ë™ì¹´ë“œ(1000)ë¥¼ '1ì¥ ë˜ëŠ” 0ì¥'ìœ¼ë¡œ ìœ ì§€
+    private void EnsureBasicMoveCardInCardZone()
+    {
+        int alive = GetAliveCharacterCount();
+        int basicMoveInRound = GetBasicMoveCardCountInRoundZone();
+        int desiredInCardZone = (basicMoveInRound < alive) ? 1 : 0;  //ìƒì¡´ ìºë¦­í„° ìˆ˜ë¥¼ ì´ˆê³¼í•˜ì§€ ì•Šìœ¼ë©´ CardZoneì— ê¸°ë³¸ ì´ë™ì¹´ë“œ(1000)ì„ ê³„ì† í‘œì‹œ
+
+        //í˜„ì¬ CardZoneì— ìˆëŠ” ê¸°ë³¸ ì´ë™ì¹´ë“œ ëª©ë¡
+        var basicMoveCardsInZone = settingSkillCards
+            .Where(c => c != null
+                && c.SkillCardData != null
+                && c.SkillCardData.id == 1000
+                && c.transform.parent == skillCardZone)
+            .ToList();
+
+        //ë‚¨ëŠ” ë³µì œëœ ê¸°ë³¸ ì´ë™ì¹´ë“œëŠ” 1ì¥ ëº´ê³  ì œê±°/ì‚­ì œ
+        //ë§ìœ¼ë©´ ì œê±°
+        if (basicMoveCardsInZone.Count > desiredInCardZone)
+        {
+            for (int i = desiredInCardZone; i < basicMoveCardsInZone.Count; i++)
+            {
+                var extra = basicMoveCardsInZone[i];
+                settingSkillCards.Remove(extra);
+                Destroy(extra.gameObject);
+            }
+        }
+        //ë¶€ì¡±í•˜ë©´ ìƒì„±
+        else if (basicMoveCardsInZone.Count < desiredInCardZone)
+        {
+            if (DataManager.Instance.dicSkillCardData.TryGetValue(1000, out var basicMoveCardData))
+            {
+                var go = Instantiate(skillCardPrefab, skillCardZone);
+                var sprite = SpriteManager.Instance.dicSkillSprite.TryGetValue(basicMoveCardData.name, out var sp) ? sp : null;
+
+                var skillCard = go.GetComponent<SkillCard>();
+                skillCard.Set(sprite, basicMoveCardData);
+                settingSkillCards.Add(skillCard);
+
+                //ë“œë˜ê·¸ë¡œ RoundZoneì— ì„¸íŒ… (CardZoneì—ì„œ ê³„ì† ë“œë˜ê·¸ ê°€ëŠ¥í•´ì•¼ í•˜ë¯€ë¡œ ë™ì¼í•˜ê²Œ êµ¬ì„±)
+                var drag = go.GetComponent<SkillCardEvent>();
+                drag.Set(basicMoveCardData, rootCanvas, roundSlots, skillCardZone, RefreshSkillCardZoneLayout);
+                drag.onDropToRoundSlot = OnDropToRoundSlot;
+            }
+            else Debug.Log("[UIBattleSetting] ê¸°ë³¸ ì´ë™ì¹´ë“œ(1000) ë°ì´í„°ë¥¼ ì°¾ì§€ ëª»í–ˆìŠµë‹ˆë‹¤.");
+        }
+    }
+    #endregion
+
     protected override void ResetUI() { }
+
+    // ================================ êµ¬í˜„ ì¤‘ ================================ //
+    // ================================ êµ¬í˜„ ì¤‘ ================================ //
+    // ================================ êµ¬í˜„ ì¤‘ ================================ //
 }

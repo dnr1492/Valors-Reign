@@ -107,10 +107,15 @@ public class SkillCardEvent : MonoBehaviour, IBeginDragHandler, IDragHandler, IE
                 //레이아웃 다시 깔기
                 refreshSkillCardZoneLayout?.Invoke();
             }
-            else {
-                //실패 → 원위치
+            //실패 → 원위치
+            else
+            {
                 transform.SetParent(originalParent, false);
                 skillCardRt.anchoredPosition = originalAnchoredPos;
+
+                //원위치로 돌아갈 때 CardZone 새로고침
+                if (originalParent == skillCardZoneParent)
+                    refreshSkillCardZoneLayout?.Invoke();
             }
         }
 

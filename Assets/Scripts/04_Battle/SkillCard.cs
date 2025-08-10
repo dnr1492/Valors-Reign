@@ -14,6 +14,8 @@ public class SkillCard : MonoBehaviour
     private readonly List<GameObject> skillHexes = new();
     private readonly Dictionary<(int dq, int dr), GameObject> skillHexMap = new();
 
+    public SkillCardData SkillCardData { get; private set; }
+
     public void Set(Sprite sprite, SkillCardData skillCardData)
     {
         txtSkillRank.text = skillCardData.rank.ToString();
@@ -25,5 +27,7 @@ public class SkillCard : MonoBehaviour
         UISkillHexGridHelper.ClearSkillHexGrid(skillHexes, skillHexMap);
         UISkillHexGridHelper.CreateSkillHexGrid(hexContainer, hexPrefab, skillHexes, skillHexMap, 1.1f);
         UISkillHexGridHelper.ShowSkillHexRange(skillCardData, skillHexMap);
+
+        SkillCardData = skillCardData;
     }
 }

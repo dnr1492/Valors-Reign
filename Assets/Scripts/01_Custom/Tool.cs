@@ -168,8 +168,8 @@ public class Tool
         list.skillCardDatas.Add(new SkillCardData { id = 4017, name = "프로즌 팩트", effect = "해당 대상자에 있는 캐릭터에게 \"프로즌 카운터\"를 1 개 부여한다. (최대 1 회)\n프로즌 카운터: 해당 캐릭터를 방어한다.", cardType = SkillCardType.Buff, rank = 2, round = 1 });
         list.skillCardDatas.Add(new SkillCardData { id = 4020, name = "페더 왈츠", effect = "해당 칸에 HP + 4 를 부여한다.", cardType = SkillCardType.Buff, rank = 2, round = 3 });
         list.skillCardDatas.Add(new SkillCardData { id = 4021, name = "바람의 노래", effect = "해당 칸에 MP + 4 를 부여한다.", cardType = SkillCardType.Buff, rank = 2, round = 3 });
-        list.skillCardDatas.Add(new SkillCardData { id = 4022, name = "천상의 아리아", effect = "해당 칸에 HP + 2, MP + 2 를 부여한다.", cardType = SkillCardType.Buff, rank = 3, round = 6 });
-        list.skillCardDatas.Add(new SkillCardData { id = 4023, name = "하늘의 밀물", effect = "해당 칸에 있는 캐릭터를 회복한다.", cardType = SkillCardType.Buff, rank = 2, round = 3 });
+        list.skillCardDatas.Add(new SkillCardData { id = 4022, name = "천공의 아리아", effect = "해당 칸에 HP + 2, MP + 2 를 부여한다.", cardType = SkillCardType.Buff, rank = 3, round = 6 });
+        list.skillCardDatas.Add(new SkillCardData { id = 4023, name = "타임 리플", effect = "해당 칸에 있는 캐릭터는 이동한다.", cardType = SkillCardType.Buff, rank = 2, round = 3 });
         list.skillCardDatas.Add(new SkillCardData { id = 4024, name = "천상의 선율", effect = "해당 대상자에게 버프를 부여한다.", cardType = SkillCardType.Buff, rank = 2, round = 3 });
         #endregion
 
