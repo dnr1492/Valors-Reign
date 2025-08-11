@@ -4,14 +4,18 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
+using Cysharp.Threading.Tasks;
 
 public class UIBattleSetting : UIPopupBase
 {
     [SerializeField] GameObject uiCoinFlipPrefab;
     [SerializeField] Button btn_back;
+    [SerializeField] Button btn_testStartRound;
 
     private Canvas rootCanvas;
     private UICoinFlip uiCoinFlip;
+    private MovementOrderController movementOrderCtrl;
 
     [Header("Hex Grid")]
     [SerializeField] RectTransform hexParantRt /*map*/, battleFieldRt;
@@ -35,15 +39,59 @@ public class UIBattleSetting : UIPopupBase
     {
         rootCanvas = GetComponentInParent<Canvas>();
 
+        //필드 생성
         GridManager.Instance.CreateHexGrid(battleFieldRt, hexPrefab, hexParantRt, false, true);
 
+        //덱 불러와서 필드에 표시
         UIEditorDeckPhase1 popup = UIManager.Instance.GetPopup<UIEditorDeckPhase1>("UIEditorDeckPhase1");
         var pack = popup.GetSelectedDeckPack();
-        if (pack != null) GridManager.Instance.ShowDecksOnField(pack, ControllerRegister.Get<PhotonController>().OpponentDeckPack);
+        if (pack != null)
+            GridManager.Instance.ShowDecksOnField(pack, ControllerRegister.Get<PhotonController>().OpponentDeckPack);
 
+        //코인 플립 UI 초기화
         var go = Instantiate(uiCoinFlipPrefab, transform);
         uiCoinFlip = go.GetComponent<UICoinFlip>();
         uiCoinFlip.Init(OnCoinDirectionSelected);
+
+        //이동 오더 컨트롤러 참조 및 초기화
+        movementOrderCtrl = ControllerRegister.Get<MovementOrderController>();
+        if (movementOrderCtrl != null)
+        {
+            #region (1) UI 이벤트 구독
+            movementOrderCtrl.UI_HighlightMyCharacters -= GridManager.Instance.OnHighlightMyCharacters;
+            movementOrderCtrl.UI_HighlightMyCharacters += GridManager.Instance.OnHighlightMyCharacters;
+
+            movementOrderCtrl.UI_HighlightCandidateCells -= GridManager.Instance.OnHighlightCandidateCells;
+            movementOrderCtrl.UI_HighlightCandidateCells += GridManager.Instance.OnHighlightCandidateCells;
+
+            movementOrderCtrl.UI_ClearHighlights -= GridManager.Instance.OnClearHighlights;
+            movementOrderCtrl.UI_ClearHighlights += GridManager.Instance.OnClearHighlights;
+
+            movementOrderCtrl.UI_Toast -= OnToast;
+            movementOrderCtrl.UI_Toast += OnToast;
+            #endregion
+
+            #region (2) 규칙 및 이동 실행 델리게이트 주입
+            movementOrderCtrl.Map_CellExists = GridManager.Instance.CellExists;
+            movementOrderCtrl.Map_IsPassable = GridManager.Instance.IsPassable;
+            movementOrderCtrl.Map_IsOccupied = GridManager.Instance.IsOccupied;
+            movementOrderCtrl.Map_IsMyTokenAt = hex => GridManager.Instance.IsMyTokenAt(hex);
+
+            movementOrderCtrl.Char_GetCurrentHex = id => GridManager.Instance.TryGetTokenPosition(id, out var pos) ? pos : new Vector2Int(-1, -1);
+            movementOrderCtrl.Char_MoveToHexAsync = async (id, toHex) => {
+                if (!GridManager.Instance.TryGetTokenPosition(id, out var from)) return;
+                await GridManager.Instance.MoveFromToByHexAsync(from, toHex);
+            };
+            #endregion
+        }
+
+        //라운드 슬롯 순서 지정 (1 ~ 4)
+        for (int i = 0; i < roundSlots.Length; i++)
+            roundSlots[i].SetRoundOrder(i + 1);
+
+        // ========== TODO: 테스트용 라운드 실행 버튼 ========== //
+        btn_testStartRound.onClick.RemoveAllListeners();
+        btn_testStartRound.onClick.AddListener(() => TurnManager.Instance.StartRound());
     }
 
     private void OnCoinDirectionSelected(int myCoinDriection)
@@ -192,7 +240,13 @@ public class UIBattleSetting : UIPopupBase
         slot.Assign(drag.SkillCardData, drag);
 
         //CardZone만 재정렬
-        RefreshSkillCardZoneLayout();  
+        RefreshSkillCardZoneLayout();
+
+        //드래그 드롭 이후 이동카드면 타겟팅 모드 ON
+        if (drag.SkillCardData != null && drag.SkillCardData.id == 1000) {
+            movementOrderCtrl.BeginForSlot(slot);
+            Debug.Log("[MoveOrder] Begin targeting for slot");
+        }
     }
     #endregion
 
@@ -249,4 +303,10 @@ public class UIBattleSetting : UIPopupBase
     // ================================ 구현 중 ================================ //
     // ================================ 구현 중 ================================ //
     // ================================ 구현 중 ================================ //
+
+    private void OnToast(string msg)
+    {
+        Debug.Log($"[Toast] {msg}");
+        // ========== TODO: 실제 토스트 UI가 있으면 여기에서 연결 ========== //
+    }
 }

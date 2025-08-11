@@ -104,7 +104,7 @@ public class UIFilterPopup : UIPopupBase
             .ToDictionary(g => g.Key, g => g.ToList());
     }
 
-    private void OnResetFilter()
+    public void OnResetFilter()
     {
         foreach (var toggle in filterToggles)
             toggle.isOn = false;

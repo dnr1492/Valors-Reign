@@ -4,7 +4,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using static EnumClass;
 
-public class HexTileEvent : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerClickHandler
+public class HexTileEditorEvent : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerClickHandler
 {
     private Canvas canvas;
     private HexTile hexTile;
@@ -56,7 +56,7 @@ public class HexTileEvent : MonoBehaviour, IBeginDragHandler, IDragHandler, IEnd
         ghostRect.sizeDelta = GetComponent<RectTransform>().sizeDelta;
 
         //복제된 오브젝트에서 필요 없는 컴포넌트 제거
-        Destroy(dragGhost.GetComponent<HexTileEvent>());
+        Destroy(dragGhost.GetComponent<HexTileEditorEvent>());
 
         //원래 위치랑 겹치지 않게 UI 제일 위로 보정
         ghostRect.SetAsLastSibling();
@@ -107,7 +107,7 @@ public class HexTileEvent : MonoBehaviour, IBeginDragHandler, IDragHandler, IEnd
         if (GridManager.Instance.TryGetNearestSlot(Input.mousePosition, out var dropPos))
         {
             var fromPos = hexTile.GridPosition;
-            GridManager.Instance.MoveToken(fromPos, dropPos, hexTile);
+            GridManager.Instance.MoveTokenEditor(fromPos, dropPos, hexTile);
         }
     }
 

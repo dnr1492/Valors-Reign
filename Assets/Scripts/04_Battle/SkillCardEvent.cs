@@ -53,11 +53,6 @@ public class SkillCardEvent : MonoBehaviour, IBeginDragHandler, IDragHandler, IE
         foreach (var slot in allRoundSlots) {
             if (slot == null) continue;
 
-            if (!slot.CanAccept()) { 
-                slot.HideHighlight(); 
-                continue; 
-            }
-
             if (slot.IsEmpty) slot.ShowEmptyHighlight();
             else slot.ShowSwapHighlight();
         }
@@ -89,7 +84,7 @@ public class SkillCardEvent : MonoBehaviour, IBeginDragHandler, IDragHandler, IE
         }
 
         //배치 또는 스왑
-        if (roundSlot != null && roundSlot.CanAccept()) {
+        if (roundSlot != null) {
             SwapSkillCard(roundSlot);
             onDropToRoundSlot?.Invoke(this, roundSlot);
         }

@@ -68,4 +68,20 @@ public class FilterController : MonoBehaviour
     }
 
     public CharacterRace GetSelectedRace() => selectedRace;
+
+    //필터 초기화
+    public void ResetFilter()
+    {
+        selectedRace = CharacterRace.None;
+        Debug.Log("FilterController: 필터가 초기화되었습니다.");
+
+        //모든 캐릭터 토큰 표시
+        var arrCharacterToken = ControllerRegister.Get<CharacterTokenController>().GetAllCharacterToken();
+        foreach (var token in arrCharacterToken)
+            token.gameObject.SetActive(true);
+
+        //선택 버튼 초기화
+        var filterPopup = UIManager.Instance.GetPopup<UIFilterPopup>("UIFilterPopup");
+        filterPopup.OnResetFilter();
+    }
 }

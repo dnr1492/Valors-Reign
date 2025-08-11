@@ -1,5 +1,6 @@
 using Cysharp.Threading.Tasks;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
@@ -9,6 +10,7 @@ using static EnumClass;
 
 public class GridManager : Singleton<GridManager>
 {
+    private RectTransform battleFieldRt;
     private bool isEditorMode;
 
     private float hexWidth;  //육각형의 가로 크기, 해당 육각형의 기본 크기 70
@@ -43,6 +45,23 @@ public class GridManager : Singleton<GridManager>
     private float tierFontSize;
     private float costFontSize;
 
+    [Header("Highlight")]
+    private readonly Color HL_SELECT = new Color(0.2f, 1f, 0.2f, 1f);  //하이라이트 색상 초록
+    private readonly Color HL_CANDID = new Color(1f, 0.2f, 0.2f, 1f);  //하이라이트 색상 빨강
+    private readonly List<OutlineSnapshot> selectedSnaps = new();  //현재 프레임에 적용된 하이라이트 기록
+    private readonly List<OutlineSnapshot> candidSnaps = new();    //현재 프레임에 적용된 하이라이트 기록
+    private struct OutlineSnapshot  //원복을 위한 스냅샷
+    {
+        public Image img;
+        public Color origColor;
+        public bool origActive;  //GameObject 활성 상태를 저장
+    }
+
+    [Header("이동 애니메이션")]
+    private RectTransform tokenLayer;
+    private float moveAnimDuration = 0.25f;  //한 칸 이동 시간(초)
+    private AnimationCurve moveEase = AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);  //가감속 곡선
+
     protected override void Awake()
     {
         base.Awake();
@@ -51,6 +70,7 @@ public class GridManager : Singleton<GridManager>
     #region 그리드 생성
     public void CreateHexGrid(RectTransform battleFieldRt, GameObject hexPrefab, RectTransform parant, bool isEditorMode, bool enableTierTextForOpponent)
     {
+        this.battleFieldRt = battleFieldRt;
         this.isEditorMode = isEditorMode;
 
         //초기화
@@ -81,9 +101,15 @@ public class GridManager : Singleton<GridManager>
             for (int row = 0; row < maxRow; row++)
             {
                 GameObject hex = Instantiate(hexPrefab, parant);
+                var hexEditorEvent = hex.GetComponent<HexTileEditorEvent>();
+                var hexBattleEvent = hex.GetComponent<HexTileBattleEvent>();
                 if (!isEditorMode) {
-                    var hexEvent = hex.GetComponent<HexTileEvent>();
-                    if (hexEvent != null) hexEvent.enabled = false;
+                    hexEditorEvent.enabled = false;
+                    hexBattleEvent.enabled = true;
+                }
+                else {
+                    hexEditorEvent.enabled = true;
+                    hexBattleEvent.enabled = false;
                 }
                 RectTransform rt = hex.GetComponent<RectTransform>();
                 hexTransforms.Add(rt);
@@ -174,7 +200,7 @@ public class GridManager : Singleton<GridManager>
         //캡틴은 중앙 첫 칸
         if (tier == 'B')
         {
-            PlaceToken(slots[0], token.Key, token.GetCharacterSprite());
+            PlaceToken(slots[0], token.Key, token.GetCharacterSprite(), true);
             return;
         }
 
@@ -183,13 +209,13 @@ public class GridManager : Singleton<GridManager>
         {
             if (imgCharacterMap[pos].sprite == null)
             {
-                PlaceToken(pos, token.Key, token.GetCharacterSprite());
+                PlaceToken(pos, token.Key, token.GetCharacterSprite(), true);
                 return;
             }
         }
 
         //빈 칸이 없으면 첫 칸에 배치
-        PlaceToken(slots[0], token.Key, token.GetCharacterSprite());
+        PlaceToken(slots[0], token.Key, token.GetCharacterSprite(), true);
     }
 
     private void BuildTierSlotTable()
@@ -217,7 +243,7 @@ public class GridManager : Singleton<GridManager>
                                : b.row.CompareTo(a.row));
     }
 
-    private void PlaceToken((int col, int row) pos, int tokenKey, Sprite sprite)
+    private void PlaceToken((int col, int row) pos, int tokenKey, Sprite sprite, bool isMyToken)
     {
         if (!hexTileMap.TryGetValue(pos, out var hexTile)) return;
 
@@ -239,10 +265,10 @@ public class GridManager : Singleton<GridManager>
         //HexTile에 할당
         var token = ControllerRegister.Get<CharacterTokenController>().GetAllCharacterToken()
             .FirstOrDefault(t => t.Key == tokenKey);
-        hexTile.AssignToken(tokenKey, token, isEditorMode);
+        hexTile.AssignToken(tokenKey, token, isEditorMode, isMyToken);
 
-        //위치 매핑
-        tokenPosMap[tokenKey] = pos;
+        //내 토큰만 위치 매핑 (적은 기록하지 않음 → key 충돌 제거)
+        if (isMyToken) tokenPosMap[tokenKey] = pos;
     }
     #endregion
 
@@ -305,7 +331,7 @@ public class GridManager : Singleton<GridManager>
     /// <param name="from"></param>
     /// <param name="to"></param>
     /// <param name="tile"></param>
-    public bool MoveToken((int col, int row) from, (int col, int row) to, HexTile tile)
+    public bool MoveTokenEditor((int col, int row) from, (int col, int row) to, HexTile tile)
     {
         if (from == to || !tile.AssignedTokenKey.HasValue) return false;
 
@@ -328,7 +354,7 @@ public class GridManager : Singleton<GridManager>
         {
             tokenPosMap[fromKey] = to;
             fromTile.ClearToken();
-            toTile.AssignToken(fromKey, fromToken, isEditorMode);
+            toTile.AssignToken(fromKey, fromToken, isEditorMode, true);
 
             toImg.sprite = fromImg.sprite;
             toImg.enabled = true;
@@ -347,8 +373,8 @@ public class GridManager : Singleton<GridManager>
             tokenPosMap[fromKey] = to;
             tokenPosMap[toKey] = from;
 
-            fromTile.AssignToken(toKey, toToken, isEditorMode);
-            toTile.AssignToken(fromKey, fromToken, isEditorMode);
+            fromTile.AssignToken(toKey, toToken, isEditorMode, true);
+            toTile.AssignToken(fromKey, fromToken, isEditorMode, true);
 
             (fromImg.sprite, toImg.sprite) = (toImg.sprite, fromImg.sprite);
             fromImg.enabled = fromImg.sprite != null;
@@ -429,7 +455,7 @@ public class GridManager : Singleton<GridManager>
                 if (token == null) continue;
                 token.SetCardToBack();  //캐릭터 카드를 숨김 상태로 변경
 
-                PlaceToken((slot.col, slot.row), token.Key, token.GetCharacterSprite());  //위치 계산해서 배치
+                PlaceToken((slot.col, slot.row), token.Key, token.GetCharacterSprite(), true);  //위치 계산해서 배치
                 token.SetTokenState(CharacterTokenState.Confirm);  //상태를 Confirm으로 변경
 
                 //스킬 개수 복원
@@ -464,7 +490,7 @@ public class GridManager : Singleton<GridManager>
                 var token = allTokens.FirstOrDefault(t => t.Key == slot.tokenKey);
                 if (token == null) continue;
 
-                PlaceToken((slot.col, slot.row), token.Key, token.GetCharacterSprite());
+                PlaceToken((slot.col, slot.row), token.Key, token.GetCharacterSprite(), true);
 
                 //스킬 수량 반영
                 if (slot.skillCounts != null) {
@@ -485,7 +511,7 @@ public class GridManager : Singleton<GridManager>
                     var token = allTokens.FirstOrDefault(t => t.Key == slot.tokenKey);
                     if (token == null) continue;
 
-                    PlaceToken((col, row), token.Key, token.GetCharacterSprite());
+                    PlaceToken((col, row), token.Key, token.GetCharacterSprite(), false);
 
                     //스킬 수량 반영
                     if (slot.skillCounts != null) {
@@ -542,9 +568,7 @@ public class GridManager : Singleton<GridManager>
     }
     #endregion
 
-    /// <summary>
-    /// UIDeckPhase3 Popup 초기화
-    /// </summary>
+    #region UIDeckPhase3 Popup 초기화
     public void ResetUIDeckPhase3()
     {
         //모든 토큰 이미지 제거
@@ -582,8 +606,246 @@ public class GridManager : Singleton<GridManager>
             token.SetCardToBack();
         }
 
-        ////필터 초기화
-        // ===== 덱을 구성할 때마다 필터를 초기화할 필요가 있을까??? ===== //
-        //ControllerRegister.Get<FilterController>().ResetFilter();
+        //필터 초기화
+        ControllerRegister.Get<FilterController>().ResetFilter();
     }
+    #endregion
+
+    #region 필드 정보 조회/판정 ===== TODO: IsPassable는 추가적으로 구현 필요 =====
+    //해당 좌표가 필드 범위 안인지
+    public bool CellExists(Vector2Int hex) => hexTileMap.ContainsKey((hex.x, hex.y));
+
+    //해당 좌표가 점유되었는지
+    public bool IsOccupied(Vector2Int hex) => hexTileMap.TryGetValue((hex.x, hex.y), out var t) && t.AssignedTokenKey.HasValue;
+
+    //통행 가능 여부 ===== TODO: 지형 규칙 생기면 확장 =====
+    public bool IsPassable(Vector2Int hex) => true;
+
+    //토큰 ID로 현재 좌표 조회
+    public bool TryGetTokenPosition(int tokenKey, out Vector2Int pos)
+    {
+        if (tokenPosMap.TryGetValue(tokenKey, out var p))
+        {
+            pos = new Vector2Int(p.col, p.row);
+            return true;
+        }
+        pos = default;
+        return false;
+    }
+
+    //지정한 좌표에 상대방 토큰이 아닌 '나의 토큰'이 존재하는지 여부 반환
+    public bool IsMyTokenAt(Vector2Int hex) => hexTileMap.TryGetValue((hex.x, hex.y), out var tile) && tile.AssignedTokenKey.HasValue && tile.IsMyToken;
+    #endregion
+
+    #region 이동 처리 (feat.애니메이션)
+    public async UniTask MoveFromToByHexAsync(Vector2Int from, Vector2Int to)
+    {
+        if (!CanMove(from, to, out var fromTile, out var toTile)) return;
+
+        var fromTileRt = fromTile.GetComponent<RectTransform>();
+        var toTileRt = toTile.GetComponent<RectTransform>();
+        var fromMaskTf = fromTile.transform.Find("mask");
+        var fromOutlineTf = fromTile.transform.Find("outline");
+        if (fromMaskTf == null || fromOutlineTf == null) return;
+
+        //도착칸 이미지 잠시 비활성 (중복 노출 방지)
+        var toImg = toTile.transform.Find("mask/imgCharacter")?.GetComponent<Image>();
+        if (toImg == null) return;
+        toImg.enabled = false;
+
+        //토큰 이동 전용 레이어 확보
+        EnsureTokenLayer();
+
+        //이동 컨테이너 생성
+        var moverGO = new GameObject("HexMover", typeof(RectTransform));
+        var moverRT = (RectTransform)moverGO.transform;
+        moverRT.SetParent(tokenLayer, false);
+        moverRT.position = fromTileRt.position;
+        moverRT.SetAsLastSibling();
+
+        //원래 부모/인덱스 백업
+        var maskOrigParent = fromMaskTf.parent;
+        int maskOrigIndex = fromMaskTf.GetSiblingIndex();
+        var outlineOrigParent = fromOutlineTf.parent;
+        int outlineOrigIndex = fromOutlineTf.GetSiblingIndex();
+
+        //월드좌표 유지하며 컨테이너로 이동
+        fromMaskTf.SetParent(moverRT, true);
+        fromOutlineTf.SetParent(moverRT, true);
+
+        //보간 이동
+        Vector3 start = fromTileRt.position;
+        Vector3 end = toTileRt.position;
+        float t = 0f, dur = Mathf.Max(0.0001f, moveAnimDuration);
+        while (t < 1f)
+        {
+            t += Time.deltaTime / dur;
+            float e = moveEase != null ? moveEase.Evaluate(t) : t;
+            moverRT.position = Vector3.Lerp(start, end, Mathf.Clamp01(e));
+            await UniTask.Yield(PlayerLoopTiming.Update);
+        }
+
+        //토큰/필드 갱신
+        MoveTokenBattle((from.x, from.y), (to.x, to.y));
+
+        //원래 구조 복귀+레이아웃 리셋
+        fromMaskTf.SetParent(maskOrigParent, false);
+        fromMaskTf.SetSiblingIndex(maskOrigIndex);
+        fromOutlineTf.SetParent(outlineOrigParent, false);
+        fromOutlineTf.SetSiblingIndex(outlineOrigIndex);
+
+        var mRt = (RectTransform)fromMaskTf;
+        var oRt = (RectTransform)fromOutlineTf;
+        mRt.offsetMin = Vector2.zero; mRt.offsetMax = Vector2.zero;
+        oRt.offsetMin = Vector2.zero; oRt.offsetMax = Vector2.zero;
+        mRt.anchoredPosition = Vector2.zero; oRt.anchoredPosition = Vector2.zero;
+        mRt.localScale = Vector3.one; oRt.localScale = Vector3.one;
+        mRt.localRotation = Quaternion.identity; oRt.localRotation = Quaternion.identity;
+
+        //정리
+        Destroy(moverGO);
+        toImg.enabled = true;
+    }
+
+    private void MoveTokenBattle((int col, int row) from, (int col, int row) to)
+    {
+        var fromTile = hexTileMap[(from.col, from.row)];
+        var toTile = hexTileMap[(to.col, to.row)];
+        int fromKey = fromTile.AssignedTokenKey.Value;
+
+        var tokenCtrl = ControllerRegister.Get<CharacterTokenController>();
+        var token = tokenCtrl != null ? tokenCtrl.GetAllCharacterToken().FirstOrDefault(t => t.Key == fromKey) : null;
+
+        tokenPosMap[fromKey] = to;
+
+        fromTile.ClearToken();
+        toTile.AssignToken(fromKey, token, false, true);
+
+        var fromImg = imgCharacterMap[from];
+        var toImg = imgCharacterMap[to];
+        toImg.sprite = fromImg.sprite;
+        toImg.enabled = true;
+        fromImg.sprite = null;
+        fromImg.enabled = false;
+    }
+
+    private bool CanMove(Vector2Int from, Vector2Int to, out HexTile fromTile, out HexTile toTile)
+    {
+        fromTile = null; 
+        toTile = null;
+
+        if (from == to) return false;
+        if (!hexTileMap.TryGetValue((from.x, from.y), out fromTile)) return false;
+        if (!hexTileMap.TryGetValue((to.x, to.y), out toTile)) return false;
+        if (!fromTile.AssignedTokenKey.HasValue) return false;  //출발칸 토큰 없음
+        if (toTile.AssignedTokenKey.HasValue) return false;     //도착칸 점유(스왑 금지)
+        return true;
+    }
+
+    //안전한 이동을 위한 토큰 레이어 확보
+    private void EnsureTokenLayer()
+    {
+        if (tokenLayer != null) return;
+        var go = new GameObject("TokenLayer", typeof(RectTransform));
+        tokenLayer = go.GetComponent<RectTransform>();
+        tokenLayer.SetParent(battleFieldRt, false);
+        tokenLayer.anchorMin = Vector2.zero;
+        tokenLayer.anchorMax = Vector2.one;
+        tokenLayer.offsetMin = Vector2.zero;
+        tokenLayer.offsetMax = Vector2.zero;
+    }
+    #endregion
+
+    #region 기본 이동카드 관련 캐릭터/이동 후보 좌표 하이라이트
+    //선택 하이라이트 (내 캐릭터)
+    public void OnHighlightMyCharacters(IEnumerable<int> ids)
+    {
+        RestoreSnapshots(selectedSnaps);
+        selectedSnaps.Clear();
+
+        foreach (var id in ids)
+        {
+            if (!TryGetTokenHex(id, out var pos)) continue;
+            if (!TryGetOutline(pos, out var img)) continue;
+
+            selectedSnaps.Add(new OutlineSnapshot
+            {
+                img = img,
+                origColor = img.color,
+                origActive = img.gameObject.activeSelf  //원래 활성 상태 저장
+            });
+
+            img.color = HL_SELECT;
+            if (!img.gameObject.activeSelf) img.gameObject.SetActive(true);  //잠시 활성
+            img.transform.SetAsLastSibling();
+        }
+
+        Debug.Log("[Highlight] 내 캐릭터 선택 단계");
+    }
+
+    //이동 후보 좌표 하이라이트
+    public void OnHighlightCandidateCells(IEnumerable<Vector2Int> hexes)
+    {
+        RestoreSnapshots(candidSnaps);
+        candidSnaps.Clear();
+
+        foreach (var h in hexes)
+        {
+            if (!TryGetOutline(h, out var img)) continue;
+
+            bool alreadySelected = selectedSnaps.Any(s => s.img == img);
+            if (!alreadySelected)
+            {
+                candidSnaps.Add(new OutlineSnapshot
+                {
+                    img = img,
+                    origColor = img.color,
+                    origActive = img.gameObject.activeSelf  //원래 활성 상태 저장
+                });
+
+                img.color = HL_CANDID;
+            }
+
+            if (!img.gameObject.activeSelf) img.gameObject.SetActive(true);  //잠시 활성
+            img.transform.SetAsLastSibling();
+        }
+
+        Debug.Log($"[Highlight] 이동 가능한 좌표: {string.Join(",", hexes)}");
+    }
+
+    //outline 찾기
+    private bool TryGetOutline(Vector2Int hex, out Image img)
+    {
+        img = null;
+        if (!hexTileMap.TryGetValue((hex.x, hex.y), out var tile)) return false;
+        var tf = tile.transform.Find("outline");
+        if (tf == null) return false;
+        img = tf.GetComponent<Image>();
+        return img != null;
+    }
+
+    //id → 현재 좌표
+    private bool TryGetTokenHex(int tokenKey, out Vector2Int hex) => TryGetTokenPosition(tokenKey, out hex);
+
+    //모든 하이라이트 원복
+    public void OnClearHighlights()
+    {
+        RestoreSnapshots(candidSnaps);
+        RestoreSnapshots(selectedSnaps);
+        candidSnaps.Clear();
+        selectedSnaps.Clear();
+        Debug.Log("[Highlight] Clear");
+    }
+
+    //원복 공통 함수
+    private void RestoreSnapshots(List<OutlineSnapshot> list)
+    {
+        foreach (var s in list)
+        {
+            if (s.img == null) continue;
+            s.img.color = s.origColor;
+            s.img.gameObject.SetActive(s.origActive);  //GameObject 활성 상태 복원
+        }
+    }
+    #endregion
 }

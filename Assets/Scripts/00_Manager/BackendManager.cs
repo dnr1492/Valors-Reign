@@ -228,7 +228,7 @@ public class BackendManager : Singleton<BackendManager>
             }
             else
             {
-                Debug.LogWarning($"[서버 불러오기 실패] guid: {guid}");
+                Debug.Log($"[서버 불러오기 실패] guid: {guid}");
                 onLoaded?.Invoke(null);
             }
         });

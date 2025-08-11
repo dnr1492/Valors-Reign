@@ -16,6 +16,7 @@ public class HexTile : MonoBehaviour
     public Nullable<int> AssignedTokenKey { get; private set; } = null;
     public CharacterToken AssignedToken { get; private set; }
     public CharacterTokenDirection CharacterTokenDirection { get; private set; }  //캐릭터 토큰 방향 저장
+    public bool IsMyToken { get; private set; }  //캐릭터 토큰이 내 것인지
 
     //헥스 타일 초기화
     public void Init((int, int) pos)
@@ -26,12 +27,13 @@ public class HexTile : MonoBehaviour
     }
 
     //토큰 할당
-    public void AssignToken(int tokenKey, CharacterToken token, bool showCost)
+    public void AssignToken(int tokenKey, CharacterToken token, bool isEditorMode, bool isMyToken)
     {
         ShowDecorations(true);
         AssignedTokenKey = tokenKey;
         AssignedToken = token;
-        SetCost(showCost, token.Cost);
+        SetCost(isEditorMode, token.Cost);
+        IsMyToken = isMyToken;
     }
 
     //토큰 제거
@@ -41,6 +43,7 @@ public class HexTile : MonoBehaviour
         AssignedTokenKey = null;
         AssignedToken = null;
         SetCost(false);
+        IsMyToken = false;
     }
 
     //장식 요소 표시/숨김 (아웃라인, 방향 표시)

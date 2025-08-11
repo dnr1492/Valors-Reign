@@ -15,22 +15,36 @@ public class SkillCardRoundSlot : MonoBehaviour
     public void ShowEmptyHighlight() => ShowHighlight(emptyHighlight);
     public void ShowSwapHighlight() => ShowHighlight(swapHighlight);
 
-    #region CardZone에 스킬카드 셋팅
+    #region RoundSlot에 배치
     public void Assign(SkillCardData data, SkillCardEvent drag = null)
     {
         AssignedSkillCardData = data;
-        TestSkillCardData_Delete = data;
 
-        if (drag != null) {
+        if (drag != null)
+        {
             //드래그된 카드를 이 슬롯 아래로 붙인다 (원본 카드를 그대로 옮기는 방식)
             drag.transform.SetParent(transform, false);
             var rt = (RectTransform)drag.transform;
-            rt.anchoredPosition = Vector2.zero;
+            rt.anchoredPosition = Vector2.zero;  //카드 정중앙 배치
         }
+
+        //이동카드가 아닌 것으로 바뀌면 이 슬롯의 이동 예약/오더 해제
+        if (AssignedSkillCardData == null || AssignedSkillCardData.id != 1000)
+            ControllerRegister.Get<MovementOrderController>().ReleaseReservation(this);
     }
     #endregion
 
-    #region CardZone Highlight Show/Hide
+    #region RoundSlot에서 해제 (데이터 제거 + 예약 해제)
+    public void Clear()
+    {
+        AssignedSkillCardData = null;
+
+        //슬롯 비워질 때 이동 예약/오더 해제
+        ControllerRegister.Get<MovementOrderController>().ReleaseReservation(this);
+    }
+    #endregion
+
+    #region RoundSlot Highlight Show/Hide
     private void ShowHighlight(Color c)
     {
         if (slotHighlightsBg == null) return;
@@ -50,21 +64,9 @@ public class SkillCardRoundSlot : MonoBehaviour
     }
     #endregion
 
-    public void Clear()
-    {
-        AssignedSkillCardData = null;
-        TestSkillCardData_Delete = null;
-    }
-
-    // ================================ 구현 중 ================================ //
-    // ================================ 구현 중 ================================ //
-    // ================================ 구현 중 ================================ //
-
-    public SkillCardData TestSkillCardData_Delete;
-
-    public bool CanAccept()
-    {
-        // ===== 필요하면 제약(예: 이동카드 금지 등) 체크 ===== //
-        return true;
-    }
+    #region 라운드 슬롯 순서
+    private int roundOrder = 0;
+    public int GetRoundOrder() => roundOrder;
+    public void SetRoundOrder(int order) => roundOrder = order;
+    #endregion
 }
