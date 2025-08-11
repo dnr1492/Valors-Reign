@@ -12,18 +12,23 @@ public class HexTileBattleEvent : MonoBehaviour, IPointerClickHandler
         hexTile = GetComponent<HexTile>();
     }
 
-    public void OnPointerClick(PointerEventData eventData)
+    public void OnPointerClick(PointerEventData e)
     {
-        var movementOrderCtrl = ControllerRegister.Get<MovementOrderController>();
-        if (movementOrderCtrl == null || !movementOrderCtrl.IsTargeting || hexTile == null) return;
+        var ctrl = ControllerRegister.Get<MovementOrderController>();
+        if (ctrl == null) return;
 
-        //클릭한 Hex의 좌표
+        //(1) 클릭한 Hex 좌표 계산
         var (col, row) = hexTile.GridPosition;
         var hex = new Vector2Int(col, row);
 
-        //캐릭터가 있으면 캐릭터 선택
-        if (hexTile.AssignedTokenKey.HasValue) movementOrderCtrl.OnCharacterClicked(hexTile.AssignedTokenKey.Value, hex);
-        //캐릭터가 없으면 Hex 선택 (목적지)
-        else movementOrderCtrl.OnHexClicked(hex);
+        //(2) 해당 타일에 '내 토큰'이 있으면 캐릭터 클릭 이벤트 전달 (타겟팅 상태 무관하게 항상 전달)
+        if (hexTile.AssignedTokenKey.HasValue && hexTile.IsMyToken) {
+            int tokenKey = hexTile.AssignedTokenKey.Value;
+            ctrl.OnCharacterClicked(tokenKey, hex);
+            return;
+        }
+
+        //(3) 그 외에는 목적지 클릭 시도
+        ctrl.OnHexClicked(hex);
     }
 }

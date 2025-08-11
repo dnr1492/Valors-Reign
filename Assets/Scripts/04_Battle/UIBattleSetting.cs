@@ -34,6 +34,7 @@ public class UIBattleSetting : UIPopupBase
 
     private int GetAliveCharacterCount() => CombatManager.Instance.GetAliveCharacterCount();
     private int GetBasicMoveCardCountInRoundZone() => roundSlots.Count(s => s.AssignedSkillCardData != null && s.AssignedSkillCardData.id == 1000);
+    private void OnToast(string msg) => UIManager.Instance.ShowPopup<UIModalPopup>("UIModalPopup", false).Set("알림", msg);
 
     public void Init()
     {
@@ -89,9 +90,17 @@ public class UIBattleSetting : UIPopupBase
         for (int i = 0; i < roundSlots.Length; i++)
             roundSlots[i].SetRoundOrder(i + 1);
 
-        // ========== TODO: 테스트용 라운드 실행 버튼 ========== //
+        //라운드 슬롯 바인딩
+        movementOrderCtrl.BindRoundSlots(roundSlots);
+
+        //테스트용 라운드 실행 버튼
         btn_testStartRound.onClick.RemoveAllListeners();
-        btn_testStartRound.onClick.AddListener(() => TurnManager.Instance.StartRound());
+        btn_testStartRound.onClick.AddListener(() => {
+            //라운드 시작 전 게이트
+            if (movementOrderCtrl != null && !movementOrderCtrl.AreAllMoveCardsConfigured())
+                return;
+            TurnManager.Instance.StartRound();
+        });
     }
 
     private void OnCoinDirectionSelected(int myCoinDriection)
@@ -299,14 +308,4 @@ public class UIBattleSetting : UIPopupBase
     #endregion
 
     protected override void ResetUI() { }
-
-    // ================================ 구현 중 ================================ //
-    // ================================ 구현 중 ================================ //
-    // ================================ 구현 중 ================================ //
-
-    private void OnToast(string msg)
-    {
-        Debug.Log($"[Toast] {msg}");
-        // ========== TODO: 실제 토스트 UI가 있으면 여기에서 연결 ========== //
-    }
 }
