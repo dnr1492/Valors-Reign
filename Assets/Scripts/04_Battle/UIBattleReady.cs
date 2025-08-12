@@ -10,7 +10,7 @@ public class UIBattleReady : UIPopupBase
     [SerializeField] Button btn_battleDeck;
 
     [Header("Hex Grid")]
-    [SerializeField] RectTransform hexParantRt /*map*/, battleFieldRt;
+    [SerializeField] RectTransform hexParentRt /*map*/, battleFieldRt;
     [SerializeField] GameObject hexPrefab;  //육각형 모양의 이미지가 있는 UI 프리팹
 
     private void Awake()
@@ -50,7 +50,7 @@ public class UIBattleReady : UIPopupBase
 
     private void OnClickSelectBattleDeck()
     {
-        GridManager.Instance.CreateHexGrid(battleFieldRt, hexPrefab, hexParantRt, false, false);
+        GridManager.Instance.CreateHexGrid(battleFieldRt, hexPrefab, hexParentRt, false, false);
 
         UIEditorDeckPhase1 popup = UIManager.Instance.ShowPopup<UIEditorDeckPhase1>("UIEditorDeckPhase1");
         popup.SetEditMode(false);

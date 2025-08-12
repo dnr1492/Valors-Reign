@@ -18,7 +18,7 @@ public class UIBattleSetting : UIPopupBase
     private MovementOrderController movementOrderCtrl;
 
     [Header("Hex Grid")]
-    [SerializeField] RectTransform hexParantRt /*map*/, battleFieldRt;
+    [SerializeField] RectTransform hexParentRt /*map*/, battleFieldRt;
     [SerializeField] GameObject hexPrefab;  //육각형 모양의 이미지가 있는 UI 프리팹
 
     [Header("Setting SkillCardZone")]
@@ -32,8 +32,6 @@ public class UIBattleSetting : UIPopupBase
     [Header("Setting SkillCardRoundZone")]
     [SerializeField] SkillCardRoundSlot[] roundSlots = new SkillCardRoundSlot[4];  //SkillCardRoundSlot 4칸 연결
 
-    private int GetAliveCharacterCount() => CombatManager.Instance.GetAliveCharacterCount();
-    private int GetBasicMoveCardCountInRoundZone() => roundSlots.Count(s => s.AssignedSkillCardData != null && s.AssignedSkillCardData.id == 1000);
     private void OnToast(string msg) => UIManager.Instance.ShowPopup<UIModalPopup>("UIModalPopup", false).Set("알림", msg);
 
     public void Init()
@@ -41,7 +39,7 @@ public class UIBattleSetting : UIPopupBase
         rootCanvas = GetComponentInParent<Canvas>();
 
         //필드 생성
-        GridManager.Instance.CreateHexGrid(battleFieldRt, hexPrefab, hexParantRt, false, true);
+        GridManager.Instance.CreateHexGrid(battleFieldRt, hexPrefab, hexParentRt, false, true);
 
         //덱 불러와서 필드에 표시
         UIEditorDeckPhase1 popup = UIManager.Instance.GetPopup<UIEditorDeckPhase1>("UIEditorDeckPhase1");
@@ -248,13 +246,21 @@ public class UIBattleSetting : UIPopupBase
         //슬롯의 자식으로 이동 + 배정
         slot.Assign(drag.SkillCardData, drag);
 
-        //CardZone만 재정렬
+        //드롭 직후, 빈 라운드 슬롯을 먼저 정리
+        foreach (var s in roundSlots)
+        {
+            if (s == null) continue;
+            if (s.GetComponentInChildren<SkillCardEvent>() == null && !s.IsEmpty)
+                s.Clear();  //고스트 데이터 제거 (예약/이미지 원복 포함)
+        }
+
+        //CardZone 재정렬 (이 시점엔 RoundZone 카운트가 정확)
         RefreshSkillCardZoneLayout();
 
-        //드래그 드롭 이후 이동카드면 타겟팅 모드 ON
+        //드래그 드롭 이후 기본 이동카드면 타겟팅 모드 ON (항상 1 → 2 → 3 → 4 첫 미설정부터)
         if (drag.SkillCardData != null && drag.SkillCardData.id == 1000) {
-            movementOrderCtrl.BeginForSlot(slot);
-            Debug.Log("[MoveOrder] Begin targeting for slot");
+            movementOrderCtrl.BeginNextPending();
+            Debug.Log("[MoveOrder] Begin targeting for pending basic-move slot");
         }
     }
     #endregion
@@ -264,7 +270,7 @@ public class UIBattleSetting : UIPopupBase
     {
         int alive = GetAliveCharacterCount();
         int basicMoveInRound = GetBasicMoveCardCountInRoundZone();
-        int desiredInCardZone = (basicMoveInRound < alive) ? 1 : 0;  //생존 캐릭터 수를 초과하지 않으면 CardZone에 기본 이동카드(1000)을 계속 표시
+        int desiredInCardZone = (alive > 0 && basicMoveInRound < alive) ? 1 : 0;  //CardZone에 1장은 계속 유지. 다만 생존 0이면 0장.
 
         //현재 CardZone에 있는 기본 이동카드 목록
         var basicMoveCardsInZone = settingSkillCards
@@ -274,7 +280,7 @@ public class UIBattleSetting : UIPopupBase
                 && c.transform.parent == skillCardZone)
             .ToList();
 
-        //남는 복제된 기본 이동카드는 1장 뺴고 제거/삭제
+        //남는 복제된 기본 이동카드는 유지해야 하는 장수를 제외하고 제거/삭제
         //많으면 제거
         if (basicMoveCardsInZone.Count > desiredInCardZone)
         {
@@ -305,6 +311,14 @@ public class UIBattleSetting : UIPopupBase
             else Debug.Log("[UIBattleSetting] 기본 이동카드(1000) 데이터를 찾지 못했습니다.");
         }
     }
+
+    private int GetAliveCharacterCount() => CombatManager.Instance.GetAliveCharacterCount();
+
+    private int GetBasicMoveCardCountInRoundZone() => roundSlots.Count(
+        s => s.AssignedSkillCardData != null
+          && s.AssignedSkillCardData.id == 1000
+          && s.GetComponentInChildren<SkillCardEvent>() != null  //실제 카드가 붙어 있을 때만 카운트
+    );
     #endregion
 
     protected override void ResetUI() { }

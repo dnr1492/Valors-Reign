@@ -21,8 +21,8 @@ public class SkillCardEvent : MonoBehaviour, IBeginDragHandler, IDragHandler, IE
 
     public Action<SkillCardEvent, SkillCardRoundSlot> onDropToRoundSlot;
 
-    public void Set(SkillCardData skillCardData, 
-        Canvas rootCanvas, 
+    public void Set(SkillCardData skillCardData,
+        Canvas rootCanvas,
         SkillCardRoundSlot[] allRoundSlots,
         Transform skillCardZoneParent,
         Action refreshSkillCardZoneLayout)
@@ -36,7 +36,7 @@ public class SkillCardEvent : MonoBehaviour, IBeginDragHandler, IDragHandler, IE
         canvasGroup = GetComponent<CanvasGroup>();
         if (!canvasGroup) canvasGroup = gameObject.AddComponent<CanvasGroup>();
         SkillCardData = skillCardData;
-        
+
         //하이라이트 끄기
         foreach (var slot in this.allRoundSlots) slot.HideHighlight();
     }
@@ -50,7 +50,8 @@ public class SkillCardEvent : MonoBehaviour, IBeginDragHandler, IDragHandler, IE
         dragSlot = originalParent ? originalParent.GetComponent<SkillCardRoundSlot>() : null;
 
         //하이라이트 켜기
-        foreach (var slot in allRoundSlots) {
+        foreach (var slot in allRoundSlots)
+        {
             if (slot == null) continue;
 
             if (slot.IsEmpty) slot.ShowEmptyHighlight();
@@ -71,8 +72,6 @@ public class SkillCardEvent : MonoBehaviour, IBeginDragHandler, IDragHandler, IE
     {
         canvasGroup.blocksRaycasts = true;
 
-        //레이캐스트로 슬롯 찾기 (UI에 레이캐스트 쏘기)
-        //Raycast Target이 true인 모든 UI를 찾음
         var results = new System.Collections.Generic.List<RaycastResult>();
         EventSystem.current.RaycastAll(e, results);
 
@@ -83,32 +82,37 @@ public class SkillCardEvent : MonoBehaviour, IBeginDragHandler, IDragHandler, IE
             if (roundSlot != null) break;
         }
 
-        //배치 또는 스왑
-        if (roundSlot != null) {
+        if (roundSlot != null)
+        {
             SwapSkillCard(roundSlot);
             onDropToRoundSlot?.Invoke(this, roundSlot);
         }
-        else {
-            //RoundZone에서 CardZone으로 이동
+        else
+        {
             bool droppedOnSkillZone = results.Any(r => r.gameObject.GetComponentInParent<SkillCardZone>() != null);
-            if (droppedOnSkillZone && skillCardZoneParent != null) {
-                //슬롯에서 빼고 CardZone으로 귀환
+            if (droppedOnSkillZone && skillCardZoneParent != null)
+            {
                 transform.SetParent(skillCardZoneParent, false);
                 skillCardRt.anchoredPosition = Vector2.zero;
 
-                //출발 슬롯 데이터 초기화
+                //RoundZone → CardZone 이동 시, 출발 슬롯 데이터/오더/이미지 리셋
+                if (dragSlot != null)
+                {
+                    var moveCtrl = ControllerRegister.Get<MovementOrderController>();
+                    moveCtrl.ReleaseReservation(dragSlot);
+                    var selfCard = GetComponent<SkillCard>();
+                    if (selfCard != null) selfCard.ResetImageIfMoveCard();
+                }
+
                 if (dragSlot != null) dragSlot.Clear();
 
-                //레이아웃 다시 깔기
                 refreshSkillCardZoneLayout?.Invoke();
             }
-            //실패 → 원위치
             else
             {
                 transform.SetParent(originalParent, false);
                 skillCardRt.anchoredPosition = originalAnchoredPos;
 
-                //원위치로 돌아갈 때 CardZone 새로고침
                 if (originalParent == skillCardZoneParent)
                     refreshSkillCardZoneLayout?.Invoke();
             }
@@ -116,37 +120,47 @@ public class SkillCardEvent : MonoBehaviour, IBeginDragHandler, IDragHandler, IE
 
         foreach (var slot in allRoundSlots)
         {
-            //하이라이트 끄기
             slot.HideHighlight();
-            //빈 슬롯 데이터 초기화
-            if (slot.GetComponentInChildren<SkillCardEvent>() == null) slot.Clear();
+            if (slot.AssignedSkillCardData != null && slot.GetComponentInChildren<SkillCardEvent>() == null)
+                slot.Clear();
         }
     }
 
     private void SwapSkillCard(SkillCardRoundSlot dropSlot)
     {
-        //드롭하려는 슬롯(roundSlot)에 이미 카드가 있으면 스왑 처리
+        var moveCtrl = ControllerRegister.Get<MovementOrderController>();
+
         if (!dropSlot.IsEmpty)
         {
             var existingCard = dropSlot.GetComponentInChildren<SkillCardEvent>();
-            //슬롯에 카드가 존재한다면
             if (existingCard != null)
             {
-                if (dragSlot != null) {
-                    //드래그를 시작한 슬롯에 스왑한 다른 카드를 배치하고,
-                    //그 슬롯의 데이터도 스왑한 다른 카드 데이터로 동기화
+                if (dragSlot != null)
+                {
                     dragSlot.Assign(existingCard.SkillCardData, existingCard);
+                    moveCtrl.SwapOrders(dragSlot, dropSlot);
                 }
-                else {
-                    //CardZone → RoundZone의 슬롯 스왑
-                    //1. 기존 슬롯의 카드를 CardZone으로 보냄
+                else
+                {
+                    //CardZone → RoundSlot (점유) 드롭
                     existingCard.transform.SetParent(skillCardZoneParent, false);
                     var exRt = (RectTransform)existingCard.transform;
                     exRt.anchoredPosition = Vector2.zero;
 
-                    //2. CardZone 새로고침
+                    if (moveCtrl != null) moveCtrl.ReleaseReservation(dropSlot);
+                    var existingSkillCard = existingCard.GetComponent<SkillCard>();
+                    if (existingSkillCard != null) existingSkillCard.ResetImageIfMoveCard();
+
                     refreshSkillCardZoneLayout?.Invoke();
                 }
+            }
+        }
+        else
+        {
+            //빈 슬롯으로 이동
+            if (dragSlot != null)
+            {
+                moveCtrl.TransferOrder(dragSlot, dropSlot);
             }
         }
     }

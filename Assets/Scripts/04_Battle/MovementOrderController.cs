@@ -14,8 +14,7 @@ public class MovementOrderController : MonoBehaviour
     private List<SkillCardRoundSlot> boundRoundSlots = new();  //라운드 슬롯 바인딩 (라운드 슬롯에 셋팅한 기본 이동카드 수 계산용)
     private bool isEditing = false;
     private MoveOrder? editingBackup = null;
-
-    public bool IsTargeting => currentRoundSlot != null;
+    private SkillCardRoundSlot resumeAfterEditSlot = null;  //인라인 편집 중, 편집 종료 후 재개해야 할 타겟팅 슬롯 저장
 
     //라운드 슬롯에 설정된 한 번의 이동
     public struct MoveOrder
@@ -114,7 +113,7 @@ public class MovementOrderController : MonoBehaviour
     #endregion
 
     #region 최종 이동 가능 판정
-    //캐릭터 ID 기준 fromHex → toHex 이동 가능 여부 최종 검증
+    //캐릭터 ID 기준 fromHexPos → toHexPos 이동 가능 여부 최종 검증
     private bool ValidateFinalDestination(int characterId, Vector2Int fromHex, Vector2Int toHex, SkillCardRoundSlot ownerSlot)
     {
         if (Char_IsMineAlive != null && !Char_IsMineAlive(characterId)) return false;  //생존 여부
@@ -128,11 +127,9 @@ public class MovementOrderController : MonoBehaviour
     #endregion
 
     #region 타겟팅 플로우
-    //슬롯 대상으로 타겟팅 시작: 실행 중이면 안내, 현재 상태 초기화 후 사용 중인 나의 캐릭터 제외 하이라이트
     public void BeginForSlot(SkillCardRoundSlot slot)
     {
         if (isExecuting) {
-            //이동 중 보호
             UI_Toast?.Invoke("이동 실행 중입니다.");
             return;
         }
@@ -140,15 +137,12 @@ public class MovementOrderController : MonoBehaviour
         CancelCurrent();               //진행 중인 타겟팅 초기화
         currentRoundSlot = slot;       //현재 조작 슬롯 지정
         selectingTokenKey = -1;        //선택 해제
+        resumeAfterEditSlot = null;    //새 타겟팅 시작 시 편집 복귀 슬롯 초기화
         UI_ClearHighlights?.Invoke();  //기존 하이라이트 제거
 
-        //이미 다른 이동카드에 배정된 캐릭터 제외
         var used = GetUsedTokenKeys();
         var candidates = GetMyAliveCharacterIds().Where(id => !used.Contains(id));
-
-        //가용 캐릭터 없으면 안내 후 종료
-        if (!candidates.Any())
-        {
+        if (!candidates.Any()) {
             UI_Toast?.Invoke("이동 가능한 캐릭터가 없습니다. (이미 다른 이동카드로 설정됨)");
             CancelCurrent();
             return;
@@ -174,48 +168,61 @@ public class MovementOrderController : MonoBehaviour
         UI_ClearHighlights?.Invoke();
     }
 
-    //캐릭터 클릭 처리: 인라인 편집 우선 스위치 → 일반 타겟팅 → 검증
     public void OnCharacterClicked(int tokenKey, Vector2Int charHexPos)
     {
-        //1) 항상 먼저: 해당 캐릭터가 이미 배정된 슬롯이 있는지 확인 → 있으면 그 슬롯 편집으로 스위치
-        if (TryGetSlotByToken(tokenKey, out var ownerSlot)) {
-            if (currentRoundSlot != ownerSlot) {
-                EnterInlineEdit(ownerSlot, tokenKey, charHexPos);
-                return;  //중요: 아래 '이미 설정됨' 토스트 분기로 떨어지지 않도록 종료
+        //편집 중에 미사용 캐릭터를 클릭하면, 편집을 끝내고 복귀 슬롯으로 타겟팅을 넘김
+        if (isEditing && resumeAfterEditSlot != null && currentRoundSlot != resumeAfterEditSlot)
+        {
+            bool usedAnywhere = moveOrders.Any(kv => kv.Value.tokenKey == tokenKey);
+            if (!usedAnywhere) {
+                //편집 슬롯 예약/하이라이트 복구 + 복귀 슬롯으로 BeginForSlot됨
+                //fall-through: 아래 일반 타겟팅 로직이 이 클릭을 복귀 슬롯에 대해 처리
+                CancelEdit();
             }
-            //같은 슬롯이면 그대로 진행
         }
 
-        //2) 일반 타겟팅 흐름 (타겟팅 없으면 다음 미설정 슬롯으로 자동 진입)
+        //1) 이미 배정된 슬롯이면 그 슬롯 인라인 편집으로 스위치
+        if (TryGetSlotByToken(tokenKey, out var ownerSlot))
+        {
+            if (currentRoundSlot != ownerSlot)
+            {
+                EnterInlineEdit(ownerSlot, tokenKey, charHexPos);
+                return;
+            }
+        }
+
+        //2) 일반 타겟팅 흐름
         if (currentRoundSlot == null)
         {
             var next = PendingMoveSlots().FirstOrDefault();
             if (next != null) BeginForSlot(next);
-            else {
+            else
+            {
                 UI_Toast?.Invoke("먼저 이동카드를 라운드 슬롯에 배치해 주세요.");
                 return;
             }
         }
 
-        //3) 턴당 1회 제한: '다른 슬롯'에서 이미 사용 중이면 차단 (위에서 ownerSlot 스위치했으므로 여기 걸리면 진짜 다른 슬롯)
+        //3) 다른 슬롯에서 이미 사용 중이면 차단
         bool usedByOther = moveOrders.Any(kv => kv.Value.tokenKey == tokenKey && kv.Key != currentRoundSlot);
-        if (usedByOther) {
+        if (usedByOther)
+        {
             UI_Toast?.Invoke("이 캐릭터는 이번 턴에 이미 이동이 설정되었습니다.");
             return;
         }
 
-        //4) 소유/생존 검증
+        //4) 소유/생존 검증 → 선택 가능한 후보 표시
         bool isMineHere = Map_IsMyTokenAt != null && Map_IsMyTokenAt(charHexPos);
-        if (!isMineHere || (Char_IsMineAlive != null && !Char_IsMineAlive(tokenKey))) {
+        if (!isMineHere || (Char_IsMineAlive != null && !Char_IsMineAlive(tokenKey)))
+        {
             UI_Toast?.Invoke("선택할 수 없는 캐릭터입니다.");
             return;
         }
 
         //5) 인접 후보 계산 → 표시
-        selectingTokenKey = tokenKey;      //선택 캐릭터 고정
-        selectingCharHexPos = charHexPos;  //선택 시점 좌표 저장
-
-        var candidates = ComputeValidNeighbors(selectingCharHexPos);  //인접 유효 칸 계산
+        selectingTokenKey = tokenKey;
+        selectingCharHexPos = charHexPos;
+        var candidates = ComputeValidNeighbors(selectingCharHexPos);
         if (candidates.Count == 0)
         {
             UI_Toast?.Invoke("이동 가능한 인접칸이 없습니다.");
@@ -223,55 +230,75 @@ public class MovementOrderController : MonoBehaviour
             UI_HighlightMyCharacters?.Invoke(GetMyAliveCharacterIds().Where(id => !used.Contains(id)));
             return;
         }
-        UI_HighlightCandidateCells?.Invoke(candidates);  //이동 후보 하이라이트
+        UI_HighlightCandidateCells?.Invoke(candidates);
     }
 
     public bool OnHexClicked(Vector2Int destinationHexPos)
     {
-        //선택 상태 확인
         if (currentRoundSlot == null || selectingTokenKey < 0) return false;
 
-        //소유 슬롯(ownerSlot) 전달로 자기 슬롯 예약은 허용
-        if (!ValidateFinalDestination(selectingTokenKey, selectingCharHexPos, destinationHexPos, currentRoundSlot)) {
+        if (!ValidateFinalDestination(selectingTokenKey, selectingCharHexPos, destinationHexPos, currentRoundSlot))
+        {
             UI_Toast?.Invoke("이동할 수 없는 위치입니다.");
             return false;
         }
 
-        //예약 + 오더 저장 (fromHexPos를 함께 저장해 라운드 시작 전 재검증 가능)
-        moveOrders[currentRoundSlot] = new MoveOrder
+        var newOrder = new MoveOrder
         {
             tokenKey = selectingTokenKey,
             fromHexPos = selectingCharHexPos,
             toHexPos = destinationHexPos,
             roundOrder = currentRoundSlot != null ? currentRoundSlot.GetRoundOrder() : 999
         };
-        reservedByHexPos[destinationHexPos] = currentRoundSlot;  //도착지 예약
+
+        moveOrders[currentRoundSlot] = newOrder;
+        reservedByHexPos[destinationHexPos] = currentRoundSlot;
+
+        UpdateMoveCardImageByOrder(currentRoundSlot, selectingTokenKey);
 
         UI_Toast?.Invoke("이동 위치가 설정되었습니다.");
 
-        if (isEditing) {
+        if (isEditing)
+        {
             isEditing = false;
             editingBackup = null;
-            CancelCurrent();  //선택 흐름 종료
+
+            //편집 완료 후 복귀 슬롯이 존재하면 그 슬롯의 타겟팅을 즉시 재개
+            var resume = resumeAfterEditSlot;
+            resumeAfterEditSlot = null;
+
+            //편집 후에는 '복귀 슬롯'이 유효하고 미설정이면 그 슬롯으로,
+            //그 외에는 '항상 다음 미설정 슬롯(1 → 2 → 3 → 4)'로 진행
+            if (resume != null && !moveOrders.ContainsKey(resume)) BeginForSlot(resume);
+            else if (!BeginNextPending()) CancelCurrent();
         }
-        else {
-            if (!BeginNextPending()) CancelCurrent();  //선택 흐름 종료
+        else
+        {
+            if (!BeginNextPending()) CancelCurrent();
         }
         return true;
     }
 
-    //해당 슬롯의 예약 해제 (오더와 예약 모두 제거, 현재 슬롯이면 타겟팅도 취소)
     public void ReleaseReservation(SkillCardRoundSlot slot)
     {
         if (slot == null) return;
-        if (moveOrders.TryGetValue(slot, out var order)) {
+
+        bool hadOrder = false;
+        if (moveOrders.TryGetValue(slot, out var order))
+        {
             reservedByHexPos.Remove(order.toHexPos);
             moveOrders.Remove(slot);
+            hadOrder = true;
         }
-        if (currentRoundSlot == slot) CancelCurrent();
+
+        //현재 타겟팅 중인 슬롯이어도 '실제 오더 제거가 있었을 때'만 취소
+        if (currentRoundSlot == slot) {
+            if (isEditing || hadOrder) CancelCurrent();
+        }
+
+        ResetMoveCardImageIfNoOrder(slot);
     }
 
-    //라운드 시작 전 일괄 재검증: fromHexPos 기준으로 최종 판정, 무효한 예약 제거
     public bool ValidateAllBeforeRound()
     {
         var invalid = new List<SkillCardRoundSlot>();
@@ -281,23 +308,24 @@ public class MovementOrderController : MonoBehaviour
             var slot = kv.Key;
             var mo = kv.Value;
 
-            Vector2Int from = mo.fromHexPos;  //항상 fromHexPos 사용 (키 덮어쓰기 영향 제거)
+            Vector2Int from = mo.fromHexPos;
             if (!ValidateFinalDestination(mo.tokenKey, from, mo.toHexPos, slot))
                 invalid.Add(slot);
         }
 
-        //무효 오더 정리 (예약/오더 동시 제거)
         foreach (var s in invalid)
         {
             var hex = moveOrders[s].toHexPos;
             reservedByHexPos.Remove(hex);
             moveOrders.Remove(s);
+
+            ResetMoveCardImageIfNoOrder(s);
         }
 
         if (invalid.Count > 0)
             UI_Toast?.Invoke("일부 이동 위치가 유효하지 않아 해제되었습니다.");
 
-        return invalid.Count == 0;  //모두 유효하면 true
+        return invalid.Count == 0;
     }
 
     //현재까지 예약에 사용된 캐릭터 집합
@@ -319,8 +347,8 @@ public class MovementOrderController : MonoBehaviour
     }
     #endregion
 
-    #region 순서대로 실행
-    //외부에서 순차 실행 요청 진입점
+    #region 순서대로 이동을 수행
+    //외부에서 실행을 요청하면 비동기로 순차적으로 이동을 처리
     public void ExecuteInOrder(Action onComplete = null)
     {
         if (!isActiveAndEnabled) {
@@ -368,12 +396,10 @@ public class MovementOrderController : MonoBehaviour
     #endregion
 
     #region 라운드 시작 게이트
-    //라운드 슬롯 목록 바인딩 (라운드 시작 게이트에서 필요)
     public void BindRoundSlots(IEnumerable<SkillCardRoundSlot> slots) => boundRoundSlots = slots != null
             ? slots.Where(s => s != null).OrderBy(s => s.GetRoundOrder()).ToList()
             : new List<SkillCardRoundSlot>();
 
-    //라운드 시작 게이트: 이동을 위한 캐릭터/목적지를 전부 설정했는지 검사 (+중복 캐릭터 검사)
     public bool AreAllMoveCardsConfigured(bool toast = true)
     {
         if (boundRoundSlots == null || boundRoundSlots.Count == 0) return true;
@@ -392,7 +418,6 @@ public class MovementOrderController : MonoBehaviour
             return false;
         }
 
-        //같은 캐릭터가 2번 이상 배정됐는지 검사
         int distinct = ordersForMoveSlots.Select(o => o.tokenKey).Distinct().Count();
         if (distinct < have)
         {
@@ -404,23 +429,22 @@ public class MovementOrderController : MonoBehaviour
     #endregion
 
     #region 캐릭터/목적지를 설정하지 않은 라운드 슬롯들을 찾기
-    //이동을 위한 캐릭터/목적지를 설정하지 않은 다음 라운드 슬롯으로 자동 타겟팅 진입
     public bool BeginNextPending()
     {
         if (isExecuting) return false;
 
-        var next = PendingMoveSlots().FirstOrDefault();
-        if (next == null)
-        {
-            CancelCurrent();  //더 이상 없음 → 정리
+        //무조건 1 → 2 → 3 → 4 순서의 첫 번째 미설정 슬롯을 사용
+        SkillCardRoundSlot next = PendingMoveSlots().FirstOrDefault();
+
+        if (next == null) {
+            CancelCurrent();
             return false;
         }
 
-        BeginForSlot(next);  //하이라이트 리셋 → 내 캐릭터 재하이라이트
+        BeginForSlot(next);
         return true;
     }
 
-    //아직 이동을 위한 캐릭터/목적지를 설정하지 않은 라운드 슬롯들을 열거
     private IEnumerable<SkillCardRoundSlot> PendingMoveSlots()
     {
         if (boundRoundSlots == null) yield break;
@@ -435,41 +459,7 @@ public class MovementOrderController : MonoBehaviour
     }
     #endregion
 
-    #region 기타 유틸 ===== TODO: 추후 다시 확인 필요 =====
-    //전체 상태 초기화(타깃팅/오더/예약/실행)
-    public void ClearAll()
-    {
-        CancelCurrent();
-        moveOrders.Clear();
-        reservedByHexPos.Clear();
-        isExecuting = false;
-    }
-
-    //슬롯에 대응하는 이동 오더 조회 시도
-    public bool TryGetOrder(SkillCardRoundSlot slot, out MoveOrder order)
-        => moveOrders.TryGetValue(slot, out order);
-
-    //지정 좌표가 예약 상태인지 여부
-    public bool IsReserved(Vector2Int hex) => reservedByHexPos.ContainsKey(hex);
-
-    //내 유닛 하이라이트용 ID 목록 제공
-    private IEnumerable<int> GetMyAliveCharacterIds()
-    {
-        return CombatManager.Instance != null
-            ? CombatManager.Instance.GetMyAliveTokenIds()
-            : Array.Empty<int>();
-    }
-
-    //해당 좌표 예약자가 나인지 여부 확인 (다른 슬롯이 예약했는지 판정)
-    private bool IsReservedByOther(Vector2Int hex, SkillCardRoundSlot owner) => reservedByHexPos.TryGetValue(hex, out var s) && s != owner;
-    #endregion
-
-    // ================================ 구현 중 ================================ //
-    // ================================ 구현 중 ================================ //
-    // ================================ 구현 중 ================================ //
-
-    #region Inline(팝업/화면 전환 없는) 편집 모드
-    //이미 이동이 설정된 캐릭터의 토큰에 대해 인라인 편집 진입
+    #region Inline 편집 모드
     private void EnterInlineEdit(SkillCardRoundSlot slot, int tokenKey, Vector2Int charHexPos)
     {
         if (isExecuting)
@@ -478,14 +468,25 @@ public class MovementOrderController : MonoBehaviour
             return;
         }
 
+        //기존에 다른 슬롯을 편집 중이었다면 그 슬롯의 예약을 먼저 원복
+        if (isEditing && currentRoundSlot != null && currentRoundSlot != slot && editingBackup.HasValue)
+        {
+            var prev = editingBackup.Value;
+            moveOrders[currentRoundSlot] = prev;
+            reservedByHexPos[prev.toHexPos] = currentRoundSlot;
+            editingBackup = null;
+        }
+
+        //편집 전, '미설정' 슬롯에서 들어온 경우에만 복귀 대상 설정하되, 기존 값이 있으면 유지
+        if (currentRoundSlot != null && currentRoundSlot != slot && !moveOrders.ContainsKey(currentRoundSlot))
+            resumeAfterEditSlot = resumeAfterEditSlot != null ? resumeAfterEditSlot : currentRoundSlot;
+
         isEditing = true;
         currentRoundSlot = slot;
         selectingTokenKey = tokenKey;
         selectingCharHexPos = charHexPos;
 
-        //원복 백업 + 배정된 목적지 예약 해제 (후보 표시를 위해)
-        if (moveOrders.TryGetValue(slot, out var mo))
-        {
+        if (moveOrders.TryGetValue(slot, out var mo)) {
             editingBackup = mo;
             reservedByHexPos.Remove(mo.toHexPos);
         }
@@ -500,10 +501,9 @@ public class MovementOrderController : MonoBehaviour
             return;
         }
 
-        UI_HighlightCandidateCells?.Invoke(candidates);  //좌표 재선택
+        UI_HighlightCandidateCells?.Invoke(candidates);
     }
 
-    //편집 취소 (원복)
     public void CancelEdit()
     {
         if (!isEditing || currentRoundSlot == null || editingBackup == null)
@@ -518,7 +518,115 @@ public class MovementOrderController : MonoBehaviour
 
         isEditing = false;
         editingBackup = null;
-        CancelCurrent();
+
+        //편집 취소 후 복귀 슬롯 재개
+        var resume = resumeAfterEditSlot;
+        resumeAfterEditSlot = null;
+        if (resume != null && !moveOrders.ContainsKey(resume)) BeginForSlot(resume);
+        else CancelCurrent();
     }
+    #endregion
+
+    #region 오더 이동/스왑 및 카드 이미지 처리
+    //슬롯 간 오더 이동 (카드가 다른 슬롯으로 '이동'한 경우)
+    //from 슬롯의 오더를 제거하고 to 슬롯으로 그대로 옮기며,
+    //슬롯의 roundOrder를 to 슬롯 기준으로 동기화
+    public bool TransferOrder(SkillCardRoundSlot from, SkillCardRoundSlot to)
+    {
+        if (from == null || to == null) return false;
+        if (!moveOrders.TryGetValue(from, out var mo)) return false;
+
+        moveOrders.Remove(from);
+
+        //실행 순서 동기화
+        mo.roundOrder = to.GetRoundOrder();
+
+        //to 슬롯에 오더 등록 + 목적지 예약
+        moveOrders[to] = mo;
+        reservedByHexPos[mo.toHexPos] = to;
+
+        //UI 반영
+        UpdateMoveCardImageByOrder(to, mo.tokenKey);  //이동카드 이미지를 캐릭터로 변경
+        ResetMoveCardImageIfNoOrder(from);            //떠난 슬롯은 기본 이미지로 복원
+        return true;
+    }
+
+    //슬롯 간 오더 스왑 (카드가 서로 '스왑'된 경우)
+    //각 슬롯에 있던 오더를 반대 슬롯으로 옮기면서 roundOrder도 목적 슬롯 기준으로 갱신
+    public void SwapOrders(SkillCardRoundSlot a, SkillCardRoundSlot b)
+    {
+        if (a == null || b == null) return;
+
+        bool hasA = moveOrders.TryGetValue(a, out var oa);
+        bool hasB = moveOrders.TryGetValue(b, out var ob);
+
+        //기존 슬롯에서 오더 제거
+        if (hasA) moveOrders.Remove(a);
+        if (hasB) moveOrders.Remove(b);
+
+        //a → b
+        if (hasA)
+        {
+            oa.roundOrder = b.GetRoundOrder();
+            moveOrders[b] = oa;
+            reservedByHexPos[oa.toHexPos] = b;
+            UpdateMoveCardImageByOrder(b, oa.tokenKey);
+        }
+        else ResetMoveCardImageIfNoOrder(b);
+
+        //b → a
+        if (hasB)
+        {
+            ob.roundOrder = a.GetRoundOrder();
+            moveOrders[a] = ob;
+            reservedByHexPos[ob.toHexPos] = a;
+            UpdateMoveCardImageByOrder(a, ob.tokenKey);
+        }
+        else ResetMoveCardImageIfNoOrder(a);
+    }
+
+    //슬롯 오더 제거 시 카드 이미지 원복
+    private void ResetMoveCardImageIfNoOrder(SkillCardRoundSlot slot)
+    {
+        if (slot == null) return;
+        if (!moveOrders.ContainsKey(slot))
+        {
+            var card = slot.GetComponentInChildren<SkillCard>();
+            if (card != null) card.ResetImageIfMoveCard();
+        }
+    }
+
+    //해당 슬롯의 이동카드 이미지를 캐릭터 스프라이트로 교체
+    private void UpdateMoveCardImageByOrder(SkillCardRoundSlot slot, int tokenKey)
+    {
+        if (slot == null) return;
+        var card = slot.GetComponentInChildren<SkillCard>();
+        if (card == null || card.SkillCardData == null || card.SkillCardData.id != 1000) return;
+
+        var tokenCtrl = ControllerRegister.Get<CharacterTokenController>();
+        var token = tokenCtrl != null ? tokenCtrl.GetAllCharacterToken().FirstOrDefault(t => t.Key == tokenKey) : null;
+        if (token == null) return;
+
+        card.SetCharacterImageIfMoveCard(token.GetCharacterSprite());
+    }
+    #endregion
+
+    #region 기타 유틸 ===== TODO: 추후 다시 확인 필요 =====
+    public void ClearAll()
+    {
+        CancelCurrent();
+        moveOrders.Clear();
+        reservedByHexPos.Clear();
+        isExecuting = false;
+    }
+
+    private IEnumerable<int> GetMyAliveCharacterIds()
+    {
+        return CombatManager.Instance != null
+            ? CombatManager.Instance.GetMyAliveTokenIds()
+            : Array.Empty<int>();
+    }
+
+    private bool IsReservedByOther(Vector2Int hex, SkillCardRoundSlot owner) => reservedByHexPos.TryGetValue(hex, out var s) && s != owner;
     #endregion
 }

@@ -1355,7 +1355,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7ac3b478098e1ee49878b8cc0188b535, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  img: {fileID: 8588048159536391105}
 --- !u!1 &8588048160183874657
 GameObject:
   m_ObjectHideFlags: 0
@@ -1385,8 +1384,8 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 6657991616393136602}
-  - {fileID: 8588048158713803902}
   - {fileID: 8588048158841796353}
+  - {fileID: 8588048158713803902}
   m_Father: {fileID: 8588048160212937241}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}

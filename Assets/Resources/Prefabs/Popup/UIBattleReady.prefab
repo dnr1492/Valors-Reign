@@ -558,7 +558,7 @@ MonoBehaviour:
   btn_back: {fileID: 2741588142333033741}
   btn_startMatching: {fileID: 7540268495476323144}
   btn_battleDeck: {fileID: 55972624402316717}
-  hexParantRt: {fileID: 5586694750914685142}
+  hexParentRt: {fileID: 5586694750914685142}
   battleFieldRt: {fileID: 4539502283706146445}
   hexPrefab: {fileID: 138201516482705832, guid: d5e3f1ef6ac85824583b859df46c1975, type: 3}
 --- !u!1 &5232366679031675343

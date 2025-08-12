@@ -28,7 +28,7 @@ public class SkillCardRoundSlot : MonoBehaviour
             rt.anchoredPosition = Vector2.zero;  //카드 정중앙 배치
         }
 
-        //이동카드가 아닌 것으로 바뀌면 이 슬롯의 이동 예약/오더 해제
+        //기본 이동카드가 아닌 것으로 바뀌거나, 슬롯이 비워진 경우 이 슬롯의 이동 예약/오더 해제
         if (AssignedSkillCardData == null || AssignedSkillCardData.id != 1000)
             ControllerRegister.Get<MovementOrderController>().ReleaseReservation(this);
     }

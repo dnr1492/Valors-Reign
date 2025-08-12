@@ -12,7 +12,7 @@ public class UIEditorDeckPhase3 : UIPopupBase
     [SerializeField] SkillSlotCollection skillSlotCollection; 
 
     [Header("Hex Grid")]
-    [SerializeField] RectTransform hexParantRt /*map*/, battleFieldRt;
+    [SerializeField] RectTransform hexParentRt /*map*/, battleFieldRt;
     [SerializeField] GameObject hexPrefab;  //육각형 모양의 이미지가 있는 UI 프리팹
 
     [Header("Cost")]
@@ -74,7 +74,7 @@ public class UIEditorDeckPhase3 : UIPopupBase
 
     public async void ApplyDeckPack(DeckPack deckPack)
     {
-        GridManager.Instance.CreateHexGrid(battleFieldRt, hexPrefab, hexParantRt, true, false);
+        GridManager.Instance.CreateHexGrid(battleFieldRt, hexPrefab, hexParentRt, true, false);
 
         await GridManager.Instance.ApplyDeckPack(deckPack);
 
