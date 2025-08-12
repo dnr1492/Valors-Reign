@@ -58,21 +58,21 @@ public class MovementOrderController : MonoBehaviour
 
     #region Odd-Q 이웃 방향 테이블
     //짝수 열(even column)에서의 6방향 상대 좌표
-    private static readonly Vector2Int[] EvenQDirs = {
-        new(+1, 0),  //오른쪽
+    public readonly Vector2Int[] EvenQDirs = {
+        new(+1, 0),  //오른쪽 아래
         new(+1,-1),  //오른쪽 위
         new( 0,-1),  //위
         new(-1,-1),  //왼쪽 위
-        new(-1, 0),  //왼쪽
+        new(-1, 0),  //왼쪽 아래
         new( 0,+1)   //아래
     };
 
     //홀수 열(odd column)에서의 6방향 상대 좌표
-    private static readonly Vector2Int[] OddQDirs = {
+    public readonly Vector2Int[] OddQDirs = {
         new(+1,+1),  //오른쪽 아래
-        new(+1, 0),  //오른쪽
+        new(+1, 0),  //오른쪽 위
         new( 0,-1),  //위
-        new(-1, 0),  //왼쪽
+        new(-1, 0),  //왼쪽 위
         new(-1,+1),  //왼쪽 아래
         new( 0,+1)   //아래
     };

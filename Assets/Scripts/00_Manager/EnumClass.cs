@@ -2,7 +2,7 @@ public class EnumClass
 {
     public enum CharacterRace { None = -1, Primordial, Earthbound, Seaborne, Verdant, Skyborne, Mythkin, Divinite, Morphid, Undying, Automaton }  //영장, 지주, 수생, 식물, 천익, 환수, 성휘, 이형, 불사, 기계
     public enum CharacterTokenState { None = -1, Cancel, Select, Confirm }
-    public enum CharacterTokenDirection { None = -1, Right = 0, UpRight, UpLeft, Left, DownLeft, DownRight }
+    public enum CharacterTokenDirection { None = -1, RightDown = 0, RightUp = 1, Up = 2, LeftUp = 3, LeftDown = 4, Down = 5 }
     public enum CharacterTier { None = -1, Boss, High, Middle, Low }
     public enum CharacterJob { None = -1, Dealer, Tanker, Supporter }
     public enum FilterType

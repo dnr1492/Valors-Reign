@@ -637,10 +637,15 @@ public class GridManager : Singleton<GridManager>
     public bool IsMyTokenAt(Vector2Int hex) => hexTileMap.TryGetValue((hex.x, hex.y), out var tile) && tile.AssignedTokenKey.HasValue && tile.IsMyToken;
     #endregion
 
-    #region 이동 처리 (feat.애니메이션)
+    #region 이동 처리 (feat.애니메이션) (feat.이동 방향으로 회전)
+    //선회 인덱스 계산 → 선회 → 이동 → 도착 후 동일 방향 고정
     public async UniTask MoveFromToByHexAsync(Vector2Int from, Vector2Int to)
     {
         if (!CanMove(from, to, out var fromTile, out var toTile)) return;
+
+        int dirIdx = ResolveDirectionIndex(from, to);
+        if (dirIdx >= 0 && fromTile.AssignedTokenKey.HasValue)
+            await fromTile.RotateAnimationAsync((CharacterTokenDirection)dirIdx, 0.15f);
 
         var fromTileRt = fromTile.GetComponent<RectTransform>();
         var toTileRt = toTile.GetComponent<RectTransform>();
@@ -649,11 +654,10 @@ public class GridManager : Singleton<GridManager>
         if (fromMaskTf == null || fromOutlineTf == null) return;
 
         //도착칸 이미지 잠시 비활성 (중복 노출 방지)
-        var toImg = toTile.transform.Find("mask/imgCharacter")?.GetComponent<Image>();
+        var toImg = toTile.transform.Find("mask/imgCharacter").GetComponent<Image>();
         if (toImg == null) return;
         toImg.enabled = false;
 
-        //토큰 이동 전용 레이어 확보
         EnsureTokenLayer();
 
         //이동 컨테이너 생성
@@ -663,13 +667,11 @@ public class GridManager : Singleton<GridManager>
         moverRT.position = fromTileRt.position;
         moverRT.SetAsLastSibling();
 
-        //원래 부모/인덱스 백업
         var maskOrigParent = fromMaskTf.parent;
         int maskOrigIndex = fromMaskTf.GetSiblingIndex();
         var outlineOrigParent = fromOutlineTf.parent;
         int outlineOrigIndex = fromOutlineTf.GetSiblingIndex();
 
-        //월드좌표 유지하며 컨테이너로 이동
         fromMaskTf.SetParent(moverRT, true);
         fromOutlineTf.SetParent(moverRT, true);
 
@@ -685,10 +687,8 @@ public class GridManager : Singleton<GridManager>
             await UniTask.Yield(PlayerLoopTiming.Update);
         }
 
-        //토큰/필드 갱신
         MoveTokenBattle((from.x, from.y), (to.x, to.y));
 
-        //원래 구조 복귀+레이아웃 리셋
         fromMaskTf.SetParent(maskOrigParent, false);
         fromMaskTf.SetSiblingIndex(maskOrigIndex);
         fromOutlineTf.SetParent(outlineOrigParent, false);
@@ -701,6 +701,9 @@ public class GridManager : Singleton<GridManager>
         mRt.anchoredPosition = Vector2.zero; oRt.anchoredPosition = Vector2.zero;
         mRt.localScale = Vector3.one; oRt.localScale = Vector3.one;
         mRt.localRotation = Quaternion.identity; oRt.localRotation = Quaternion.identity;
+
+        //이동 후 같은 방향으로 고정 (원위치 회전 방지)
+        if (dirIdx >= 0) toTile.SetCharacterTokenDirection((CharacterTokenDirection)dirIdx);
 
         //정리
         Destroy(moverGO);
@@ -753,6 +756,47 @@ public class GridManager : Singleton<GridManager>
         tokenLayer.anchorMax = Vector2.one;
         tokenLayer.offsetMin = Vector2.zero;
         tokenLayer.offsetMax = Vector2.zero;
+    }
+
+    //from → to가 인접칸일 때 정확히 방향 인덱스를 반환
+    private int GetDirectionIndexByOffset(Vector2Int from, Vector2Int to)
+    {
+        var moveCtrl = ControllerRegister.Get<MovementOrderController>();
+        Vector2Int d = to - from;
+        var dirs = ((from.x & 1) == 0) ? moveCtrl.EvenQDirs : moveCtrl.OddQDirs;
+        for (int i = 0; i < 6; i++) if (dirs[i] == d) return i;
+        return -1;  //인접이 아니면 -1
+    }
+
+    //비인접 이동 폴백 (각도 기반). bin 기준을 index 0 = RightDown의 월드각으로 교정
+    private int GetDirectionIndexByAngle(Vector2Int from, Vector2Int to)
+    {
+        if (!hexTileMap.TryGetValue((from.x, from.y), out var ft)) return -1;
+        if (!hexTileMap.TryGetValue((to.x, to.y), out var tt)) return -1;
+
+        Vector2 a = ft.GetComponent<RectTransform>().position;
+        Vector2 b = tt.GetComponent<RectTransform>().position;
+        Vector2 v = b - a;
+        if (v.sqrMagnitude < 0.000001f) return -1;
+
+        float ang = Mathf.Atan2(v.y, v.x) * Mathf.Rad2Deg;  //동 = 0도, 북 = +90도
+        if (ang < 0f) ang += 360f;
+
+        const float index0 = 330f;  //0 = RightDown 기준축을 330도로 고정 (실제 배치 각도에 맞춤)
+        float rel = ang - index0;
+        rel = (rel % 360f + 360f) % 360f;  //0...360 정규화
+
+        //경계 튐 방지: 30도 쉬프트 후 60도 단위로 Floor
+        int idx = Mathf.FloorToInt((rel + 30f) / 60f) % 6;
+        return idx;
+    }
+
+    //최종 방향 인덱스 선택: 1순위 오프셋, 2순위 각도 (멀리 이동하는 연출 대비)
+    private int ResolveDirectionIndex(Vector2Int from, Vector2Int to)
+    {
+        int idx = GetDirectionIndexByOffset(from, to);
+        if (idx >= 0) return idx;
+        return GetDirectionIndexByAngle(from, to);
     }
     #endregion
 

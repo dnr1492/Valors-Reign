@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using static EnumClass;
+using Cysharp.Threading.Tasks;
 
 public class HexTile : MonoBehaviour
 {
@@ -15,8 +16,10 @@ public class HexTile : MonoBehaviour
     public (int col, int row) GridPosition { get; private set; }
     public Nullable<int> AssignedTokenKey { get; private set; } = null;
     public CharacterToken AssignedToken { get; private set; }
-    public CharacterTokenDirection CharacterTokenDirection { get; private set; }  //캐릭터 토큰 방향 저장
     public bool IsMyToken { get; private set; }  //캐릭터 토큰이 내 것인지
+
+    private const float DIR_OFFSET_DEG = -120f;  //회전 보정값
+    private const float DIR_STEP = 60f;          //육각 6방향
 
     //헥스 타일 초기화
     public void Init((int, int) pos)
@@ -59,15 +62,6 @@ public class HexTile : MonoBehaviour
         imgCharacter.color = color;
     }
 
-    //캐릭터 토큰 방향 설정 (현재 사용하지 않음 - 추후 검증 기능 구현 시 사용 예정)
-    //사용 예시: hexTile.SetCharacterTokenDirection(CharacterTokenDirection.UpLeft);
-    public void SetCharacterTokenDirection(CharacterTokenDirection direction)
-    {
-        float[] angles = { 0f, 60f, 120f, 180f, 240f, 300f };
-        int index = Mathf.Clamp((int)direction, 0, 5);
-        imgCharacter.rectTransform.rotation = Quaternion.Euler(0, 0, -angles[index]);  //시계방향 회전
-    }
-
     //티어별 텍스트를 표시
     public void DisplayTierText(string txt)
     {
@@ -87,4 +81,37 @@ public class HexTile : MonoBehaviour
         txtTier.fontSize = tierFontSize;
         txtCost.fontSize = costFontSize;
     }
+
+    //이동 방향으로 부드러운 선회
+    public async UniTask RotateAnimationAsync(CharacterTokenDirection direction, float duration)
+    {
+        int index = Mathf.Clamp((int)direction, 0, 5);
+        float targetZ = IndexToAngle(index);
+        var rt = imgCharacter.rectTransform;
+
+        float startZ = rt.localEulerAngles.z;
+        float t = 0f;
+        float dur = Mathf.Max(0.0001f, duration);
+        while (t < 1f)
+        {
+            t += Time.deltaTime / dur;
+            float z = Mathf.LerpAngle(startZ, targetZ, Mathf.Clamp01(t));
+            ApplyRotationZ(z);
+            await UniTask.Yield(PlayerLoopTiming.Update);
+        }
+        ApplyRotationZ(targetZ);
+    }
+
+    //즉시 방향 고정 (도착 후 되돌림 방지용)
+    public void SetCharacterTokenDirection(CharacterTokenDirection direction)
+    {
+        int index = Mathf.Clamp((int)direction, 0, 5);
+        ApplyRotationZ(IndexToAngle(index));
+    }
+
+    //인덱스 → 각도로 변환
+    private float IndexToAngle(int index) => DIR_OFFSET_DEG + index * DIR_STEP;
+
+    //회전 적용
+    private void ApplyRotationZ(float z) => imgCharacter.rectTransform.localRotation = Quaternion.Euler(0, 0, z);  
 }
