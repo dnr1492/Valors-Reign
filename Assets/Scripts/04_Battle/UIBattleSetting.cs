@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.EventSystems;
-using Cysharp.Threading.Tasks;
+using TMPro;
 
 public class UIBattleSetting : UIPopupBase
 {
@@ -31,6 +29,10 @@ public class UIBattleSetting : UIPopupBase
 
     [Header("Setting SkillCardRoundZone")]
     [SerializeField] SkillCardRoundSlot[] roundSlots = new SkillCardRoundSlot[4];  //SkillCardRoundSlot 4칸 연결
+
+    [Header("SkillCard Detail UI")]
+    [SerializeField] Transform skillCardCopyZone;                  //클론을 붙일 영역
+    [SerializeField] TextMeshProUGUI txtSkillCardDescriptionZone;  //설명 표시
 
     private void OnToast(string msg) => UIManager.Instance.ShowPopup<UIModalPopup>("UIModalPopup", false).Set("알림", msg);
 
@@ -149,6 +151,7 @@ public class UIBattleSetting : UIPopupBase
             var drag = go.GetComponent<SkillCardEvent>();
             drag.Set(skillCardData, rootCanvas, roundSlots, skillCardZone, RefreshSkillCardZoneLayout);
             drag.onDropToRoundSlot = OnDropToRoundSlot;  //슬롯에 제대로 떨어졌을 때 처리
+            drag.onSkillCardClick = OnSkillCardClicked;  //스킬카드를 클릭할 경우에 대한 이벤트
         }
 
         EnsureBasicMoveCardInCardZone();
@@ -307,6 +310,7 @@ public class UIBattleSetting : UIPopupBase
                 var drag = go.GetComponent<SkillCardEvent>();
                 drag.Set(basicMoveCardData, rootCanvas, roundSlots, skillCardZone, RefreshSkillCardZoneLayout);
                 drag.onDropToRoundSlot = OnDropToRoundSlot;
+                drag.onSkillCardClick = OnSkillCardClicked;  //스킬카드를 클릭할 경우에 대한 이벤트
             }
             else Debug.Log("[UIBattleSetting] 기본 이동카드(1000) 데이터를 찾지 못했습니다.");
         }
@@ -319,6 +323,38 @@ public class UIBattleSetting : UIPopupBase
           && s.AssignedSkillCardData.id == 1000
           && s.GetComponentInChildren<SkillCardEvent>() != null  //실제 카드가 붙어 있을 때만 카운트
     );
+    #endregion
+
+    #region DetailZone에 스킬카드 Detail 표시
+    private void OnSkillCardClicked(SkillCardEvent evt)
+    {
+        if (evt == null || evt.SkillCardData == null) return;
+
+        //설명 텍스트 갱신
+        if (txtSkillCardDescriptionZone != null)
+            txtSkillCardDescriptionZone.text = evt.SkillCardData.effect ?? string.Empty;
+
+        //기존 클론 제거 (항상 하나만 유지)
+        if (skillCardCopyZone != null)
+        {
+            for (int i = skillCardCopyZone.childCount - 1; i >= 0; i--)
+                Destroy(skillCardCopyZone.GetChild(i).gameObject);
+
+            //원본을 그대로 복제해서 현재 상태로 보여준다.
+            //단, 기본 이동카드인 경우 기본 이미지로 보여준다.
+            var clone = Instantiate(evt.gameObject, skillCardCopyZone);
+            var skillCard = clone.GetComponent<SkillCard>();
+            var sprite = SpriteManager.Instance.dicSkillSprite.TryGetValue(evt.SkillCardData.name, out var sp) ? sp : null;
+            skillCard.Set(sprite, evt.SkillCardData);
+            skillCard.ResetImageIfMoveCard();
+            var rt = clone.GetComponent<RectTransform>();
+            rt.anchoredPosition = Vector2.zero;
+
+            //클론은 클릭/드래그 불가능
+            var cloneEvt = clone.GetComponent<SkillCardEvent>();
+            if (cloneEvt != null) cloneEvt.enabled = false;
+        }
+    }
     #endregion
 
     protected override void ResetUI() { }

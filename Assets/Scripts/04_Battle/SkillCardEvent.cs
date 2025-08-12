@@ -20,6 +20,7 @@ public class SkillCardEvent : MonoBehaviour, IBeginDragHandler, IDragHandler, IE
     public SkillCardData SkillCardData { get; private set; }
 
     public Action<SkillCardEvent, SkillCardRoundSlot> onDropToRoundSlot;
+    public Action<SkillCardEvent> onSkillCardClick;
 
     public void Set(SkillCardData skillCardData,
         Canvas rootCanvas,
@@ -165,15 +166,8 @@ public class SkillCardEvent : MonoBehaviour, IBeginDragHandler, IDragHandler, IE
         }
     }
 
-    // ================================ 구현 중 ================================ //
-    // ================================ 구현 중 ================================ //
-    // ================================ 구현 중 ================================ //
-
-    public Action<SkillCardEvent> onSkillCardClick;
-
     public void OnPointerClick(PointerEventData e)
     {
-        Debug.Log("추후 스킬카드를 클릭할 경우 이벤트");
         onSkillCardClick?.Invoke(this);
     }
 }

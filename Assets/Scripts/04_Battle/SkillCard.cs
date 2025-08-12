@@ -14,7 +14,7 @@ public class SkillCard : MonoBehaviour
     private readonly List<GameObject> skillHexes = new();
     private readonly Dictionary<(int dq, int dr), GameObject> skillHexMap = new();
 
-    private Sprite originalSkillSprite;  //원본 스킬 스프라이트 보관
+    private Sprite originalBasicMoveSkillSprite;  //원본 기본 이동카드의 스프라이트 보관
 
     public SkillCardData SkillCardData { get; private set; }
 
@@ -25,7 +25,7 @@ public class SkillCard : MonoBehaviour
         txtSkillName.text = skillCardData.name;
         txtSkillEffect.text = skillCardData.effect;
         imgSkill.sprite = sprite;
-        originalSkillSprite = sprite;
+        originalBasicMoveSkillSprite = sprite;
 
         UISkillHexGridHelper.ClearSkillHexGrid(skillHexes, skillHexMap);
         UISkillHexGridHelper.CreateSkillHexGrid(hexContainer, hexPrefab, skillHexes, skillHexMap, 1.1f);
@@ -45,6 +45,6 @@ public class SkillCard : MonoBehaviour
     public void ResetImageIfMoveCard()
     {
         if (SkillCardData != null && SkillCardData.id == 1000)
-            imgSkill.sprite = originalSkillSprite;
+            imgSkill.sprite = originalBasicMoveSkillSprite;
     }
 }

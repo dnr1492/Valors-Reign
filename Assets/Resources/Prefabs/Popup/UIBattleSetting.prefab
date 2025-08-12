@@ -146,7 +146,7 @@ GameObject:
   - component: {fileID: 6352733687861797625}
   - component: {fileID: 993499054903820403}
   m_Layer: 5
-  m_Name: SkillCardCopyZone
+  m_Name: CopyZone
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -464,7 +464,7 @@ GameObject:
   - component: {fileID: 8633768033630315621}
   - component: {fileID: 6038747941488466367}
   m_Layer: 5
-  m_Name: SkillCardRoundZone
+  m_Name: RoundZone
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -906,7 +906,7 @@ GameObject:
   - component: {fileID: 7768326542649787919}
   - component: {fileID: 3413607028111164941}
   m_Layer: 5
-  m_Name: SkillCardZone
+  m_Name: CardZone
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1041,7 +1041,7 @@ GameObject:
   - component: {fileID: 6621854675225552778}
   - component: {fileID: 1061032308272064484}
   m_Layer: 5
-  m_Name: SkillCardDescriptionZone
+  m_Name: txt_DescriptionZone
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1063,8 +1063,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 69.99997, y: 0}
-  m_SizeDelta: {x: -140, y: -20}
+  m_AnchoredPosition: {x: 70, y: 0}
+  m_SizeDelta: {x: -160, y: -20}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &6621854675225552778
 CanvasRenderer:
@@ -1094,7 +1094,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\uC2A4\uD0AC \uCE74\uB4DC\uC758 \uC124\uBA85\uC744 \uD45C\uC2DC\uD558\uC2ED\uC2DC\uC624."
+  m_text: "\uC2A4\uD0AC\uCE74\uB4DC\uB97C \uC120\uD0DD\uD558\uBA74 \uC815\uBCF4\uAC00
+    \uD45C\uC2DC\uB429\uB2C8\uB2E4."
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: cc604f61b5bf19348a3ff622f20f4545, type: 2}
   m_sharedMaterial: {fileID: -9131770026233852502, guid: cc604f61b5bf19348a3ff622f20f4545, type: 2}
@@ -1121,8 +1122,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 30
-  m_fontSizeBase: 30
+  m_fontSize: 25
+  m_fontSizeBase: 25
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -1584,7 +1585,7 @@ GameObject:
   - component: {fileID: 3162583624232353110}
   - component: {fileID: 6432686581834953004}
   m_Layer: 5
-  m_Name: SkillCardDescriptionZone
+  m_Name: DetailZone
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1838,3 +1839,5 @@ MonoBehaviour:
   - {fileID: 3042557905844957636}
   - {fileID: 398056571963699029}
   - {fileID: 4326958257394309128}
+  skillCardCopyZone: {fileID: 4298379551621887335}
+  txtSkillCardDescriptionZone: {fileID: 1061032308272064484}
