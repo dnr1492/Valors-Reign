@@ -8,7 +8,6 @@ using TMPro;
 public class UIBattleSetting : UIPopupBase
 {
     [SerializeField] GameObject uiCoinFlipPrefab;
-    [SerializeField] Button btn_back;
     [SerializeField] Button btn_testStartRound;
 
     private Canvas rootCanvas;

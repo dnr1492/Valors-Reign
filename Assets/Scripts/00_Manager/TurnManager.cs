@@ -1,4 +1,4 @@
-using Cysharp.Threading.Tasks;
+ï»¿using Cysharp.Threading.Tasks;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,7 +17,7 @@ public class TurnManager : Singleton<TurnManager>
         base.Awake();
     }
 
-    #region ¸ÅÄ¡ ½ÃÀÛ
+    #region ë§¤ì¹˜ ì‹œì‘
     public void StartMatch(bool iAmFirst)
     {
         trnIndex = 1;
@@ -25,8 +25,8 @@ public class TurnManager : Singleton<TurnManager>
         this.isMyRound = iAmFirst;
 
         var photon = ControllerRegister.Get<PhotonController>();
-        CardManager.Instance.InitDeckFromDeckPack(photon.MyDeckPack);             //µ¦ ÃÊ±âÈ­
-        CombatManager.Instance.InitCharacterInfoFromDeckPack(photon.MyDeckPack);  //Ä³¸¯ÅÍ Á¤º¸ ÃÊ±âÈ­
+        CardManager.Instance.InitDeckFromDeckPack(photon.MyDeckPack);             //ë± ì´ˆê¸°í™”
+        CombatManager.Instance.InitCharacterInfoFromDeckPack(photon.MyDeckPack);  //ìºë¦­í„° ì •ë³´ ì´ˆê¸°í™”
 
         var movementOrderCtrl = ControllerRegister.Get<MovementOrderController>();
         if (movementOrderCtrl == null)
@@ -40,58 +40,58 @@ public class TurnManager : Singleton<TurnManager>
     }
     #endregion
 
-    // ================================ ±¸Çö Áß ================================ //
-    // ================================ ±¸Çö Áß ================================ //
-    // ================================ ±¸Çö Áß ================================ //
+    // ================================ êµ¬í˜„ ì¤‘ ================================ //
+    // ================================ êµ¬í˜„ ì¤‘ ================================ //
+    // ================================ êµ¬í˜„ ì¤‘ ================================ //
 
     private void ProceedToNextTurn()
     {
-        Debug.Log($"[ÅÏ {trnIndex} ½ÃÀÛ]");
+        Debug.Log($"[í„´ {trnIndex} ì‹œì‘]");
 
-        //1. »ıÁ¸ Ä³¸¯ÅÍ ¼ö °è»ê
+        //1. ìƒì¡´ ìºë¦­í„° ìˆ˜ ê³„ì‚°
         int aliveCharacterCount = CombatManager.Instance.GetAliveCharacterCount();
 
-        //2. Ä«µå µå·Î¿ì
-        CardManager.Instance.DrawSkillCards(aliveCharacterCount * 2);   //»ıÁ¸ Ä³¸¯ÅÍ ¼ö ¡¿ 2 Àå µå·Î¿ì + ±âº» ÀÌµ¿Ä«µå 1 Àå
+        //2. ì¹´ë“œ ë“œë¡œìš°
+        CardManager.Instance.DrawSkillCards(aliveCharacterCount * 2);   //ìƒì¡´ ìºë¦­í„° ìˆ˜ Ã— 2 ì¥ ë“œë¡œìš° + ê¸°ë³¸ ì´ë™ì¹´ë“œ 1 ì¥
 
-        //3. µå·Î¿ìÇÑ ½ºÅ³Ä«µå¸¦ Ç¥½Ã
+        //3. ë“œë¡œìš°í•œ ìŠ¤í‚¬ì¹´ë“œë¥¼ í‘œì‹œ
         UIManager.Instance.GetPopup<UIBattleSetting>("UIBattleSetting")
             .SetDrawnSkillCard(CardManager.Instance.GetDrawnSkillCards());
     }
 
-    #region ¶ó¿îµå ÁøÇà (¶ó¿îµå Áõ°¡ ¡æ Á¾·á °Ë»ç ¡æ ¶ó¿îµå ¼ÒÀ¯±Ç ¼³Á¤ ¡æ ÀÌµ¿/½ºÅ³Ä«µå ½ÇÇà)
+    #region ë¼ìš´ë“œ ì§„í–‰ (ë¼ìš´ë“œ ì¦ê°€ â†’ ì¢…ë£Œ ê²€ì‚¬ â†’ ë¼ìš´ë“œ ì†Œìœ ê¶Œ ì„¤ì • â†’ ì´ë™/ìŠ¤í‚¬ì¹´ë“œ ì‹¤í–‰)
     public async void StartRound()
     {
         roundIndex++;
 
-        //ÃÖ´ë ¶ó¿îµå ÃÊ°ú ½Ã ´ÙÀ½ ÅÏÀ¸·Î ÀüÈ¯
+        //ìµœëŒ€ ë¼ìš´ë“œ ì´ˆê³¼ ì‹œ ë‹¤ìŒ í„´ìœ¼ë¡œ ì „í™˜
         if (roundIndex > 4) {
             EndRound();
             return;
         }
 
-        //ÇöÀç ¶ó¿îµå°¡ ³» ¶ó¿îµåÀÎÁö ÆÇÁ¤
+        //í˜„ì¬ ë¼ìš´ë“œê°€ ë‚´ ë¼ìš´ë“œì¸ì§€ íŒì •
         isMyRound = IsMyRound(roundIndex);
 
-        // ==================== ¿©±â¼­ ½ºÅ³Ä«µå ½ÇÇà ·ÎÁ÷ µé¾î°¨ ==================== //
+        // ==================== ì—¬ê¸°ì„œ ìŠ¤í‚¬ì¹´ë“œ ì‹¤í–‰ ë¡œì§ ë“¤ì–´ê° ==================== //
 
-        //ÀÌµ¿ ¿À´õ Àç°ËÁõ + ¼øÂ÷ ½ÇÇà
+        //ì´ë™ ì˜¤ë” ì¬ê²€ì¦ + ìˆœì°¨ ì‹¤í–‰
         var movementOrderCtrl = ControllerRegister.Get<MovementOrderController>();
         if (movementOrderCtrl != null)
         {
-            //¶ó¿îµå ½ÃÀÛ Á÷Àü ÀüÃ¼ Àç°ËÁõ (fromHexPos ±âÁØ)
+            //ë¼ìš´ë“œ ì‹œì‘ ì§ì „ ì „ì²´ ì¬ê²€ì¦ (fromHexPos ê¸°ì¤€)
             bool ok = movementOrderCtrl.ValidateAllBeforeRound(); 
 
-            //¼ø¼­´ë·Î ½ÇÇà(1 ¡æ 4). ¿Ï·á ÈÄ ÈÄ¼Ó Ã³¸®(´ÙÀ½ ½ºÅ³ µî)´Â Äİ¹é¿¡¼­ ÀÌ¾î°¡±â.
+            //ìˆœì„œëŒ€ë¡œ ì‹¤í–‰(1 â†’ 4). ì™„ë£Œ í›„ í›„ì† ì²˜ë¦¬(ë‹¤ìŒ ìŠ¤í‚¬ ë“±)ëŠ” ì½œë°±ì—ì„œ ì´ì–´ê°€ê¸°.
             await UniTask.Create(async () => {
                 bool done = false;
                 movementOrderCtrl.ExecuteInOrder(() => {
-                    Debug.Log("[Turn] ÀÌµ¿ ½ÇÇà ¿Ï·á");
-                    // ===== TODO: ÀÌµ¿ ¿Ü ´Ù¸¥ ½ºÅ³ ½ÇÇà/¶ó¿îµå ÁøÇàÀ» ¿©±â¿¡ ÀÌ¾î ºÙÀÌ¼¼¿ä. ===== //
+                    Debug.Log("[Turn] ì´ë™ ì‹¤í–‰ ì™„ë£Œ");
+                    // ===== TODO: ì´ë™ ì™¸ ë‹¤ë¥¸ ìŠ¤í‚¬ ì‹¤í–‰/ë¼ìš´ë“œ ì§„í–‰ì„ ì—¬ê¸°ì— ì´ì–´ ë¶™ì´ì„¸ìš”. ===== //
                     done = true;
                 });
 
-                //¿Ï·á±îÁö ÇÁ·¹ÀÓ ´ë±â
+                //ì™„ë£Œê¹Œì§€ í”„ë ˆì„ ëŒ€ê¸°
                 while (!done) await UniTask.Yield(PlayerLoopTiming.Update);  
             });
         }
@@ -102,7 +102,7 @@ public class TurnManager : Singleton<TurnManager>
 
     private void EndRound()
     {
-        Debug.Log($"[ÅÏ {trnIndex} Á¾·á]");
+        Debug.Log($"[í„´ {trnIndex} ì¢…ë£Œ]");
 
         trnIndex++;
         roundIndex = 0;
