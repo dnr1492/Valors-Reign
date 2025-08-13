@@ -46,10 +46,13 @@ public class GridManager : Singleton<GridManager>
     private float costFontSize;
 
     [Header("Highlight")]
-    private readonly Color HL_SELECT = new Color(0.2f, 1f, 0.2f, 1f);  //하이라이트 색상 초록
-    private readonly Color HL_CANDID = new Color(1f, 0.2f, 0.2f, 1f);  //하이라이트 색상 빨강
+    private readonly Color HL_SELECT = new Color(0.2f, 1f, 0.2f, 1f);     //하이라이트 색상 초록
+    private readonly Color HL_RESERVED = new Color(1f, 0.95f, 0.6f, 1f);  //하이라이트 색상 연노랑
+    private readonly Color HL_CANDID = new Color(1f, 0.2f, 0.2f, 1f);     //하이라이트 색상 빨강
     private readonly List<OutlineSnapshot> selectedSnaps = new();  //현재 프레임에 적용된 하이라이트 기록
+    private readonly List<OutlineSnapshot> reservedSnaps = new();  //현재 프레임에 적용된 하이라이트 기록
     private readonly List<OutlineSnapshot> candidSnaps = new();    //현재 프레임에 적용된 하이라이트 기록
+
     private struct OutlineSnapshot  //원복을 위한 스냅샷
     {
         public Image img;
@@ -827,7 +830,7 @@ public class GridManager : Singleton<GridManager>
         Debug.Log("[Highlight] 내 캐릭터 선택 단계");
     }
 
-    //이동 후보 좌표 하이라이트
+    //이동 후보만 하이라이트
     public void OnHighlightCandidateCells(IEnumerable<Vector2Int> hexes)
     {
         RestoreSnapshots(candidSnaps);
@@ -857,6 +860,52 @@ public class GridManager : Singleton<GridManager>
         Debug.Log($"[Highlight] 이동 가능한 좌표: {string.Join(",", hexes)}");
     }
 
+    //이동 후보(빨강) + 예약(연노랑) 하이라이트 동시 처리
+    public void OnHighlightCandidateCells(IEnumerable<Vector2Int> candidates, IEnumerable<Vector2Int> reserved)
+    {
+        //기존 스냅샷 원복
+        RestoreSnapshots(candidSnaps);
+        RestoreSnapshots(reservedSnaps);
+        candidSnaps.Clear();
+        reservedSnaps.Clear();
+
+        var reservedSet = new HashSet<Vector2Int>(reserved ?? Array.Empty<Vector2Int>());
+
+        //1) 후보 칠하기 (빨강)
+        foreach (var h in candidates)
+        {
+            if (!TryGetOutline(h, out var img)) continue;
+
+            //선택(초록)으로 이미 칠한 칸은 건너뜀
+            bool alreadySelected = selectedSnaps.Any(s => s.img == img);
+            if (!alreadySelected)
+            {
+                candidSnaps.Add(new OutlineSnapshot { img = img, origColor = img.color, origActive = img.gameObject.activeSelf });
+                img.color = HL_CANDID;
+            }
+            if (!img.gameObject.activeSelf) img.gameObject.SetActive(true);
+            img.transform.SetAsLastSibling();
+        }
+
+        //2) 예약 칠하기
+        //초록(선택) → 연노랑(예약) → 빨강(이동 후보) 순서 보장
+        foreach (var h in reservedSet)
+        {
+            if (!TryGetOutline(h, out var img)) continue;
+
+            bool alreadySelected = selectedSnaps.Any(s => s.img == img);
+            if (alreadySelected) continue;  //초록이 최우선
+
+            //연노랑 스냅샷 기록하고 색 덮어씀 (빨강 위에 우선)
+            reservedSnaps.Add(new OutlineSnapshot { img = img, origColor = img.color, origActive = img.gameObject.activeSelf });
+            img.color = HL_RESERVED;
+            if (!img.gameObject.activeSelf) img.gameObject.SetActive(true);
+            img.transform.SetAsLastSibling();
+        }
+
+        Debug.Log($"[Highlight] 후보:{string.Join(",", candidates)} | 예약:{string.Join(",", reservedSet)}");
+    }
+
     //outline 찾기
     private bool TryGetOutline(Vector2Int hex, out Image img)
     {
@@ -876,8 +925,10 @@ public class GridManager : Singleton<GridManager>
     {
         RestoreSnapshots(candidSnaps);
         RestoreSnapshots(selectedSnaps);
+        RestoreSnapshots(reservedSnaps);
         candidSnaps.Clear();
         selectedSnaps.Clear();
+        reservedSnaps.Clear();
         Debug.Log("[Highlight] Clear");
     }
 

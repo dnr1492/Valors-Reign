@@ -198,8 +198,11 @@ public class PhotonController : MonoBehaviourPunCallbacks
     #region (동전 던지기) 선공 선택권 결정
     public void RequestCoinFlip(int myCoinDriection)
     {
-        //int coinDirectionResult = Random.Range(0, 2);  //0: 앞면, 1: 뒷면
-        int coinDirectionResult = 0;  // ===== TODO: 임시로 앞면만 선공 선택권을 가지도록 구현 ===== //
+        int coinDirectionResult;
+#if UNITY_EDITOR
+        coinDirectionResult = 0;
+#endif
+        coinDirectionResult = Random.Range(0, 2);  //0: 앞면, 1: 뒷면
 
         if (PhotonNetwork.IsMasterClient)
         {
@@ -247,7 +250,7 @@ public class PhotonController : MonoBehaviourPunCallbacks
             ? selectedFirst
             : !selectedFirst;
 
-        TurnManager.Instance.StartTurn(iAmFirst);
+        TurnManager.Instance.StartMatch(iAmFirst);
 
         LoadingManager.Instance.Hide();
 

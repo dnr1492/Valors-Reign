@@ -17,12 +17,12 @@ public class TurnManager : Singleton<TurnManager>
         base.Awake();
     }
 
-    #region 턴 시작
-    public void StartTurn(bool isMyRound)
+    #region 매치 시작
+    public void StartMatch(bool iAmFirst)
     {
         trnIndex = 1;
         roundIndex = 0;
-        this.isMyRound = isMyRound;
+        this.isMyRound = iAmFirst;
 
         var photon = ControllerRegister.Get<PhotonController>();
         CardManager.Instance.InitDeckFromDeckPack(photon.MyDeckPack);             //덱 초기화

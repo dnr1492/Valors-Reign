@@ -47,9 +47,10 @@ public class MovementOrderController : MonoBehaviour
     #endregion
 
     #region [UI] 하이라이트 표시
-    public Action<IEnumerable<int>> UI_HighlightMyCharacters;           //[UI] 내 캐릭터들의 ID 목록을 하이라이트 표시
-    public Action<IEnumerable<Vector2Int>> UI_HighlightCandidateCells;  //[UI] 이동 후보 셀 좌표 목록을 하이라이트 표시
-    public Action UI_ClearHighlights;                                   //[UI] 모든 하이라이트 제거
+    public Action<IEnumerable<int>> UI_HighlightMyCharacters;                                      //[UI] 내 캐릭터들의 ID 목록을 하이라이트 표시
+    public Action<IEnumerable<Vector2Int>> UI_HighlightCandidateCells;                             //[UI] 이동 후보 셀 좌표 목록을 하이라이트 표시
+    public Action<IEnumerable<Vector2Int>, IEnumerable<Vector2Int>> UI_HighlightCandidateCellsEx;  //[UI] 이동 후보 + 예약 동시 하이라이트 표시
+    public Action UI_ClearHighlights;                                                              //[UI] 모든 하이라이트 제거
     #endregion
 
     #region [UI] 토스트 메시지 표시
@@ -219,7 +220,7 @@ public class MovementOrderController : MonoBehaviour
             return;
         }
 
-        //5) 인접 후보 계산 → 표시
+        //5) 인접 후보 계산 → 이동 후보 표시 + 예약해 둔 경우 같이 표시
         selectingTokenKey = tokenKey;
         selectingCharHexPos = charHexPos;
         var candidates = ComputeValidNeighbors(selectingCharHexPos);
@@ -230,7 +231,9 @@ public class MovementOrderController : MonoBehaviour
             UI_HighlightMyCharacters?.Invoke(GetMyAliveCharacterIds().Where(id => !used.Contains(id)));
             return;
         }
-        UI_HighlightCandidateCells?.Invoke(candidates);
+        var reserved = reservedByHexPos.Keys;  //예약해 둔 목적지들
+        if (UI_HighlightCandidateCellsEx != null) UI_HighlightCandidateCellsEx.Invoke(candidates, reserved);
+        else UI_HighlightCandidateCells?.Invoke(candidates);
     }
 
     public bool OnHexClicked(Vector2Int destinationHexPos)
@@ -501,7 +504,9 @@ public class MovementOrderController : MonoBehaviour
             return;
         }
 
-        UI_HighlightCandidateCells?.Invoke(candidates);
+        var reserved = reservedByHexPos.Keys;
+        if (UI_HighlightCandidateCellsEx != null) UI_HighlightCandidateCellsEx.Invoke(candidates, reserved);
+        else UI_HighlightCandidateCells?.Invoke(candidates);
     }
 
     public void CancelEdit()

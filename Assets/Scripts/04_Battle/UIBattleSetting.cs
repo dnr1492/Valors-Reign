@@ -65,6 +65,9 @@ public class UIBattleSetting : UIPopupBase
             movementOrderCtrl.UI_HighlightCandidateCells -= GridManager.Instance.OnHighlightCandidateCells;
             movementOrderCtrl.UI_HighlightCandidateCells += GridManager.Instance.OnHighlightCandidateCells;
 
+            movementOrderCtrl.UI_HighlightCandidateCellsEx -= GridManager.Instance.OnHighlightCandidateCells;
+            movementOrderCtrl.UI_HighlightCandidateCellsEx += GridManager.Instance.OnHighlightCandidateCells;
+
             movementOrderCtrl.UI_ClearHighlights -= GridManager.Instance.OnClearHighlights;
             movementOrderCtrl.UI_ClearHighlights += GridManager.Instance.OnClearHighlights;
 
