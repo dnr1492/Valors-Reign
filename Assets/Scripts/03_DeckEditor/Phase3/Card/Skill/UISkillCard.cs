@@ -58,7 +58,7 @@ public class UISkillCard : MonoBehaviour
         txtSelectedSkillCount.text = count.ToString();
 
         UISkillHexGridHelper.ClearSkillHexGrid(skillHexes, skillHexMap);
-        UISkillHexGridHelper.CreateSkillHexGrid(hexContainer, hexPrefab, skillHexes, skillHexMap, 1.1f);
+        UISkillHexGridHelper.CreateSkillHexGrid(hexContainer, hexPrefab, skillHexes, skillHexMap);
         UISkillHexGridHelper.ShowSkillHexRange(skillCardData, skillHexMap);
     }
 

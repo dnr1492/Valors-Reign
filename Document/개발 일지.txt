@@ -9,9 +9,6 @@
     (덱 이름을 누르고 바로 저장을 누를 경우... 또는 다른 곳 클릭할 경우)
     (Error: Attempting to select while already selecting an object)
 2. Ring1의 범위 표시 중 좌표 1개가 맞지 않는 버그
-3. 스킬카드 드래그 시 스킬범위 쪽은 드래그가 안되는 버그
-     => HexTileEvent 때문인 거 같은데?? hexContainer 비활성화하고 해보면 잘 됨...
-     => 추가로 스킬범위의 Hex의 크기가 너무 큼.. 줄여야 함
 
 ***Photon 버그
 - (예정) Photon 연결 또는 룸 생성 중 취소를 눌려도 뒤 로직이 자동으로 호출되는 버그 
@@ -24,6 +21,8 @@
 - 추후 스킬카드 선택 시 '필드에 범위 표시'  구현
 - 추후 스킬카드의 Effect 통일 (ex) 피해 (데미지X), 회복 (힐X), [패시브] 표시 등)
 - 추후 선공부터 라운드 교차 진행 구현 (feat.PhotonController, TurnManager)
+- 추후 스킬범위의 Hex를 Container의 크기에 맞게 SizeDelta를 조절하면서 표시할 스킬범위에 따라 Row/Col을 표시하도록 수정
+  (UISkillHexGridHelper)
 
 ***참고
 - 서버 관련 로직을 변경 또는 뒤끝 콘솔에서 데이터를 변경한 경우

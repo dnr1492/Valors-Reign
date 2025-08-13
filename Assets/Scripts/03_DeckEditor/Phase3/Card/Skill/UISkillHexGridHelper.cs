@@ -1,17 +1,16 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using static EnumClass;
 
 public static class UISkillHexGridHelper
 {
     private readonly static float spacingX = 1f;
     private readonly static float spacingY = 0.5f;
-    private readonly static int visualOffset = 2;  //Hex »ı¼ºÀ» À§, ¾Æ·¡ 2Ä­¾¿ ´õ Ãß°¡
+    private readonly static int visualOffset = 2;  //Hex ìƒì„±ì„ ìœ„, ì•„ë˜ 2ì¹¸ì”© ë” ì¶”ê°€
 
-    #region Skill HexGrid »ı¼º
+    #region Skill HexGrid ìƒì„±
     public static void CreateSkillHexGrid(RectTransform container, GameObject prefab, List<GameObject> hexList,
-                                Dictionary<(int, int), GameObject> hexMap, float hexScale)
+                                Dictionary<(int, int), GameObject> hexMap)
     {
         float baseHexWidth = 24f;
         float baseHexHeight = baseHexWidth * Mathf.Sqrt(3f) / 2f;
@@ -30,9 +29,6 @@ public static class UISkillHexGridHelper
         float hexWidth = (parentWidth - spacingX * (cols - 1)) / (cols * 0.75f + 0.25f);
         float hexHeight = hexWidth * Mathf.Sqrt(3f) / 2f;
 
-        hexWidth *= hexScale;
-        hexHeight *= hexScale;
-
         for (int dq = -halfCols; dq <= halfCols; dq++)
         {
             for (int dr = -(halfRows + visualOffset); dr <= (halfRows + visualOffset); dr++)
@@ -43,6 +39,12 @@ public static class UISkillHexGridHelper
                 var hexTile = hex.GetComponent<HexTile>();
                 hexTile.Init((dq, dr));
                 hexMap[(dq, dr)] = hex;
+
+                var hexTileEditorEvent = hex.GetComponent<HexTileEditorEvent>();
+                hexTileEditorEvent.enabled = false;
+
+                var hexTileBattleEvent = hex.GetComponent<HexTileBattleEvent>();
+                hexTileBattleEvent.enabled = false;
 
                 var rt = hex.GetComponent<RectTransform>();
                 rt.sizeDelta = new Vector2(hexWidth, hexHeight);
@@ -55,7 +57,7 @@ public static class UISkillHexGridHelper
     }
     #endregion
 
-    #region Skill HexGrid ÃÊ±âÈ­
+    #region Skill HexGrid ì´ˆê¸°í™”
     public static void ClearSkillHexGrid(List<GameObject> hexList, Dictionary<(int, int), GameObject> hexMap)
     {
         foreach (var hex in hexList)
@@ -65,7 +67,7 @@ public static class UISkillHexGridHelper
     }
     #endregion
 
-    #region Skill HexGrid¿¡ ½ºÅ³ ¹üÀ§¸¦ Ç¥½Ã
+    #region Skill HexGridì— ìŠ¤í‚¬ ë²”ìœ„ë¥¼ í‘œì‹œ
     public static void ShowSkillHexRange(SkillCardData data, Dictionary<(int, int), GameObject> hexMap)
     {
         List<(int dq, int dr, Color color)> range = new();
@@ -82,14 +84,14 @@ public static class UISkillHexGridHelper
         //        range.AddRange(SkillRangeHelper.GetLine((0, -1), 3, Color.red));
         //        break;
         //    case SkillRangeType.Ring1:
-        //        range.AddRange(SkillRangeHelper.GetRing(1, Color.green));  //1Ä­, ringÀº ÃÊ·Ï
+        //        range.AddRange(SkillRangeHelper.GetRing(1, Color.green));  //1ì¹¸, ringì€ ì´ˆë¡
         //        break;
         //    case SkillRangeType.Custom:
         //        range = data.customOffsetRange;
         //        break;
         //}
 
-        //¸ÕÀú ÀüÃ¼ ¹üÀ§ Ç¥½Ã (Áß½É Á¦¿Ü)
+        //ë¨¼ì € ì „ì²´ ë²”ìœ„ í‘œì‹œ (ì¤‘ì‹¬ ì œì™¸)
         foreach (var (dq, dr, color) in range)
         {
             if (dq == 0 && dr == 0) continue;
@@ -97,11 +99,9 @@ public static class UISkillHexGridHelper
                 hex.GetComponent<HexTile>().SetColor(color);
         }
 
-        //Áß½ÉÀº Ç×»ó È¸»ö
+        //ì¤‘ì‹¬ì€ í•­ìƒ íšŒìƒ‰
         if (hexMap.TryGetValue((0, 0), out var centerHex))
             centerHex.GetComponent<HexTile>().SetColor(Color.gray);
     }
     #endregion
-
-    // ============== ¿øÇü(Ring1)ÀÇ °æ¿ì Á¦´ë·Î Àû¿ëÀÌ ¾ÈµÇ´Â ¹ö±×... ================= //
 }
