@@ -34,6 +34,7 @@ public class UISkillInfoPopup : UIPopupBase
     public void Init(List<SkillCardData> skillDataList, CharacterCard characterCard)
     {
         targetCharacterCard = characterCard;
+        skillDataList = skillDataList.FindAll(sd => sd != null && sd.id != 1000);  //방어적 코드로서 혹시라도 id 1000이 들어오면 제거
 
         //필요한 만큼 활성화, 없으면 새로 생성
         for (int i = 0; i < skillDataList.Count; i++)

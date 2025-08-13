@@ -148,7 +148,7 @@ public class Tool
         list.skillCardDatas.Add(new SkillCardData { id = 3013, name = "가시덩굴", effect = "이번 라운드까지 해당 칸에 락존을 형성한다.", cardType = SkillCardType.Defense, rank = 1, round = 2 });
         list.skillCardDatas.Add(new SkillCardData { id = 3014, name = "철벽의 자세", effect = "해당 캐릭터는 방어한다.", cardType = SkillCardType.Defense, rank = 1, round = 1 });
         list.skillCardDatas.Add(new SkillCardData { id = 3015, name = "정보 우위", effect = "해당 캐릭터는 방어한다. 그 후 이동한다.", cardType = SkillCardType.Defense, rank = 2, round = 1 });
-        list.skillCardDatas.Add(new SkillCardData { id = 3016, name = "변화: 물질", effect = "다음 라운드까지 해당 칸에 락존을 형성한다.\n(해당 칸에 캐릭터가 있을 경우, 효과 처리되지 않는다.)", cardType = SkillCardType.Defense, rank = 1, round = 2 });
+        list.skillCardDatas.Add(new SkillCardData { id = 3016, name = "변화-물질", effect = "다음 라운드까지 해당 칸에 락존을 형성한다.\n(해당 칸에 캐릭터가 있을 경우, 효과 처리되지 않는다.)", cardType = SkillCardType.Defense, rank = 1, round = 2 });
         #endregion
 
         #region Buff
@@ -160,7 +160,7 @@ public class Tool
         list.skillCardDatas.Add(new SkillCardData { id = 4008, name = "행운의 손길", effect = "동전을 굴린다. 앞면이 나온다면 해당 칸에 HP + 3 을 부여한다.", cardType = SkillCardType.Buff, rank = 2, round = 3 });
         list.skillCardDatas.Add(new SkillCardData { id = 4009, name = "지휘 강화령", effect = "해당 칸에 있는 캐릭터에게 \"지휘 강화령 카운터\"를 올린다. (최대 1 개)\n캐릭터가 스킬 사용 시 \"지휘 강화령 카운터\"를 소모하고, 추가 데미지 + 2 를 준다.", cardType = SkillCardType.Buff, rank = 1, round = 3 });
         list.skillCardDatas.Add(new SkillCardData { id = 4011, name = "더러운 거래", effect = "해당 칸에 있는 캐릭터의 HP 를 1 소모하고, MP 를 2 올린다.", cardType = SkillCardType.Buff, rank = 1, round = 3 });
-        list.skillCardDatas.Add(new SkillCardData { id = 4012, name = "변환: 생명", effect = "해당 칸에 있는 캐릭터는 MP 를 가능한 만큼 소모하고, HP 를 소모한 만큼 올린다.", cardType = SkillCardType.Buff, rank = 1, round = 1 });
+        list.skillCardDatas.Add(new SkillCardData { id = 4012, name = "변환-생명", effect = "해당 칸에 있는 캐릭터는 MP 를 가능한 만큼 소모하고, HP 를 소모한 만큼 올린다.", cardType = SkillCardType.Buff, rank = 1, round = 1 });
         list.skillCardDatas.Add(new SkillCardData { id = 4013, name = "커맨딩 그레이스", effect = "해당 칸에서 공격 시 데미지 + 4 를 부여한다.", cardType = SkillCardType.Buff, rank = 2, round = 1 });
         list.skillCardDatas.Add(new SkillCardData { id = 4014, name = "배너 오브 바우", effect = "해당 칸의 대상자에게 HP + 2, MP + 1 을 부여한다.", cardType = SkillCardType.Buff, rank = 2, round = 3 });
         list.skillCardDatas.Add(new SkillCardData { id = 4015, name = "로열 펄스", effect = "해당 칸에 추가 MP + 2, 추가 데미지 + 2 를 1 회 부여한다.\n(중첩 최대 1 회)", cardType = SkillCardType.Buff, rank = 3, round = 6 });
