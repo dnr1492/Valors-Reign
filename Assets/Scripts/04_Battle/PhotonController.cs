@@ -198,12 +198,11 @@ public class PhotonController : MonoBehaviourPunCallbacks
     #region (동전 던지기) 선공 선택권 결정
     public void RequestCoinFlip(int myCoinDriection)
     {
-        int coinDirectionResult;
 #if UNITY_EDITOR
-        coinDirectionResult = 0;
+        int coinDirectionResult = 0;
+#else
+        int coinDirectionResult = Random.Range(0, 2);  //0: 앞면, 1: 뒷면
 #endif
-        coinDirectionResult = Random.Range(0, 2);  //0: 앞면, 1: 뒷면
-
         if (PhotonNetwork.IsMasterClient)
         {
             object[] content = { coinDirectionResult, myCoinDriection };
@@ -227,9 +226,9 @@ public class PhotonController : MonoBehaviourPunCallbacks
         var popup = UIManager.Instance.GetPopup<UIBattleSetting>("UIBattleSetting");
         popup.ShowCoinFlipResult(result, hasFirstTurnChoice);
     }
-    #endregion
+#endregion
 
-    #region (동전 던지기) 선공 or 후공 선택
+#region (동전 던지기) 선공 or 후공 선택
     public void SendTurnOrderChoice(bool wantFirst, bool force = false)
     {
         //선공 선택권 없는 유저가 보내는 경우 막기 (AI는 force = true로 통과시킴)
@@ -257,9 +256,9 @@ public class PhotonController : MonoBehaviourPunCallbacks
         UIManager.Instance.GetPopup<UIBattleSetting>("UIBattleSetting")
             .DestroyUICoinFlip();
     }
-    #endregion
+#endregion
 
-    #region 룸 취소
+#region 룸 취소
     public void LeaveRoom()
     {
         if (PhotonNetwork.InRoom) {
@@ -271,7 +270,7 @@ public class PhotonController : MonoBehaviourPunCallbacks
             pendingJoinRequest = false;
         }
     }
-    #endregion
+#endregion
 
     //public override void OnJoinRoomFailed(short returnCode, string message)
     //{

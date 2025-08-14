@@ -96,10 +96,10 @@ public class Tool
         };
 
         #region Move
-        list.skillCardDatas.Add(new SkillCardData { id = 1000, name = "기본 이동카드", effect = "해당 대상지 중 한 곳으로 이동한다. 이동하려는 칸에 다른 캐릭터가 존재하는 경우 데미지 1 을 주고 이동하지 않는다.", cardType = SkillCardType.Move, rank = 0, round = null });
-        list.skillCardDatas.Add(new SkillCardData { id = 1001, name = "신속", effect = "해당 이동 칸으로 이동한다. \"정조준 카운터\"는 전부 사라진다.", cardType = SkillCardType.Move, rank = 2, round = null });
-        list.skillCardDatas.Add(new SkillCardData { id = 1002, name = "전선 재배치", effect = "해당 칸에 캐릭터가 전부 있을 경우, 칸에 있는 캐릭터의 위치를 변경한다.", cardType = SkillCardType.Move, rank = 2, round = null });
-        list.skillCardDatas.Add(new SkillCardData { id = 1003, name = "거짓 정보", effect = "해당 칸에 캐릭터가 1 칸에만 있을 경우, 해당 칸 중 다른 칸으로 이동한다.", cardType = SkillCardType.Move, rank = 3, round = null });
+        list.skillCardDatas.Add(new SkillCardData { id = 1000, name = "기본 이동카드", effect = "해당 대상지 중 한 곳으로 이동한다. 이동하려는 칸에 다른 캐릭터가 존재하는 경우 데미지 1 을 주고 이동하지 않는다.", cardType = SkillCardType.Move, rank = 0, round = 0 });
+        list.skillCardDatas.Add(new SkillCardData { id = 1001, name = "신속", effect = "해당 이동 칸으로 이동한다. \"정조준 카운터\"는 전부 사라진다.", cardType = SkillCardType.Move, rank = 2, round = 0 });
+        list.skillCardDatas.Add(new SkillCardData { id = 1002, name = "전선 재배치", effect = "해당 칸에 캐릭터가 전부 있을 경우, 칸에 있는 캐릭터의 위치를 변경한다.", cardType = SkillCardType.Move, rank = 2, round = 0 });
+        list.skillCardDatas.Add(new SkillCardData { id = 1003, name = "거짓 정보", effect = "해당 칸에 캐릭터가 1 칸에만 있을 경우, 해당 칸 중 다른 칸으로 이동한다.", cardType = SkillCardType.Move, rank = 3, round = 0 });
         #endregion
 
         #region Attack
@@ -240,11 +240,13 @@ public class SkillCardData
     public string effect;
     public SkillCardType cardType;
     public int rank;  //MP소모량은 Rank랑 동일
-    /* 추후 다시 정리
-    스킬 사거리
-    스킬 범위
-    public SkillRangeType rangeType;
-    public List<(int dq, int dr, Color color)> customOffsetRange; */
-    public int? round;  //지속시간
+    public int round;  //지속시간
+
+    ////[ADDED] 범위 UI 미니맵(이미 Enum 존재)
+    //public SkillRangeType rangeType; //Ring1/LineForward2/Custom 등 
+    ////[ADDED] Custom 범위가 필요한 경우(색 포함)
+    //public List<(int dq, int dr, UnityEngine.Color color)> customOffsetRange;
+    ////[ADDED] 조립형 스텝(대상→조건→효과→트리거)
+    //public List<EffectStep> steps = new();
 }
 #endregion
