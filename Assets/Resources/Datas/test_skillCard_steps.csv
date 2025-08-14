@@ -1,0 +1,5 @@
+﻿cardId,stepIdx,targetKind,includeSelf,rangeType,rangeParam,customOffsets,trigger,effectType,amount,statusId,duration,op1,c1,c1_i1,c1_i2,c1_s1,op2,c2,c2_i1,c2_i2,c2_s1,op3,c3,c3_i1,c3_i2,c3_s1
+3009,1,Tile,False,LineForward1,1,,Instant,Damage,1,,ThisRound,None,None,0,0,,None,None,0,0,,None,None,0,0,
+2018,1,Tile,True,Ring1,1,,Instant,Custom,0,Unhealable,ThisRound,None,None,0,0,,None,None,0,0,,None,None,0,0,
+3003,1,Tile,False,Custom,0,"(0,1);(1,0);(1,-1)",Instant,Custom,0,RockZone,UpToNextRound,None,None,0,0,,None,None,0,0,,None,None,0,0,
+2006,1,Tile,False,LineForward2,2,,Instant,Damage,2,,ThisRound,None,None,0,0,,None,None,0,0,,None,None,0,0,

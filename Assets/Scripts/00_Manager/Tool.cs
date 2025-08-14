@@ -242,11 +242,11 @@ public class SkillCardData
     public int rank;  //MP소모량은 Rank랑 동일
     public int round;  //지속시간
 
-    ////[ADDED] 범위 UI 미니맵(이미 Enum 존재)
-    //public SkillRangeType rangeType; //Ring1/LineForward2/Custom 등 
-    ////[ADDED] Custom 범위가 필요한 경우(색 포함)
-    //public List<(int dq, int dr, UnityEngine.Color color)> customOffsetRange;
-    ////[ADDED] 조립형 스텝(대상→조건→효과→트리거)
-    //public List<EffectStep> steps = new();
+    //조립형 스텝 (대상 → 조건 → 효과 → 트리거)
+    //1. skillCard_steps_pamphlet의 스킬카드 데이터 내용처럼 정리
+    //2. CVS로 확장자 변경
+    //3. Tool을 활용해서 CVS → steps로 변환
+    //4. 자동으로 skillCard_data에 저장
+    public List<EffectStep> steps = new();
 }
 #endregion
