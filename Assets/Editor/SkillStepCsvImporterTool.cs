@@ -71,7 +71,7 @@ public static class SkillStepCsvImporterTool
     {
         if (!File.Exists(SKILL_JSON_PATH))
         {
-            Debug.LogError($"스킬 JSON이 없습니다: {SKILL_JSON_PATH}\n먼저 Tool 메뉴에서 skillCard_data를 생성하세요.");
+            Debug.Log($"스킬 JSON이 없습니다: {SKILL_JSON_PATH}\n먼저 Tool 메뉴에서 skillCard_data를 생성하세요.");
             return;
         }
 
@@ -79,7 +79,7 @@ public static class SkillStepCsvImporterTool
         var listWrapper = JsonUtility.FromJson<SkillCardDataList>(json);
         if (listWrapper?.skillCardDatas == null)
         {
-            Debug.LogError("스킬 JSON 파싱 실패");
+            Debug.Log("스킬 JSON 파싱 실패");
             return;
         }
         var dic = listWrapper.skillCardDatas.ToDictionary(c => c.id, c => c);
@@ -273,7 +273,7 @@ public static class SkillStepCsvImporterTool
             if (File.Exists(main)) return main;
             if (File.Exists(test))
             {
-                Debug.LogWarning($"[CSV Import] 메인 CSV가 없어 테스트 CSV로 대체합니다: {test}");
+                Debug.Log($"[CSV Import] 메인 CSV가 없어 테스트 CSV로 대체합니다: {test}");
                 return test;
             }
         }
@@ -282,7 +282,7 @@ public static class SkillStepCsvImporterTool
             if (File.Exists(test)) return test;
             if (File.Exists(main))
             {
-                Debug.LogWarning($"[CSV Import] 테스트 CSV가 없어 메인 CSV로 대체합니다: {main}");
+                Debug.Log($"[CSV Import] 테스트 CSV가 없어 메인 CSV로 대체합니다: {main}");
                 return main;
             }
         }

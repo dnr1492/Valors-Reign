@@ -4,11 +4,13 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using System.Threading;
+using Cysharp.Threading.Tasks;
+using System;
 
 public class UIBattleSetting : UIPopupBase
 {
     [SerializeField] GameObject uiCoinFlipPrefab;
-    [SerializeField] Button btn_testStartRound;
 
     private Canvas rootCanvas;
     private UICoinFlip uiCoinFlip;
@@ -32,6 +34,12 @@ public class UIBattleSetting : UIPopupBase
     [Header("SkillCard Detail UI")]
     [SerializeField] Transform skillCardCopyZone;                  //클론을 붙일 영역
     [SerializeField] TextMeshProUGUI txtSkillCardDescriptionZone;  //설명 표시
+
+    [Header("Top UI")]
+    [SerializeField] Button btn_ready;
+    [SerializeField] TextMeshProUGUI txt_timer, txt_curTrun, txt_roundState;
+    private readonly float settingTimeLimitSec = 20f;
+    private CancellationTokenSource settingTimerCts;
 
     private void OnToast(string msg) => UIManager.Instance.ShowPopup<UIModalPopup>("UIModalPopup", false).Set("알림", msg);
 
@@ -80,7 +88,6 @@ public class UIBattleSetting : UIPopupBase
             movementOrderCtrl.Map_IsOccupied = GridManager.Instance.IsOccupied;
             movementOrderCtrl.Map_IsMyTokenAt = hex => GridManager.Instance.IsMyTokenAt(hex);
 
-            movementOrderCtrl.Char_GetCurrentHex = id => GridManager.Instance.TryGetTokenPosition(id, out var pos) ? pos : new Vector2Int(-1, -1);
             movementOrderCtrl.Char_MoveToHexAsync = async (id, toHex) => {
                 if (!GridManager.Instance.TryGetTokenPosition(id, out var from)) return;
                 await GridManager.Instance.MoveFromToByHexAsync(from, toHex);
@@ -95,14 +102,22 @@ public class UIBattleSetting : UIPopupBase
         //라운드 슬롯 바인딩
         movementOrderCtrl.BindRoundSlots(roundSlots);
 
-        //테스트용 라운드 실행 버튼
-        btn_testStartRound.onClick.RemoveAllListeners();
-        btn_testStartRound.onClick.AddListener(() => {
-            //라운드 시작 전 게이트
+        //준비완료 버튼
+        btn_ready.onClick.RemoveAllListeners();
+        btn_ready.onClick.AddListener(() => {
+            //수동 준비완료 전 게이트
             if (movementOrderCtrl != null && !movementOrderCtrl.AreAllMoveCardsConfigured())
+            {
+                movementOrderCtrl.BeginNextPending();
                 return;
-            TurnManager.Instance.StartRound();
+            }
+            TurnManager.Instance.ReadyLocal(false);  //false = Manual
         });
+
+        //타이머 시작
+        StopSettingTimerIfAny();
+        settingTimerCts = new CancellationTokenSource();
+        SetTimeoutAsync(settingTimeLimitSec).Forget();
     }
 
     private void OnCoinDirectionSelected(int myCoinDriection)
@@ -358,6 +373,95 @@ public class UIBattleSetting : UIPopupBase
         }
     }
     #endregion
+
+    #region 대전 셋팅 Timer ===== TODO: SkillCard 드래그 비활성, 타겟팅 종료 등 추가 =====
+    //타이머 만료 시 자동 준비 (게이트 무시, UI에 타이머 표시)
+    private async UniTaskVoid SetTimeoutAsync(float sec)
+    {
+        int prevSec = -1;  //이전 초 값 저장
+        float t = sec;
+
+        try
+        {
+            while (t > 0f)
+            {
+                int currentSec = Mathf.CeilToInt(t);  //올림해서 표시 (예: 9.2초 → 10)
+                if (currentSec != prevSec)
+                {
+                    DisplayTimer(currentSec);
+                    prevSec = currentSec;
+                }
+
+                t -= Time.deltaTime;
+                await UniTask.Yield(PlayerLoopTiming.Update, settingTimerCts.Token);
+            }
+
+            OnToast("제한시간 초과로 준비완료 처리됩니다.");
+
+            //이미 준비되어 있으면 중복 호출 안 함
+            var tm = TurnManager.Instance;
+            if (tm != null && !tm.IsLocalReady)
+                tm.ReadyLocal(true);  //true = Timeout
+        }
+        catch (OperationCanceledException)
+        {
+            //타이머 취소 시 예외 무시
+        }
+    }
+
+    //준비완료 상태인 지
+    public void SetReadyState(bool ready)
+    {
+        if (ready) movementOrderCtrl.UI_ClearHighlights?.Invoke();
+
+        // ===== TODO: SkillCard 드래그 비활성, 타겟팅 종료 등 추가 =====
+    }
+
+    //양쪽 모두 준비가 완료된 경우
+    public void OnBothReady()
+    {
+        //타이머 종료
+        StopSettingTimerIfAny();
+        DisplayTimer(0);
+
+        // ===== TODO: SkillCard 드래그 비활성, 타겟팅 종료 등 추가 =====
+    }
+
+    //새 턴 셋업 단계 시작: 타이머 리셋 + 시작, UI 표시 복구
+    public void BeginSetupPhase()
+    {
+        //준비 상태 표시 초기화
+        SetReadyState(false);
+
+        //기존 타이머 중지 후 재시작
+        StopSettingTimerIfAny();
+        settingTimerCts = new CancellationTokenSource();
+        SetTimeoutAsync(settingTimeLimitSec).Forget();
+    }
+
+    private void StopSettingTimerIfAny()
+    {
+        if (settingTimerCts != null)
+        {
+            settingTimerCts.Cancel();
+            settingTimerCts.Dispose();
+            settingTimerCts = null;
+        }
+    }
+    #endregion
+
+    //[UI] 현재 제한시간 표시
+    public void DisplayTimer(float timer)
+    {
+        txt_timer.text = timer.ToString() + " 초";
+    }
+
+    //[UI] 현재 턴/라운드 표시
+    public void DisplayTurnAndRound(int turnIndex, int roundIndex)
+    {
+        txt_curTrun.text = $"{turnIndex} 턴";
+        txt_roundState.text = $"현재 {roundIndex} 라운드가 진행 중입니다.";
+    }
 
     protected override void ResetUI() { }
 }

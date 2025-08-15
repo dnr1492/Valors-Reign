@@ -23,6 +23,8 @@ public class PhotonController : MonoBehaviourPunCallbacks
     private DeckPack opponentDeckPack;
     public DeckPack OpponentDeckPack { get => opponentDeckPack; }
 
+    public bool IsPvPMatch { get; private set; }  //매치 시작 시 확정되는 PvP 여부 플래그
+
     private void Awake()
     {
         ControllerRegister.Register(this);
@@ -94,6 +96,7 @@ public class PhotonController : MonoBehaviourPunCallbacks
     public override void OnJoinedRoom()
     {
         Debug.Log($"룸 입장 성공! 현재 인원: {PhotonNetwork.CurrentRoom.PlayerCount}");
+        IsPvPMatch = PhotonNetwork.CurrentRoom.PlayerCount == 2;
 
         if (PhotonNetwork.CurrentRoom.PlayerCount == 2) {
             Debug.Log("실제 상대 입장 → 나의 덱 전송");
@@ -172,6 +175,26 @@ public class PhotonController : MonoBehaviourPunCallbacks
             //내가 선택권이 없을때 동기화
             TryFinalizeTurnOrder(selectedFirst);
         }
+        //상대 라운드 종료 수신
+        if (photonEvent.Code == (byte)PhotonEventCode.RoundFinished)
+        {
+            object[] data = (object[])photonEvent.CustomData;
+            int trn = (int)data[0];
+            int round = (int)data[1];
+
+            //상대가 round 라운드를 마쳤다고 알림 → 내 클라이언트에서 즉시 다음 라운드 시작
+            TurnManager.Instance.OnOpponentRoundFinished(trn, round);
+            return;
+        }
+        //상대 준비완료/타임아웃 수신
+        if (photonEvent.Code == (byte)PhotonEventCode.PlayerReady)
+        {
+            object[] data = (object[])photonEvent.CustomData;
+            int trn = (int)data[0];
+            int readyType = (int)data[1];  //0 = Manual, 1 = Timeout
+            TurnManager.Instance.OnOpponentReady(trn, readyType);
+            return;
+        }
     }
     #endregion
 
@@ -228,7 +251,7 @@ public class PhotonController : MonoBehaviourPunCallbacks
     }
 #endregion
 
-#region (동전 던지기) 선공 or 후공 선택
+    #region (동전 던지기) 선공 or 후공 선택
     public void SendTurnOrderChoice(bool wantFirst, bool force = false)
     {
         //선공 선택권 없는 유저가 보내는 경우 막기 (AI는 force = true로 통과시킴)
@@ -256,9 +279,9 @@ public class PhotonController : MonoBehaviourPunCallbacks
         UIManager.Instance.GetPopup<UIBattleSetting>("UIBattleSetting")
             .DestroyUICoinFlip();
     }
-#endregion
+    #endregion
 
-#region 룸 취소
+    #region 룸 취소
     public void LeaveRoom()
     {
         if (PhotonNetwork.InRoom) {
@@ -270,20 +293,60 @@ public class PhotonController : MonoBehaviourPunCallbacks
             pendingJoinRequest = false;
         }
     }
-#endregion
+    #endregion
+
+    #region 룸 나가기
+    public override void OnPlayerLeftRoom(Player otherPlayer)
+    {
+        //부전승 처리 트리거
+        Debug.Log($"상대 플레이어 퇴장: {otherPlayer.NickName} → 부전승 처리");
+        TurnManager.Instance.OnOpponentLeftAndWin();
+    }
+    #endregion
+
+    #region 네트워크 연결 끊김 ===== TODO: 필요시 재연결 UI, 일시정지 처리 등 추가 =====
+    public override void OnDisconnected(DisconnectCause cause)
+    {
+        Debug.Log($"Photon 연결 끊김: {cause}");
+        // ===== TODO: 필요시 재연결 UI, 일시정지 처리 등 추가 =====
+    }
+    #endregion
+
+    #region 라운드 진행
+    //해당 라운드 종료 알림
+    public void NotifyRoundFinished(int trnIndex, int roundIndex)
+    {
+        if (!PhotonNetwork.InRoom) return;
+
+        object[] content = { trnIndex, roundIndex };
+        PhotonNetwork.RaiseEvent(
+            (byte)PhotonEventCode.RoundFinished,
+            content,
+            new RaiseEventOptions { Receivers = ReceiverGroup.Others },
+            SendOptions.SendReliable
+        );
+    }
+
+    //대전 셋팅 준비완료 알림 (Manual = 0, Timeout = 1)
+    public void NotifyPlayerReady(int trnIndex, int readyType)
+    {
+        if (!PhotonNetwork.InRoom) return;
+        object[] content = { trnIndex, readyType };
+        PhotonNetwork.RaiseEvent(
+            (byte)PhotonEventCode.PlayerReady,
+            content,
+            new RaiseEventOptions { Receivers = ReceiverGroup.Others },
+            SendOptions.SendReliable
+        );
+    }
+    #endregion
+
+    // ==================================================== 구현 중 =========================================================== //
+    // ==================================================== 구현 중 =========================================================== //
+    // ==================================================== 구현 중 =========================================================== //
 
     //public override void OnJoinRoomFailed(short returnCode, string message)
     //{
     //    Debug.Log($"룸 입장 실패: {message}");
-    //}
-
-    //public override void OnDisconnected(DisconnectCause cause)
-    //{
-    //    Debug.Log($"Photon 연결 끊김: {cause}");
-    //}
-
-    //public override void OnPlayerLeftRoom(Player otherPlayer)
-    //{
-    //    Debug.Log($"상대 플레이어 퇴장: {otherPlayer.NickName} → 부전승 처리 등 필요");
     //}
 }

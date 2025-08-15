@@ -42,7 +42,6 @@ public class MovementOrderController : MonoBehaviour
     #endregion
 
     #region 캐릭터 정보 및 이동 요청용 콜백
-    public Func<int, Vector2Int> Char_GetCurrentHex;            //캐릭터 ID를 이용해 현재 위치 좌표(hex) 반환 (재검증/이동 시작 전 위치 확인)
     public Func<int, Vector2Int, UniTask> Char_MoveToHexAsync;  //지정한 캐릭터 ID를 주어진 좌표(hex)로 실제 이동시키는 비동기 요청
     #endregion
 
@@ -302,7 +301,7 @@ public class MovementOrderController : MonoBehaviour
         ResetMoveCardImageIfNoOrder(slot);
     }
 
-    public bool ValidateAllBeforeRound()
+    public bool ValidateAllBeforeRound(int? onlyRound = null)
     {
         var invalid = new List<SkillCardRoundSlot>();
 
@@ -310,6 +309,9 @@ public class MovementOrderController : MonoBehaviour
         {
             var slot = kv.Key;
             var mo = kv.Value;
+
+            //특정 라운드만 검사
+            if (onlyRound.HasValue && mo.roundOrder != onlyRound.Value) continue;
 
             Vector2Int from = mo.fromHexPos;
             if (!ValidateFinalDestination(mo.tokenKey, from, mo.toHexPos, slot))
@@ -348,49 +350,44 @@ public class MovementOrderController : MonoBehaviour
         slot = null;
         return false;
     }
+
+    //해당 라운드에 오더가 있는지 체크
+    public bool HasOrderForRound(int roundOrder) => moveOrders.Any(kv => kv.Value.roundOrder == roundOrder);
     #endregion
 
-    #region 순서대로 이동을 수행
-    //외부에서 실행을 요청하면 비동기로 순차적으로 이동을 처리
-    public void ExecuteInOrder(Action onComplete = null)
-    {
-        if (!isActiveAndEnabled) {
-            onComplete?.Invoke();
-            return;
-        }
-        UniTask.Void(async () => await ExecuteInOrderAsync(onComplete));
-    }
+    #region 순서대로 이동을 수행 (지정된 라운드의 이동 오더만 순차적으로 수행)
+    public void ExecuteForRound(int roundOrder, Action onComplete = null) => UniTask.Void(async () => await ExecuteForRoundAsync(roundOrder, onComplete));
 
-    //실행 직전 재검증(fromHexPos 기준) 후 좌표 기반 이동을 순서대로 수행
-    private async UniTask ExecuteInOrderAsync(Action onComplete)
+    private async UniTask ExecuteForRoundAsync(int roundOrder, Action onComplete)
     {
-        if (isExecuting) return;  //중복 실행 방지
+        if (isExecuting) { onComplete?.Invoke(); return; }
         isExecuting = true;
 
-        var sequence = moveOrders
+        //해당 라운드의 오더만 추출 (안전하게 여러 개도 처리)
+        var batch = moveOrders
+            .Where(kv => kv.Value.roundOrder == roundOrder)
             .Select(kv => (slot: kv.Key, order: kv.Value))
-            .OrderBy(x => x.order.roundOrder).ToList();  //라운드 순서 기준 정렬
+            .ToList();
 
-        foreach (var x in sequence)
+        foreach (var x in batch)
         {
             var slot = x.slot;
             var mo = x.order;
 
             Vector2Int from = mo.fromHexPos;
-
             if (!ValidateFinalDestination(mo.tokenKey, from, mo.toHexPos, slot))
             {
-                reservedByHexPos.Remove(mo.toHexPos);  //예약 해제
-                moveOrders.Remove(slot);               //오더 제거
-                UI_Toast?.Invoke($"이동 불가 지역입니다. (slot {mo.roundOrder}).");
+                reservedByHexPos.Remove(mo.toHexPos);
+                moveOrders.Remove(slot);
+                UI_Toast?.Invoke($"이동 불가 지역입니다.(round {roundOrder})");
                 continue;
             }
 
             if (Char_MoveToHexAsync != null) await Char_MoveToHexAsync(mo.tokenKey, mo.toHexPos);
             else await GridManager.Instance.MoveFromToByHexAsync(from, mo.toHexPos);
 
-            reservedByHexPos.Remove(mo.toHexPos);  //정상 완료 시 예약 해제
-            moveOrders.Remove(slot);               //오더 소진
+            reservedByHexPos.Remove(mo.toHexPos);
+            moveOrders.Remove(slot);
         }
 
         isExecuting = false;

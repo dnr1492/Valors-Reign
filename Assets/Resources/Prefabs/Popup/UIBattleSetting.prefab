@@ -2122,7 +2122,7 @@ GameObject:
   - component: {fileID: 5257394789203638630}
   - component: {fileID: 209238531842166587}
   m_Layer: 5
-  m_Name: btn_roundState
+  m_Name: btn_ready
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2242,7 +2242,7 @@ GameObject:
   - component: {fileID: 1810874287328760289}
   - component: {fileID: 1009978296291500586}
   m_Layer: 5
-  m_Name: Text (TMP)
+  m_Name: txt_roundState
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2541,7 +2541,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   uiCoinFlipPrefab: {fileID: 6140730261439130796, guid: 37d8923f0b133e041a3183d95f48a743, type: 3}
-  btn_testStartRound: {fileID: 6649968009506781676}
   hexParentRt: {fileID: 2901497443782060139}
   battleFieldRt: {fileID: 3726382129370972939}
   hexPrefab: {fileID: 138201516482705832, guid: d5e3f1ef6ac85824583b859df46c1975, type: 3}
@@ -2554,3 +2553,7 @@ MonoBehaviour:
   - {fileID: 4326958257394309128}
   skillCardCopyZone: {fileID: 4298379551621887335}
   txtSkillCardDescriptionZone: {fileID: 1061032308272064484}
+  btn_ready: {fileID: 209238531842166587}
+  txt_timer: {fileID: 7581735466291627879}
+  txt_curTrun: {fileID: 5715330974196805608}
+  txt_roundState: {fileID: 1009978296291500586}
