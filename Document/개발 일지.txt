@@ -23,9 +23,6 @@
 - 디자인 - GUI Pro - Fantasy RPG Asset
 - 덱 구성 관련 전체적인 플로우의 UI 해상도 대응 테스트 및 적용하기
 - 추후 GridManager의 이동 애니메이션 분리 구조 구현 예정......
-- 추후 스킬카드 선택 시 '필드에 범위 표시'  구현
-- 추후 스킬범위의 Hex를 Container의 크기에 맞게 SizeDelta를 조절하면서 표시할 스킬범위에 따라 Row/Col을 표시하도록 수정
-  (UISkillHexGridHelper)
 
 ***참고
 - 서버 관련 로직을 변경 또는 뒤끝 콘솔에서 데이터를 변경한 경우
