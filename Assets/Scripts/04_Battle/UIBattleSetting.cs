@@ -342,7 +342,7 @@ public class UIBattleSetting : UIPopupBase
     );
     #endregion
 
-    #region DetailZone에 스킬카드 Detail 표시
+    #region DetailZone에 스킬카드 Detail 표시 및 필드에 스킬 범위 표시
     private void OnSkillCardClicked(SkillCardEvent evt)
     {
         if (evt == null || evt.SkillCardData == null) return;
@@ -351,7 +351,7 @@ public class UIBattleSetting : UIPopupBase
         if (txtSkillCardDescriptionZone != null)
             txtSkillCardDescriptionZone.text = evt.SkillCardData.effect ?? string.Empty;
 
-        //기존 클론 제거 (항상 하나만 유지)
+        //카드 정보 보기 (항상 하나만 유지)
         if (skillCardCopyZone != null)
         {
             for (int i = skillCardCopyZone.childCount - 1; i >= 0; i--)
@@ -371,6 +371,56 @@ public class UIBattleSetting : UIPopupBase
             var cloneEvt = clone.GetComponent<SkillCardEvent>();
             if (cloneEvt != null) cloneEvt.enabled = false;
         }
+
+        //스킬카드를 가지고 있는 캐릭터 토큰 찾기
+        int ownerTokenKey = ResolveOwnerTokenKeyForCard(evt.SkillCardData.id);
+        if (ownerTokenKey < 0)
+        {
+            Debug.Log($"[UIBattleSetting] 스킬카드를 가지고 있는 캐릭터 토큰을 찾지 못해 스킬 범위 프리뷰를 생략합니다. skillId={evt.SkillCardData.id}");
+            GridManager.Instance.ClearSkillRangePreview();
+            return;
+        }
+
+        //필드 스킬 범위 프리뷰 (보기 전용)
+        GridManager.Instance.ShowSkillRangePreview(evt.SkillCardData, ownerTokenKey);
+    }
+
+    /// <summary>
+    /// 클릭한 스킬카드를 가지고 있는 캐릭터 토큰의 키를 추정
+    /// 1) 라운드 슬롯에 스킬카드가 꽂혀 있으면 그 슬롯의 토큰 키 우선
+    /// 2) 아니면 내 생존 캐릭터 토큰들 중 이 스킬카드를 보유한 첫 번째 캐릭터 토큰
+    /// 찾지 못하면 -1
+    /// </summary>
+    private int ResolveOwnerTokenKeyForCard(int skillId)
+    {
+        //1) RoundSlot에 카드가 배치되어 있다면, 슬롯에서 추적
+        foreach (var slot in roundSlots)
+        {
+            if (slot == null || slot.IsEmpty) continue;
+            var cardEvt = slot.GetComponentInChildren<SkillCardEvent>();
+            if (cardEvt == null || cardEvt.SkillCardData == null) continue;
+
+            if (cardEvt.SkillCardData.id == skillId) break;
+        }
+
+        //2) 내 생존 토큰 중 '이 스킬을 가진 캐릭터' 찾기
+        var myAliveTokenKeys = CombatManager.Instance.GetMyAliveTokenIds();
+        var tokenCtrl = ControllerRegister.Get<CharacterTokenController>();
+        if (tokenCtrl == null) return -1;
+
+        foreach (var tk in tokenCtrl.GetAllCharacterToken())
+        {
+            if (!myAliveTokenKeys.Contains(tk.Key)) continue;
+            int characterId = tk.Key;
+            if (DataManager.Instance.dicCharacterCardData.TryGetValue(characterId, out var cdata)
+                && cdata.skills != null
+                && cdata.skills.Contains(skillId))
+            {
+                return tk.Key;  //첫 번째로 매칭된 토큰 반환
+            }
+        }
+
+        return -1;
     }
     #endregion
 

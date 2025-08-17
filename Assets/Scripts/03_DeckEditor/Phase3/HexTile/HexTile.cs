@@ -21,6 +21,9 @@ public class HexTile : MonoBehaviour
     private const float DIR_OFFSET_DEG = -120f;  //회전 보정값
     private const float DIR_STEP = 60f;          //육각 6방향
 
+    private int? facingIndex;  //현재 바라보는 방향의 인덱스(0~5) 캐싱
+    public int? GetFacingIndexCached() => facingIndex;  //현재 방향 인덱스 (없으면 null)
+
     //헥스 타일 초기화
     public void Init((int, int) pos)
     {
@@ -86,9 +89,9 @@ public class HexTile : MonoBehaviour
     public async UniTask RotateAnimationAsync(CharacterTokenDirection direction, float duration)
     {
         int index = Mathf.Clamp((int)direction, 0, 5);
+        facingIndex = index;
         float targetZ = IndexToAngle(index);
         var rt = imgCharacter.rectTransform;
-
         float startZ = rt.localEulerAngles.z;
         float t = 0f;
         float dur = Mathf.Max(0.0001f, duration);
@@ -97,7 +100,7 @@ public class HexTile : MonoBehaviour
             t += Time.deltaTime / dur;
             float z = Mathf.LerpAngle(startZ, targetZ, Mathf.Clamp01(t));
             ApplyRotationZ(z);
-            await UniTask.Yield(PlayerLoopTiming.Update);
+            await Cysharp.Threading.Tasks.UniTask.Yield(Cysharp.Threading.Tasks.PlayerLoopTiming.Update);
         }
         ApplyRotationZ(targetZ);
     }
@@ -106,6 +109,7 @@ public class HexTile : MonoBehaviour
     public void SetCharacterTokenDirection(CharacterTokenDirection direction)
     {
         int index = Mathf.Clamp((int)direction, 0, 5);
+        facingIndex = index;
         ApplyRotationZ(IndexToAngle(index));
     }
 
@@ -113,5 +117,5 @@ public class HexTile : MonoBehaviour
     private float IndexToAngle(int index) => DIR_OFFSET_DEG + index * DIR_STEP;
 
     //회전 적용
-    private void ApplyRotationZ(float z) => imgCharacter.rectTransform.localRotation = Quaternion.Euler(0, 0, z);  
+    private void ApplyRotationZ(float z) => imgCharacter.rectTransform.localRotation = Quaternion.Euler(0, 0, z);
 }

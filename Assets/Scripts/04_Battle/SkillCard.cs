@@ -28,7 +28,7 @@ public class SkillCard : MonoBehaviour
         originalBasicMoveSkillSprite = sprite;
 
         UISkillHexGridHelper.ClearSkillHexGrid(skillHexes, skillHexMap);
-        UISkillHexGridHelper.CreateSkillHexGrid(hexContainer, hexPrefab, skillHexes, skillHexMap);
+        UISkillHexGridHelper.CreateSkillHexGrid(hexContainer, hexPrefab, skillHexes, skillHexMap, skillCardData);
         UISkillHexGridHelper.ShowSkillHexRange(skillCardData, skillHexMap);
 
         SkillCardData = skillCardData;

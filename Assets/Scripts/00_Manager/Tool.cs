@@ -47,7 +47,7 @@ public class Tool
 
         list.characterCardDatas.Add(new CharacterCardData { id = 101, name = "어설픈 방패병", tier = CharacterTier.Low, cost = 2, hp = 4, mp = 1, race = CharacterRace.Primordial, job = CharacterJob.Tanker, skills = new List<int> { 1000, 3001 } });
         list.characterCardDatas.Add(new CharacterCardData { id = 102, name = "최전선의 창병", tier = CharacterTier.Low, cost = 2, hp = 3, mp = 1, race = CharacterRace.Primordial, job = CharacterJob.Tanker, skills = new List<int> { 1000, 2001, 3002 } });
-        list.characterCardDatas.Add(new CharacterCardData { id = 103, name = "그림자속 수호자", tier = CharacterTier.Low, cost = 2, hp = 2, mp = 2, race = CharacterRace.Primordial, job = CharacterJob.Tanker, skills = new List<int> { 1000, 3003, 3004 } });
+        list.characterCardDatas.Add(new CharacterCardData { id = 103, name = "그림자 속 수호자", tier = CharacterTier.Low, cost = 2, hp = 2, mp = 2, race = CharacterRace.Primordial, job = CharacterJob.Tanker, skills = new List<int> { 1000, 3003, 3004 } });
         list.characterCardDatas.Add(new CharacterCardData { id = 104, name = "침착한 수비수", tier = CharacterTier.Middle, cost = 3, hp = 4, mp = 2, race = CharacterRace.Primordial, job = CharacterJob.Tanker, skills = new List<int> { 1000, 3005, 2002 } });
         list.characterCardDatas.Add(new CharacterCardData { id = 105, name = "나태한 문지기", tier = CharacterTier.Middle, cost = 3, hp = 2, mp = 3, race = CharacterRace.Primordial, job = CharacterJob.Tanker, skills = new List<int> { 1000, 3006 } });
         list.characterCardDatas.Add(new CharacterCardData { id = 106, name = "마법방패를 두른 수호자", tier = CharacterTier.Middle, cost = 3, hp = 2, mp = 4, race = CharacterRace.Primordial, job = CharacterJob.Tanker, skills = new List<int> { 1000, 4001, 3007 } });
@@ -108,7 +108,7 @@ public class Tool
         list.skillCardDatas.Add(new SkillCardData { id = 2003, name = "호쇄광", effect = "해당 칸에 3 데미지를 준다.", cardType = SkillCardType.Attack, rank = 1, round = 1 });
         list.skillCardDatas.Add(new SkillCardData { id = 2004, name = "상처 전환", effect = "해당 칸에 4 데미지를 준다. \"피의 맹세 카운터\" 2 개를 올린다. (최대 3 개)", cardType = SkillCardType.Attack, rank = 2, round = 2 });
         list.skillCardDatas.Add(new SkillCardData { id = 2005, name = "하얀검무", effect = "해당 칸에 2 데미지를 준다.", cardType = SkillCardType.Attack, rank = 1, round = 1 });
-        list.skillCardDatas.Add(new SkillCardData { id = 2006, name = "그림자베기", effect = "해당 칸에 2 데미지를 준다.", cardType = SkillCardType.Attack, rank = 1, round = 2 });
+        list.skillCardDatas.Add(new SkillCardData { id = 2006, name = "그림자 베기", effect = "해당 칸에 2 데미지를 준다.", cardType = SkillCardType.Attack, rank = 1, round = 2 });
         list.skillCardDatas.Add(new SkillCardData { id = 2007, name = "그림자 수리검", effect = "해당 칸에 2 데미지를 준다.", cardType = SkillCardType.Attack, rank = 1, round = 2 });
         list.skillCardDatas.Add(new SkillCardData { id = 2008, name = "죽음의 발자국", effect = "해당 칸에 2 데미지를 준다.", cardType = SkillCardType.Attack, rank = 3, round = 4 });
         list.skillCardDatas.Add(new SkillCardData { id = 2009, name = "연속사격", effect = "해당 칸에 2 데미지를 준다.", cardType = SkillCardType.Attack, rank = 2, round = 3 });

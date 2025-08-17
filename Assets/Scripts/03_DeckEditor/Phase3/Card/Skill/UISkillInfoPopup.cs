@@ -119,7 +119,7 @@ public class UISkillInfoPopup : UIPopupBase
         overlayEnlargedRange.SetActive(true);
 
         UISkillHexGridHelper.ClearSkillHexGrid(enlargedSkillHexes, enlargedSkillHexMap);
-        UISkillHexGridHelper.CreateSkillHexGrid(hexContainer, hexPrefab, enlargedSkillHexes, enlargedSkillHexMap);
+        UISkillHexGridHelper.CreateSkillHexGrid(hexContainer, hexPrefab, enlargedSkillHexes, enlargedSkillHexMap, skillData);
         UISkillHexGridHelper.ShowSkillHexRange(skillData, enlargedSkillHexMap);
     }
 

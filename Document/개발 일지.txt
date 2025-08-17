@@ -13,7 +13,6 @@
 1. 덱 이름 설정할 때 사소한 에러가 뜸 
     (덱 이름을 누르고 바로 저장을 누를 경우... 또는 다른 곳 클릭할 경우)
     (Error: Attempting to select while already selecting an object)
-2. Ring1의 범위 표시 중 좌표 1개가 맞지 않는 버그
 
 ***Photon 버그
 - (예정) Photon 연결 또는 룸 생성 중 취소를 눌려도 뒤 로직이 자동으로 호출되는 버그 
@@ -31,3 +30,6 @@
 - Popup Prefab
   	=> SafeArea가 들어간 팝업은 전체 stretch로 설정
   	=> 그렇지 않은 팝업은 정중앙 stretch로 설정 (※스크립트가 할당된 게임 오브젝트 외에 팝업 내부에 적용)
+- 스킬범위 표시
+        => GridManager 필드에 표시
+        => UISkillHexGridHelper UI에 표시

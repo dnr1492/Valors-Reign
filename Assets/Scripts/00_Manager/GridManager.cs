@@ -49,9 +49,19 @@ public class GridManager : Singleton<GridManager>
     private readonly Color HL_SELECT = new Color(0.2f, 1f, 0.2f, 1f);     //하이라이트 색상 초록
     private readonly Color HL_RESERVED = new Color(1f, 0.95f, 0.6f, 1f);  //하이라이트 색상 연노랑
     private readonly Color HL_CANDID = new Color(1f, 0.2f, 0.2f, 1f);     //하이라이트 색상 빨강
-    private readonly List<OutlineSnapshot> selectedSnaps = new();  //현재 프레임에 적용된 하이라이트 기록
-    private readonly List<OutlineSnapshot> reservedSnaps = new();  //현재 프레임에 적용된 하이라이트 기록
-    private readonly List<OutlineSnapshot> candidSnaps = new();    //현재 프레임에 적용된 하이라이트 기록
+    private readonly Color HL_SKILL = new Color(0.2f, 0.8f, 1f, 1f);  //하이라이트 색상 하늘색
+    private readonly Color HL_CENTER_INC = new Color32(255, 221, 87, 255);  //includeSelf = true = 노란색
+    private readonly Color HL_CENTER_EXC = new Color(0.75f, 0.75f, 0.75f, 1f);  //includeSelf = false = 회색
+    private readonly List<OutlineSnapshot> selectedSnaps = new(); 
+    private readonly List<OutlineSnapshot> reservedSnaps = new(); 
+    private readonly List<OutlineSnapshot> candidSnaps = new();    
+    private readonly List<OutlineSnapshot> skillPreviewSnaps = new();
+
+    [Header("Skill Range Preview")]
+    private SkillCardData previewSkillCard;
+    private int previewStepIndex;
+    private int previewOwnerTokenKey = -1;
+    private int baseForwardIndex = -1;  //기준축(0,-1)이 "방향 인덱스"로 몇 번인지 캐싱
 
     private struct OutlineSnapshot  //원복을 위한 스냅샷
     {
@@ -62,8 +72,8 @@ public class GridManager : Singleton<GridManager>
 
     [Header("이동 애니메이션")]
     private RectTransform tokenLayer;
-    private float moveAnimDuration = 0.25f;  //한 칸 이동 시간(초)
-    private AnimationCurve moveEase = AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);  //가감속 곡선
+    private readonly float moveAnimDuration = 0.25f;  //한 칸 이동 시간(초)
+    private readonly AnimationCurve moveEase = AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);  //가감속 곡선
 
     protected override void Awake()
     {
@@ -812,7 +822,7 @@ public class GridManager : Singleton<GridManager>
 
         foreach (var id in ids)
         {
-            if (!TryGetTokenHex(id, out var pos)) continue;
+            TryGetTokenPosition(id, out var pos);
             if (!TryGetOutline(pos, out var img)) continue;
 
             selectedSnaps.Add(new OutlineSnapshot
@@ -906,23 +916,73 @@ public class GridManager : Singleton<GridManager>
         Debug.Log($"[Highlight] 후보:{string.Join(",", candidates)} | 예약:{string.Join(",", reservedSet)}");
     }
 
-    //outline 찾기
-    private bool TryGetOutline(Vector2Int hex, out Image img)
+    //캐릭터 토큰은 제외하고 빈 Hex의 Outline만 찾기
+    private bool TryGetOutline(Vector2Int off, out Image img)
     {
         img = null;
-        if (!hexTileMap.TryGetValue((hex.x, hex.y), out var tile)) return false;
-        var tf = tile.transform.Find("outline");
-        if (tf == null) return false;
-        img = tf.GetComponent<Image>();
-        return img != null;
-    }
 
-    //id → 현재 좌표
-    private bool TryGetTokenHex(int tokenKey, out Vector2Int hex) => TryGetTokenPosition(tokenKey, out hex);
+        if (!hexTileMap.TryGetValue((off.x, off.y), out var cellGo) || !cellGo)
+            return false;
+
+        //토큰 트리 여부 판별
+        bool IsTokenBranch(Transform tr)
+        {
+            if (!tr) return false;
+
+            //CharacterToken 컴포넌트가 붙은 상위가 있으면 토큰 트리로 간주
+            if (tr.GetComponentInParent<CharacterToken>() != null) return true;
+
+            //방어적 코드로서 이름에 'token'이 포함된 브랜치도 토큰 트리로 간주
+            var p = tr;
+            while (p != null)
+            {
+                if (p.name.IndexOf("token", StringComparison.OrdinalIgnoreCase) >= 0)
+                    return true;
+                p = p.parent;
+            }
+            return false;
+        }
+
+        //자식에 정확히 "outline"/"Outline" 있으면 그것만 사용
+        Transform tr = cellGo.transform.Find("outline");
+        if (tr == null) tr = cellGo.transform.Find("Outline");
+        if (tr != null && !IsTokenBranch(tr) && tr.TryGetComponent(out img))
+            return true;
+
+        //전체 Image 중 "토큰 트리 제외 + 이름에 outline 포함" 우선 선택
+        Image fallback = null;
+        var all = cellGo.GetComponentsInChildren<Image>(true);
+        foreach (var cand in all)
+        {
+            if (!cand) continue;
+            if (IsTokenBranch(cand.transform)) continue;
+
+            //이름에 outline 포함이면 즉시 채택
+            if (cand.name.IndexOf("outline", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                img = cand;
+                return true;
+            }
+
+            //토큰이 아닌 첫 Image는 폴백 후보로 킵
+            if (fallback == null) fallback = cand;
+        }
+
+        //폴백: 토큰이 아닌 첫 Image
+        if (fallback != null)
+        {
+            img = fallback;
+            return true;
+        }
+
+        return false;
+    }
 
     //모든 하이라이트 원복
     public void OnClearHighlights()
     {
+        ClearSkillRangePreview();
+
         RestoreSnapshots(candidSnaps);
         RestoreSnapshots(selectedSnaps);
         RestoreSnapshots(reservedSnaps);
@@ -932,15 +992,185 @@ public class GridManager : Singleton<GridManager>
         Debug.Log("[Highlight] Clear");
     }
 
-    //원복 공통 함수
-    private void RestoreSnapshots(List<OutlineSnapshot> list)
+    //스킬 범위 표시 원복
+    public void ClearSkillRangePreview()
     {
-        foreach (var s in list)
+        RestoreSnapshots(skillPreviewSnaps);
+        skillPreviewSnaps.Clear();
+        previewSkillCard = null;
+        previewOwnerTokenKey = -1;
+    }
+
+    //원복 공통 함수
+    private void RestoreSnapshots(List<OutlineSnapshot> snaps)
+    {
+        for (int i = snaps.Count - 1; i >= 0; i--)
         {
-            if (s.img == null) continue;
+            var s = snaps[i];
+            if (!s.img) continue;
             s.img.color = s.origColor;
-            s.img.gameObject.SetActive(s.origActive);  //GameObject 활성 상태 복원
+            s.img.gameObject.SetActive(s.origActive);
         }
+    }
+    #endregion
+
+    #region 방향에 맞게 스킬 범위를 표시
+    public void ShowSkillRangePreview(SkillCardData cardData, int ownerTokenKey, int stepIndex = 0)
+    {
+        ClearSkillRangePreview();
+
+        if (cardData == null) return;
+        if (cardData.id == 1000) return;  //기본 이동카드 제외
+        if (cardData.steps == null || cardData.steps.Count == 0) return;
+        if (!TryGetTokenPosition(ownerTokenKey, out var originOffset)) return;
+
+        //상태 보관
+        previewSkillCard = cardData;
+        previewStepIndex = Mathf.Clamp(stepIndex, 0, cardData.steps.Count - 1);
+        previewOwnerTokenKey = ownerTokenKey;
+
+        var step = cardData.steps[previewStepIndex];
+        if (step == null || step.target == null) return;
+
+        //origin axial
+        var (oq, or) = AxialFromOffset(originOffset.x, originOffset.y);
+
+        //1) 기본축 기준 패턴 생성
+        var offsets = BuildSkillOffsets(step.target);
+
+        //2) 현재 바라보는 방향만큼 회전
+        EnsureBaseForwardIndex();
+        int facing = GetTokenFacingIndexOrDefault(ownerTokenKey);
+        int rot = ((facing - baseForwardIndex) % 6 + 6) % 6;  //시계 방향 회전 스텝 (0~5)
+        if (rot != 0) offsets = RotateOffsetsCW(offsets, rot);
+
+        //3) 칠하기
+        Color rangeColor = HL_SKILL;
+        foreach (var (dq, dr) in offsets)
+        {
+            if (!step.target.includeSelf && dq == 0 && dr == 0) continue;
+
+            var off = OffsetFromAxial(oq + dq, or + dr);
+            if (!TryGetOutline(off, out var img)) continue;
+
+            skillPreviewSnaps.Add(new OutlineSnapshot { img = img, origColor = img.color, origActive = img.gameObject.activeSelf });
+            img.color = rangeColor;
+            if (!img.gameObject.activeSelf) img.gameObject.SetActive(true);
+            img.transform.SetAsLastSibling();
+        }
+
+        //중앙 기준점
+        var centerOff = OffsetFromAxial(oq, or);
+        if (TryGetOutline(centerOff, out var centerImg))
+        {
+            skillPreviewSnaps.Add(new OutlineSnapshot { img = centerImg, origColor = centerImg.color, origActive = centerImg.gameObject.activeSelf });
+            centerImg.color = step.target.includeSelf ? HL_CENTER_INC : HL_CENTER_EXC;
+            if (!centerImg.gameObject.activeSelf) centerImg.gameObject.SetActive(true);
+            centerImg.transform.SetAsLastSibling();
+        }
+    }
+
+    /// <summary>
+    /// 캐릭터 토큰의 현재 방향 인덱스 (없으면 기본축 인덱스 사용) 찾기
+    /// </summary>
+    /// <param name="ownerTokenKey"></param>
+    /// <returns></returns>
+    private int GetTokenFacingIndexOrDefault(int ownerTokenKey)
+    {
+        //토큰 위치 → 타일 → 캐시된 인덱스
+        if (TryGetTokenPosition(ownerTokenKey, out var pos)
+            && hexTileMap.TryGetValue((pos.x, pos.y), out var tile))
+        {
+            var cached = tile.GetFacingIndexCached();
+            if (cached.HasValue) return cached.Value;
+        }
+        EnsureBaseForwardIndex();
+        return baseForwardIndex;
+    }
+
+    /// <summary>
+    /// baseForwardIndex (기본축 방향 인덱스)를 초기화
+    /// </summary>
+    private void EnsureBaseForwardIndex()
+    {
+        //이미 초기화된 경우(0 이상) 그대로 반환
+        if (baseForwardIndex >= 0) return;
+
+        //중심에 가까운 칸들 중에서,
+        //위쪽 방향 오프셋 (0,-1)에 실제 타일이 존재하는 경우를 찾아냄
+        foreach (var kv in hexTileMap)
+        {
+            var origin = new Vector2Int(kv.Key.col, kv.Key.row);
+            var (oq, or) = AxialFromOffset(origin.x, origin.y);
+            var upOff = OffsetFromAxial(oq + 0, or - 1);  //(0,-1) 방향 이웃
+
+            //해당 오프셋 위치에 타일이 존재하면
+            if (hexTileMap.ContainsKey((upOff.x, upOff.y)))
+            {
+                //origin → upOff 이동이 어떤 방향 인덱스인지 계산
+                int idx = GetDirectionIndexByOffset(origin, upOff);
+
+                //인덱스가 유효하다면 이것을 baseForwardIndex로 등록하고 종료
+                if (idx >= 0) { baseForwardIndex = idx; return; }
+            }
+        }
+    }
+
+    //60도 시계 방향 회전
+    private List<(int dq, int dr)> RotateOffsetsCW(List<(int dq, int dr)> src, int stepsCW)
+    {
+        (int q, int r) Rot((int q, int r) v) => (v.q + v.r, -v.q);
+        var dst = new List<(int, int)>(src.Count);
+        foreach (var v in src)
+        {
+            int q = v.dq, r = v.dr;
+            for (int i = 0; i < stepsCW; i++) { var t = Rot((q, r)); q = t.q; r = t.r; }
+            dst.Add((q, r));
+        }
+        return dst;
+    }
+
+    //Offset → Axial 변환
+    private (int q, int r) AxialFromOffset(int col, int row)
+    {
+        int q = col;
+        int r = row - (col - (col & 1)) / 2;
+        return (q, r);
+    }
+
+    //Axial → Offset 변환
+    private Vector2Int OffsetFromAxial(int q, int r)
+    {
+        int col = q;
+        int row = r + (q - (q & 1)) / 2;
+        return new Vector2Int(col, row);
+    }
+
+    //TargetSelector 조건에 맞는 axial 상대 오프셋(dq,dr) 목록 생성
+    private List<(int dq, int dr)> BuildSkillOffsets(TargetSelector t)
+    {
+        var list = new List<(int, int)>();
+        if (t == null) return list;
+
+        int p = Mathf.Max(0, t.rangeParam);
+
+        //1) 범위 패턴 수집 (색 정보는 무시하므로 dummy 색 전달)
+        List<(int dq, int dr, Color color)> range =
+            (t.rangeType == SkillRangeType.Custom)
+                ? SkillRangeHelper.GetCustom(t.customOffsets, Color.white)
+                : SkillRangeHelper.GetPattern(t.rangeType, p, Color.white, Color.white, Color.white, Color.white);
+
+        //2) dq/dr만 추출
+        foreach (var (dq, dr, _) in range)
+            list.Add((dq, dr));
+
+        //3) 자기 자신 포함 여부 처리
+        if (!t.includeSelf)
+            list.RemoveAll(v => v.Item1 == 0 && v.Item2 == 0);  //(0,0) 제거
+        else if (!list.Contains((0, 0)))
+            list.Add((0, 0));  //(0,0) 보강
+
+        return list;
     }
     #endregion
 }
