@@ -24,6 +24,7 @@ public class UISkillCard : MonoBehaviour
     [SerializeField] Button btnEnlargeImage, btnEnlargeRange;
     [SerializeField] RectTransform hexContainer;
     [SerializeField] GameObject hexPrefab;
+    [SerializeField] Toggle toggle_effect, toggle_skillRange;
 
     private readonly List<GameObject> skillHexes = new();
     private readonly Dictionary<(int dq, int dr), GameObject> skillHexMap = new();
@@ -33,6 +34,11 @@ public class UISkillCard : MonoBehaviour
     private int skillId = -1;
     public int GetSkillId() => skillId;
     public int GetCount() => count;
+
+    private void Start()
+    {
+        InitToggleEvent();
+    }
 
     public void Set(Sprite sprite, SkillCardData skillCardData, int initialCount)
     {
@@ -87,4 +93,26 @@ public class UISkillCard : MonoBehaviour
     {
         UIManager.Instance.GetPopup<UISkillInfoPopup>("UISkillInfoPopup").ShowRangeOverlay(curSkillCardData);
     }
+
+    #region Detail 탭 메뉴
+    private void InitToggleEvent()
+    {
+        Active(true);
+
+        toggle_effect.onValueChanged.AddListener((isOn) => {
+            if (isOn) Active(true);
+        });
+
+        toggle_skillRange.onValueChanged.AddListener((isOn) => {
+            if (isOn) Active(false);
+        });
+    }
+
+    private void Active(bool isActive)
+    {
+        txtSkillEffect.gameObject.SetActive(isActive);
+        hexContainer.gameObject.SetActive(!isActive);
+        btnEnlargeRange.gameObject.SetActive(!isActive);
+    }
+    #endregion
 }

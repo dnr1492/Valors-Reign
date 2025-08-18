@@ -2289,7 +2289,7 @@ MonoBehaviour:
   battleFieldRt: {fileID: 3726382129370972939}
   hexPrefab: {fileID: 138201516482705832, guid: d5e3f1ef6ac85824583b859df46c1975, type: 3}
   skillCardZone: {fileID: 8407238350491035651}
-  skillCardPrefab: {fileID: 8588048160141759139, guid: dd7efbbd567493f4a9a2966237450e53, type: 3}
+  skillCardPrefab: {fileID: 8588048160141759139, guid: 3b5d94def71a07745bfcf569010d895c, type: 3}
   roundSlots:
   - {fileID: 7678547139956748763}
   - {fileID: 3042557905844957636}

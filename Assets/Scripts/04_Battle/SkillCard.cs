@@ -10,6 +10,7 @@ public class SkillCard : MonoBehaviour
     [SerializeField] Image imgSkill;
     [SerializeField] RectTransform hexContainer;
     [SerializeField] GameObject hexPrefab;
+    [SerializeField] Toggle toggle_effect, toggle_skillRange;
 
     private readonly List<GameObject> skillHexes = new();
     private readonly Dictionary<(int dq, int dr), GameObject> skillHexMap = new();
@@ -17,6 +18,11 @@ public class SkillCard : MonoBehaviour
     private Sprite originalBasicMoveSkillSprite;  //원본 기본 이동카드의 스프라이트 보관
 
     public SkillCardData SkillCardData { get; private set; }
+
+    private void Start()
+    {
+        InitToggleEvent();
+    }
 
     public void Set(Sprite sprite, SkillCardData skillCardData)
     {
@@ -47,4 +53,25 @@ public class SkillCard : MonoBehaviour
         if (SkillCardData != null && SkillCardData.id == 1000)
             imgSkill.sprite = originalBasicMoveSkillSprite;
     }
+
+    #region Detail 탭 메뉴
+    private void InitToggleEvent()
+    {
+        Active(true);
+
+        toggle_effect.onValueChanged.AddListener((isOn) => {
+            if (isOn) Active(true);
+        });
+
+        toggle_skillRange.onValueChanged.AddListener((isOn) => {
+            if (isOn) Active(false);
+        });
+    }
+
+    private void Active(bool isActive)
+    {
+        txtSkillEffect.gameObject.SetActive(isActive);
+        hexContainer.gameObject.SetActive(!isActive);
+    }
+    #endregion
 }
