@@ -58,17 +58,8 @@ public class GridManager : Singleton<GridManager>
     private readonly List<OutlineSnapshot> skillPreviewSnaps = new();
 
     [Header("Skill Range Preview")]
-    private SkillCardData previewSkillCard;
     private int previewStepIndex;
-    private int previewOwnerTokenKey = -1;
     private int baseForwardIndex = -1;  //기준축(0,-1)이 "방향 인덱스"로 몇 번인지 캐싱
-
-    private struct OutlineSnapshot  //원복을 위한 스냅샷
-    {
-        public Image img;
-        public Color origColor;
-        public bool origActive;  //GameObject 활성 상태를 저장
-    }
 
     [Header("이동 애니메이션")]
     private RectTransform tokenLayer;
@@ -997,8 +988,6 @@ public class GridManager : Singleton<GridManager>
     {
         RestoreSnapshots(skillPreviewSnaps);
         skillPreviewSnaps.Clear();
-        previewSkillCard = null;
-        previewOwnerTokenKey = -1;
     }
 
     //원복 공통 함수
@@ -1025,9 +1014,7 @@ public class GridManager : Singleton<GridManager>
         if (!TryGetTokenPosition(ownerTokenKey, out var originOffset)) return;
 
         //상태 보관
-        previewSkillCard = cardData;
         previewStepIndex = Mathf.Clamp(stepIndex, 0, cardData.steps.Count - 1);
-        previewOwnerTokenKey = ownerTokenKey;
 
         var step = cardData.steps[previewStepIndex];
         if (step == null || step.target == null) return;

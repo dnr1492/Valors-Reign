@@ -1986,7 +1986,7 @@ GameObject:
   - component: {fileID: 1810874287328760289}
   - component: {fileID: 1009978296291500586}
   m_Layer: 5
-  m_Name: txt_roundState
+  m_Name: txt_settingState
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2039,7 +2039,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\uB77C\uC6B4\uB4DC \uC9C4\uD589 \uC0C1\uD0DC \uD45C\uC2DC"
+  m_text: "\uC14B\uD305 \uC0C1\uD0DC \uD45C\uC2DC"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: cc604f61b5bf19348a3ff622f20f4545, type: 2}
   m_sharedMaterial: {fileID: -9131770026233852502, guid: cc604f61b5bf19348a3ff622f20f4545, type: 2}
@@ -2300,4 +2300,4 @@ MonoBehaviour:
   btn_ready: {fileID: 209238531842166587}
   txt_timer: {fileID: 7581735466291627879}
   txt_curTrun: {fileID: 5715330974196805608}
-  txt_roundState: {fileID: 1009978296291500586}
+  txt_settingState: {fileID: 1009978296291500586}

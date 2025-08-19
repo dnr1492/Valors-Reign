@@ -176,7 +176,7 @@ public class PhotonController : MonoBehaviourPunCallbacks
             TryFinalizeTurnOrder(selectedFirst);
         }
         //상대 라운드 종료 수신
-        if (photonEvent.Code == (byte)PhotonEventCode.RoundFinished)
+        else if (photonEvent.Code == (byte)PhotonEventCode.RoundFinished)
         {
             object[] data = (object[])photonEvent.CustomData;
             int trn = (int)data[0];
@@ -187,12 +187,21 @@ public class PhotonController : MonoBehaviourPunCallbacks
             return;
         }
         //상대 준비완료/타임아웃 수신
-        if (photonEvent.Code == (byte)PhotonEventCode.PlayerReady)
+        else if (photonEvent.Code == (byte)PhotonEventCode.PlayerReady)
         {
             object[] data = (object[])photonEvent.CustomData;
             int trn = (int)data[0];
             int readyType = (int)data[1];  //0 = Manual, 1 = Timeout
             TurnManager.Instance.OnOpponentReady(trn, readyType);
+            return;
+        }
+        //상대 라운드 계획 수신
+        else if (photonEvent.Code == (byte)PhotonEventCode.SendRoundPlan)
+        {
+            object[] data = (object[])photonEvent.CustomData;
+            string json = (string)data[0];
+            var plan = JsonUtility.FromJson<OppRoundPlan>(json);
+            TurnManager.Instance.SetOpponentRoundPlan(plan);
             return;
         }
     }
@@ -313,18 +322,15 @@ public class PhotonController : MonoBehaviourPunCallbacks
     #endregion
 
     #region 라운드 진행
-    //해당 라운드 종료 알림
-    public void NotifyRoundFinished(int trnIndex, int roundIndex)
+    //내 라운드 계획 송신
+    public void SendMyRoundPlan(OppRoundPlan plan)
     {
         if (!PhotonNetwork.InRoom) return;
-
-        object[] content = { trnIndex, roundIndex };
-        PhotonNetwork.RaiseEvent(
-            (byte)PhotonEventCode.RoundFinished,
-            content,
+        string json = JsonUtility.ToJson(plan);
+        object[] content = { json };
+        PhotonNetwork.RaiseEvent((byte)PhotonEventCode.SendRoundPlan, content,
             new RaiseEventOptions { Receivers = ReceiverGroup.Others },
-            SendOptions.SendReliable
-        );
+            SendOptions.SendReliable);
     }
 
     //대전 셋팅 준비완료 알림 (Manual = 0, Timeout = 1)
@@ -334,6 +340,20 @@ public class PhotonController : MonoBehaviourPunCallbacks
         object[] content = { trnIndex, readyType };
         PhotonNetwork.RaiseEvent(
             (byte)PhotonEventCode.PlayerReady,
+            content,
+            new RaiseEventOptions { Receivers = ReceiverGroup.Others },
+            SendOptions.SendReliable
+        );
+    }
+
+    //해당 라운드 종료 알림
+    public void NotifyRoundFinished(int trnIndex, int roundIndex)
+    {
+        if (!PhotonNetwork.InRoom) return;
+
+        object[] content = { trnIndex, roundIndex };
+        PhotonNetwork.RaiseEvent(
+            (byte)PhotonEventCode.RoundFinished,
             content,
             new RaiseEventOptions { Receivers = ReceiverGroup.Others },
             SendOptions.SendReliable

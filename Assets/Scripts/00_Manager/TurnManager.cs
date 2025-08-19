@@ -14,10 +14,13 @@ public class TurnManager : Singleton<TurnManager>
     private bool myReady = false;  //나의 준비 상태
     private bool oppReady = false;  //상대 준비 상태
     private bool roundsStarted = false;  //중복 트리거 방지
-
+    private UIBattleProgress progressUI;
+    private OppRoundPlan? cachedOppPlan;  //수신한 상대의 라운드 계획 캐싱 - 스킬 효과 반영에 사용
+    
     public int TurnIndex => trnIndex;
     public bool IsPvP => ControllerRegister.Get<PhotonController>().IsPvPMatch == true;  //PvP 여부
     public bool IsLocalReady => myReady;  //외부(UI)에서 내 준비 상태 조회용
+    public void SetOpponentRoundPlan(OppRoundPlan plan) => cachedOppPlan = plan;
 
     protected override void Awake()
     {
@@ -64,9 +67,9 @@ public class TurnManager : Singleton<TurnManager>
         //생존 캐릭터 수 × 2 장 드로우 + 기본 이동카드 1 장
         CardManager.Instance.DrawSkillCardsForAliveOwners(aliveKeys, aliveCharacterCount * 2);
 
-        //3) UI 반영 - 드로우한 스킬카드를 표시, 턴/라운드 표시
+        //3) UI 반영 - 드로우한 스킬카드를 표시, 턴 표시
         UIManager.Instance.GetPopup<UIBattleSetting>("UIBattleSetting").SetDrawnSkillCard(CardManager.Instance.GetDrawnSkillCards());
-        UIManager.Instance.GetPopup<UIBattleSetting>("UIBattleSetting").DisplayTurnAndRound(trnIndex, roundIndex);
+        UIManager.Instance.GetPopup<UIBattleSetting>("UIBattleSetting").DisplayTurn(trnIndex);
     }
 
     #region 라운드 진행 (동일한 라운드에서 선공 → 후공 순으로 실행)
@@ -75,24 +78,31 @@ public class TurnManager : Singleton<TurnManager>
         if (matchEnded) return;
 
         roundIndex++;
-        if (roundIndex > 4) { EndRound(); return; }  //최대 라운드 초과 시 다음 턴으로 전환
 
-        //라운드 진입 시 UI 갱신
-        UIManager.Instance.GetPopup<UIBattleSetting>("UIBattleSetting").DisplayTurnAndRound(trnIndex, roundIndex);
+        //최대 라운드 초과 시 다음 턴으로 전환
+        if (roundIndex > 4) {
+            EndRound();
+            return;
+        }
+
+        //진행 라운드 갱신
+        progressUI.DisplayRound(roundIndex);
 
         myExecutedThisRound = false;
+
+        //누가 선공인지(iAmFirst) 기준으로 먼저 움직일 쪽을 결정해서 양쪽 카드 순차 이동
+        await progressUI.AnimateRoundIntroAsync(roundIndex, iAmFirst);
 
         if (IsPvP)
         {
             if (iAmFirst)
             {
                 await ExecuteMyRoundAsync();
-                myExecutedThisRound = true;
 
                 //상대에 N 라운드 끝남 알림
                 //여기서 대기 → 상대가 해당 roundIndex를 마치고 알림 보내면 다음 라운드로 이동
                 var photon = ControllerRegister.Get<PhotonController>();
-                photon.NotifyRoundFinished(trnIndex, roundIndex);  
+                photon.NotifyRoundFinished(trnIndex, roundIndex);
             }
             else
             {
@@ -102,8 +112,23 @@ public class TurnManager : Singleton<TurnManager>
         }
         else
         {
-            await ExecuteMyRoundAsync();
-            await ExecuteOpponentRoundAIAsync();
+            if (iAmFirst)
+            {
+                //내 쪽 먼저 연출 → 내 라운드 실행
+                await ExecuteMyRoundAsync();
+
+                //그 다음 상대 쪽 연출 → AI 라운드 실행
+                await ExecuteOpponentRoundAIAsync();
+            }
+            else
+            {
+                //상대 쪽 먼저 연출 → AI 라운드 실행
+                await ExecuteOpponentRoundAIAsync();
+
+                //그 다음 내 쪽 연출 → 내 라운드 실행
+                await ExecuteMyRoundAsync();
+            }
+
             StartRound();
         }
     }
@@ -152,7 +177,7 @@ public class TurnManager : Singleton<TurnManager>
         //오더 없으면 스킵
         if (!move.HasOrderForRound(roundIndex))
         {
-            Debug.Log($"[Round] 라운드{roundIndex}: 실행할 이동 없음");
+            Debug.Log($"[Round] {roundIndex} 라운드: 실행할 이동 없음");
             return;
         }
 
@@ -168,7 +193,7 @@ public class TurnManager : Singleton<TurnManager>
     {
         // ===== TODO: AI 행동 로직 구현 필요 ===== //
         Debug.Log($"[Round] 상대 {roundIndex} 라운드 자동 처리");
-        await UniTask.Delay(250);
+        await UniTask.Delay(1000);
     }
 
     private void EndRound()
@@ -183,7 +208,7 @@ public class TurnManager : Singleton<TurnManager>
         ProceedToNextTurn();
 
         //타이머 재시작
-        UIManager.Instance.GetPopup<UIBattleSetting>("UIBattleSetting").BeginSetupPhase();
+        UIManager.Instance.ShowPopup<UIBattleSetting>("UIBattleSetting").BeginSetupPhase();
     }
     #endregion
 
@@ -219,24 +244,39 @@ public class TurnManager : Singleton<TurnManager>
     {
         if (roundsStarted) return;
 
-        if (IsPvP)
-        {
+        if (IsPvP) {
             if (!myReady || !oppReady) return;
         }
-        else
-        {
+        else {
             if (!myReady) return;
         }
 
         roundsStarted = true;
-        UIManager.Instance.GetPopup<UIBattleSetting>("UIBattleSetting").OnBothReady();
 
+        var setting = UIManager.Instance.GetPopup<UIBattleSetting>("UIBattleSetting");
+        setting.OnBothReady();
+
+        progressUI = UIManager.Instance.ShowPopup<UIBattleProgress>("UIBattleProgress", false);
+
+        //유저
         if (IsPvP)
         {
+            progressUI.DisplayMyRoundCards(setting);
+
+            // ===== TODO(PvP): facedown(뒷면) 플레이스홀더가 필요하면!cachedOppPlan.HasValue일 때 채우기. ===== //
+            // ===== TODO(PvP / 전투): 실제 스킬 효과 적용은 라운드 실행 단계에서 cachedOppPlan을 CombatManager에 enqueue 하는 식으로 붙이면 됨. ===== //
+            if (cachedOppPlan.HasValue) progressUI.DisplayOpponentRoundCards(cachedOppPlan.Value);
+
             if (iAmFirst) StartRound();
             else Debug.Log("[Turn] 상대가 선공이므로 대기");
         }
-        else StartRound();
+        //AI
+        else
+        {
+            progressUI.DisplayBoth(setting, null, IsPvP);
+
+            StartRound();
+        }
     }
 
     //준비 배리어 초기화

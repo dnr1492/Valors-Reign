@@ -16,15 +16,6 @@ public class MovementOrderController : MonoBehaviour
     private MoveOrder? editingBackup = null;
     private SkillCardRoundSlot resumeAfterEditSlot = null;  //인라인 편집 중, 편집 종료 후 재개해야 할 타겟팅 슬롯 저장
 
-    //라운드 슬롯에 설정된 한 번의 이동
-    public struct MoveOrder
-    {
-        public int tokenKey;
-        public Vector2Int fromHexPos;  //출발 좌표 (선택 당시)
-        public Vector2Int toHexPos;    //도착 좌표
-        public int roundOrder;         //현재 Round
-    }
-
     private readonly Dictionary<SkillCardRoundSlot, MoveOrder> moveOrders = new();
     private readonly Dictionary<Vector2Int, SkillCardRoundSlot> reservedByHexPos = new();
 
@@ -336,7 +327,7 @@ public class MovementOrderController : MonoBehaviour
     //현재까지 예약에 사용된 캐릭터 집합
     private HashSet<int> GetUsedTokenKeys() => new HashSet<int>(moveOrders.Values.Select(v => v.tokenKey));
 
-    //이미 오더에 쓰인 캐릭터의 슬롯 찾기
+    //오더에 쓰인 캐릭터의 슬롯 찾기
     private bool TryGetSlotByToken(int tokenKey, out SkillCardRoundSlot slot)
     {
         foreach (var kv in moveOrders)
@@ -348,6 +339,19 @@ public class MovementOrderController : MonoBehaviour
             }
         }
         slot = null;
+        return false;
+    }
+
+    //라운드 슬롯 → 토큰 키 조회
+    public bool TryGetAssignedTokenKey(SkillCardRoundSlot slot, out int tokenKey)
+    {
+        tokenKey = -1;
+        if (slot == null) return false;
+        if (moveOrders.TryGetValue(slot, out var mo))
+        {
+            tokenKey = mo.tokenKey;
+            return true;
+        }
         return false;
     }
 

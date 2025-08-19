@@ -29,7 +29,8 @@ public class UIBattleSetting : UIPopupBase
     private readonly float minVisiblePixelsWhenOverlapping = 10f;
 
     [Header("Setting SkillCardRoundZone")]
-    [SerializeField] SkillCardRoundSlot[] roundSlots = new SkillCardRoundSlot[4];  //SkillCardRoundSlot 4칸 연결
+    [SerializeField] SkillCardRoundSlot[] roundSlots = new SkillCardRoundSlot[4];  //RoundSlot 4칸 연결
+    public SkillCardRoundSlot[] GetRoundSlots() => roundSlots;
 
     [Header("SkillCard Detail UI")]
     [SerializeField] Transform skillCardCopyZone;                  //클론을 붙일 영역
@@ -37,12 +38,12 @@ public class UIBattleSetting : UIPopupBase
 
     [Header("Top UI")]
     [SerializeField] Button btn_ready;
-    [SerializeField] TextMeshProUGUI txt_timer, txt_curTrun, txt_roundState;
+    [SerializeField] TextMeshProUGUI txt_timer, txt_curTrun, txt_settingState;
     private readonly float settingTimeLimitSec = 20f;
     private CancellationTokenSource settingTimerCts;
 
     private void OnToast(string msg) => UIManager.Instance.ShowPopup<UIModalPopup>("UIModalPopup", false).Set("알림", msg);
-
+   
     public void Init()
     {
         rootCanvas = GetComponentInParent<Canvas>();
@@ -500,17 +501,52 @@ public class UIBattleSetting : UIPopupBase
     }
     #endregion
 
+    #region [대전 진행] 내 라운드 슬롯 상태를 OppRoundPlan으로 직렬화
+    public OppRoundPlan BuildMyRoundPlan()
+    {
+        var list = new List<RoundCardInfo>(4);
+        var slots = GetRoundSlots();
+        if (slots != null)
+        {
+            for (int i = 0; i < slots.Length; i++)
+            {
+                var slot = slots[i];
+                if (slot == null) continue;
+
+                var evt = slot.GetComponentInChildren<SkillCardEvent>();
+                if (evt == null || evt.SkillCardData == null) continue;
+
+                int cardId = evt.SkillCardData.id;
+                int round = i + 1;
+                int tokenKey = -1;
+
+                if (cardId == 1000 && movementOrderCtrl != null) {
+                    movementOrderCtrl.TryGetAssignedTokenKey(slot, out tokenKey);
+                }
+
+                list.Add(new RoundCardInfo { round = round, cardId = cardId, moveTokenKey = tokenKey });
+            }
+        }
+        return new OppRoundPlan { cards = list.ToArray() };
+    }
+    #endregion
+
     //[UI] 현재 제한시간 표시
     public void DisplayTimer(float timer)
     {
         txt_timer.text = timer.ToString() + " 초";
     }
 
-    //[UI] 현재 턴/라운드 표시
-    public void DisplayTurnAndRound(int turnIndex, int roundIndex)
+    //[UI] 현재 턴 표시
+    public void DisplayTurn(int turnIndex)
     {
         txt_curTrun.text = $"{turnIndex} 턴";
-        txt_roundState.text = $"현재 {roundIndex} 라운드가 진행 중입니다.";
+    }
+
+    //[UI] 현재 셋팅 상태 표시 ===== TODO: 구현 요망 =====
+    public void DisplaySettingState(string str)
+    {
+        //txt_settingState.text = str
     }
 
     protected override void ResetUI() { }
