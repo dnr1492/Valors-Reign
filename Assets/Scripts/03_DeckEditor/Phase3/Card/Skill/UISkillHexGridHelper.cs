@@ -8,9 +8,9 @@ public static class UISkillHexGridHelper
 {
     private readonly static float spacingX = 1f;
     private readonly static float spacingY = 0.5f;
-    private readonly static int verticalExtra = 1;  //상/하 여유
+    private readonly static int verticalExtra = 3;  //상/하 여유
     private readonly static int extraMargin = 1;  //스킬 범위 주변 여유 (행/열)
-    private readonly static float minHexHeightPx = 56f;
+    private readonly static float minHexHeightPx = 32f;
     private static bool isBuilding = false;  //동시 재진입 방지
 
     #region 스킬 범위 기반 HexGrid 생성

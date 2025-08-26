@@ -1,5 +1,6 @@
 public class EnumClass
 {
+    public enum ToastAnchor { Top, Center, Bottom }
     public enum PhotonEventCode : byte { SendDeck = 1, CoinFlip = 2, SendTurnOrderChoice = 3, RoundFinished = 4, PlayerReady = 5, SendRoundPlan = 6, }
     public enum CharacterRace { None = -1, Primordial, Earthbound, Seaborne, Verdant, Skyborne, Mythkin, Divinite, Morphid, Undying, Automaton }  //영장, 지주, 수생, 식물, 천익, 환수, 성휘, 이형, 불사, 기계
     public enum CharacterTokenState { None = -1, Cancel, Select, Confirm }

@@ -7,6 +7,7 @@ using TMPro;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using System;
+using static EnumClass;
 
 public class UIBattleSetting : UIPopupBase
 {
@@ -42,8 +43,8 @@ public class UIBattleSetting : UIPopupBase
     private readonly float settingTimeLimitSec = 20f;
     private CancellationTokenSource settingTimerCts;
 
-    private void OnToast(string msg) => UIManager.Instance.ShowPopup<UIModalPopup>("UIModalPopup", false).Set("알림", msg);
-   
+    private void OnToast(string msg) => ToastManager.Instance.Show(msg, ToastAnchor.Top, 1.6f);
+
     public void Init()
     {
         rootCanvas = GetComponentInParent<Canvas>();
@@ -348,6 +349,8 @@ public class UIBattleSetting : UIPopupBase
     {
         if (evt == null || evt.SkillCardData == null) return;
 
+        int ownerTokenKey = ResolveOwnerTokenKeyForCard(evt.SkillCardData.id);
+
         //설명 텍스트 갱신
         if (txtSkillCardDescriptionZone != null)
             txtSkillCardDescriptionZone.text = evt.SkillCardData.effect ?? string.Empty;
@@ -371,19 +374,15 @@ public class UIBattleSetting : UIPopupBase
             //클론은 클릭/드래그 불가능
             var cloneEvt = clone.GetComponent<SkillCardEvent>();
             if (cloneEvt != null) cloneEvt.enabled = false;
-        }
 
-        //스킬카드를 가지고 있는 캐릭터 토큰 찾기
-        int ownerTokenKey = ResolveOwnerTokenKeyForCard(evt.SkillCardData.id);
-        if (ownerTokenKey < 0)
-        {
-            Debug.Log($"[UIBattleSetting] 스킬카드를 가지고 있는 캐릭터 토큰을 찾지 못해 스킬 범위 프리뷰를 생략합니다. skillId={evt.SkillCardData.id}");
-            GridManager.Instance.ClearSkillRangePreview();
-            return;
+            //복제 카드 클릭 시 확대 토글
+            var zoom = clone.AddComponent<SkillCardDetailZoom>();
+            zoom.previewOwnerTokenKey = ownerTokenKey;
         }
 
         //필드 스킬 범위 프리뷰 (보기 전용)
-        GridManager.Instance.ShowSkillRangePreview(evt.SkillCardData, ownerTokenKey);
+        if (ownerTokenKey >= 0) GridManager.Instance.ShowSkillRangePreview(evt.SkillCardData, ownerTokenKey);
+        else GridManager.Instance.ClearSkillRangePreview();
     }
 
     /// <summary>

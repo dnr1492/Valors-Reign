@@ -92,10 +92,10 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 8
+  m_fontSize: 7.3
   m_fontSizeBase: 8
   m_fontWeight: 400
-  m_enableAutoSizing: 0
+  m_enableAutoSizing: 1
   m_fontSizeMin: 0
   m_fontSizeMax: 100
   m_fontStyle: 0
@@ -128,7 +128,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 0, y: 0, z: 0, w: 0}
+  m_margin: {x: 1, y: 1, z: 1, w: 1}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0
@@ -454,10 +454,10 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 8
+  m_fontSize: 7.3
   m_fontSizeBase: 8
   m_fontWeight: 400
-  m_enableAutoSizing: 0
+  m_enableAutoSizing: 1
   m_fontSizeMin: 0
   m_fontSizeMax: 100
   m_fontStyle: 0
@@ -490,7 +490,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 0, y: 0, z: 0, w: 0}
+  m_margin: {x: 1, y: 1, z: 1, w: 1}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0
@@ -604,10 +604,10 @@ RectTransform:
   - {fileID: 4592515619914906454}
   m_Father: {fileID: 3365230029236865015}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 16, y: 0}
-  m_SizeDelta: {x: 16, y: 16}
+  m_AnchorMin: {x: 0.12269232, y: 0.8034059}
+  m_AnchorMax: {x: 0.24538462, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &5691750752151385985
 MonoBehaviour:
@@ -974,10 +974,10 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 8
+  m_fontSize: 7.3
   m_fontSizeBase: 8
   m_fontWeight: 400
-  m_enableAutoSizing: 0
+  m_enableAutoSizing: 1
   m_fontSizeMin: 0
   m_fontSizeMax: 100
   m_fontStyle: 0
@@ -1010,7 +1010,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 0, y: 0, z: 0, w: 0}
+  m_margin: {x: 1, y: 1, z: 1, w: 1}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0
@@ -1049,10 +1049,10 @@ RectTransform:
   - {fileID: 7480508610833337532}
   m_Father: {fileID: 8588048160183874656}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: -7.5}
-  m_SizeDelta: {x: -10, y: -25}
+  m_AnchorMin: {x: 0.038307697, y: 0.061485484}
+  m_AnchorMax: {x: 0.9616154, y: 0.75429714}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &7191252160574541892
 CanvasRenderer:
@@ -1124,10 +1124,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 3365230029236865015}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
+  m_AnchorMin: {x: 0, y: 0.8034059}
+  m_AnchorMax: {x: 0.24538462, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 32, y: 16}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 1}
 --- !u!222 &3343529547827648723
 CanvasRenderer:
@@ -1275,10 +1275,10 @@ RectTransform:
   - {fileID: 6158037284598341077}
   m_Father: {fileID: 3365230029236865015}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
+  m_AnchorMin: {x: 0, y: 0.8034059}
+  m_AnchorMax: {x: 0.12269231, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 16, y: 16}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &6460687998561136508
 MonoBehaviour:
@@ -1562,21 +1562,21 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 8
+  m_fontSize: 7.8
   m_fontSizeBase: 8
   m_fontWeight: 400
-  m_enableAutoSizing: 0
+  m_enableAutoSizing: 1
   m_fontSizeMin: 0
   m_fontSizeMax: 7.8
   m_fontStyle: 0
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 256
   m_textAlignment: 65535
-  m_characterSpacing: 0
-  m_wordSpacing: 0
-  m_lineSpacing: 0
+  m_characterSpacing: 1
+  m_wordSpacing: 1
+  m_lineSpacing: 1
   m_lineSpacingMax: 0
-  m_paragraphSpacing: 0
+  m_paragraphSpacing: 1
   m_charWidthMaxAdj: 0
   m_enableWordWrapping: 1
   m_wordWrappingRatios: 0.4
@@ -2110,6 +2110,14 @@ MonoBehaviour:
   hexPrefab: {fileID: 138201516482705832, guid: d5e3f1ef6ac85824583b859df46c1975, type: 3}
   toggle_effect: {fileID: 6460687998561136508}
   toggle_skillRange: {fileID: 5691750752151385985}
+  <SkillCardData>k__BackingField:
+    id: 0
+    name: 
+    effect: 
+    cardType: 0
+    rank: 0
+    round: 0
+    steps: []
 --- !u!114 &-577570249160258036
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -6,9 +6,9 @@ public class SkillCardRoundSlot : MonoBehaviour
 {
     [SerializeField] Image slotHighlightsBg;  //Drop이 가능한 RoundZone의 하이라이트용
 
-    private Color emptyHighlight = new Color(0f, 1f, 0f, 0.35f);    //빈 슬롯: 초록
-    private Color swapHighlight = new Color(1f, 0.6f, 0f, 0.35f);   //스왑: 주황
-    private Color normalColor = new Color(1f, 1f, 1f, 0.5f);        //평상시: 반투명
+    private Color emptyHighlight = new Color(0f, 1f, 0f, 0.35f);   //빈 슬롯: 초록
+    private Color swapHighlight = new Color(1f, 0.6f, 0f, 0.35f);  //스왑: 주황
+    private Color normalColor = new Color(1f, 1f, 1f, 0.5f);       //평상시: 반투명
 
     public SkillCardData AssignedSkillCardData { get; private set; }
     public bool IsEmpty => AssignedSkillCardData == null;
