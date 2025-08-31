@@ -135,48 +135,6 @@ public class UIBattleProgress : UIPopupBase
         DisplyCloneFromSettingSlots(mySetting, progressMyRoundSlots);
     }
 
-    //상대 셋팅을 진행 팝업의 상대 라운드 슬롯에 복제 표시
-    public void DisplayOpponentRoundCards(OppRoundPlan plan)
-    {
-        ClearSlots(progressOpponentRoundSlots);
-        if (plan.cards == null) return;
-
-        foreach (var info in plan.cards)
-        {
-            int idx = Mathf.Clamp(info.round - 1, 0, progressOpponentRoundSlots.Length - 1);
-            var dst = progressOpponentRoundSlots[idx];
-            if (dst == null) continue;
-
-            //카드 프리팹 생성
-            var go = Instantiate(skillCardPrefab, dst);
-            var sc = go.GetComponent<SkillCard>();
-
-            //기본 스킬 스프라이트
-            Sprite baseSp = null;
-            if (DataManager.Instance.dicSkillCardData.TryGetValue(info.cardId, out var cardData))
-                SpriteManager.Instance.dicSkillSprite.TryGetValue(cardData.name, out baseSp);
-
-            sc.Set(baseSp, DataManager.Instance.dicSkillCardData[info.cardId]);
-
-            //기본 이동카드(1000)면 moveTokenKey의 캐릭터 스프라이트로 교체
-            if (info.cardId == 1000 && info.moveTokenKey >= 0)
-            {
-                var token = ControllerRegister.Get<CharacterTokenController>()
-                            .GetAllCharacterToken()
-                            .FirstOrDefault(t => t.Key == info.moveTokenKey);
-                if (token != null)
-                    sc.SetCharacterImageIfMoveCard(token.GetCharacterSprite());
-            }
-
-            //진행 화면은 상호작용 비활성
-            var evt = go.GetComponent<SkillCardEvent>();
-            if (evt) evt.enabled = false;
-
-            var rt = go.GetComponent<RectTransform>();
-            rt.anchoredPosition = Vector2.zero;
-        }
-    }
-
     #region 나/상대 진행 슬롯에 있는 스킬카드를 가이드까지 이동 (feat.애니메이션)
     //선공/후공에 따라 둘 다 순차 실행
     public async UniTask AnimateRoundIntroAsync(int roundIndex, bool iAmFirst)

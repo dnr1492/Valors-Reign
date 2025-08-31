@@ -43,7 +43,7 @@ public class UIBattleSetting : UIPopupBase
     private readonly float settingTimeLimitSec = 20f;
     private CancellationTokenSource settingTimerCts;
 
-    private void OnToast(string msg) => ToastManager.Instance.Show(msg, ToastAnchor.Top, 1.6f);
+    private void OnToast(string msg) => ToastManager.Instance.Show(msg, ToastAnchor.Top);
 
     public void Init()
     {

@@ -39,11 +39,15 @@ public class PhotonController : MonoBehaviourPunCallbacks
     /// </summary>
     public void RequestJoinRoomAfterConnection()
     {
-        if (PhotonNetwork.IsConnectedAndReady) {
+        if (!GuardSession()) return;
+
+        if (PhotonNetwork.IsConnectedAndReady)
+        {
             Debug.Log("Photon 연결 완료 → 즉시 룸 입장");
             JoinOrCreateRoom();
         }
-        else {
+        else
+        {
             Debug.Log("Photon 아직 연결 안 됨 → 매칭 예약 후 연결 시도");
             pendingJoinRequest = true;
             ConnectToPhoton();
@@ -53,6 +57,8 @@ public class PhotonController : MonoBehaviourPunCallbacks
     #region Photon 서버에 연결
     private void ConnectToPhoton()
     {
+        if (!GuardSession()) return;
+
         if (!PhotonNetwork.IsConnected)
         {
             Debug.Log("Photon 서버 연결 시도...");
@@ -82,6 +88,8 @@ public class PhotonController : MonoBehaviourPunCallbacks
     #region 룸 생성 또는 참가
     public void JoinOrCreateRoom()
     {
+        if (!GuardSession()) return;
+
         string roomName = ROOM_NAME_PREFIX + Random.Range(1000, 9999);
         RoomOptions options = new RoomOptions
         {
@@ -126,8 +134,10 @@ public class PhotonController : MonoBehaviourPunCallbacks
     #endregion
 
     #region [유저 대전] 전투 준비 단계
-    public void StartDeckExchange(DeckPack deckPack)
+    private void StartDeckExchange(DeckPack deckPack)
     {
+        if (!GuardSession()) return;
+
         string json = JsonUtility.ToJson(deckPack);
         object[] content = { json };
 
@@ -193,15 +203,6 @@ public class PhotonController : MonoBehaviourPunCallbacks
             int trn = (int)data[0];
             int readyType = (int)data[1];  //0 = Manual, 1 = Timeout
             TurnManager.Instance.OnOpponentReady(trn, readyType);
-            return;
-        }
-        //상대 라운드 계획 수신
-        else if (photonEvent.Code == (byte)PhotonEventCode.SendRoundPlan)
-        {
-            object[] data = (object[])photonEvent.CustomData;
-            string json = (string)data[0];
-            var plan = JsonUtility.FromJson<OppRoundPlan>(json);
-            TurnManager.Instance.SetOpponentRoundPlan(plan);
             return;
         }
     }
@@ -293,6 +294,8 @@ public class PhotonController : MonoBehaviourPunCallbacks
     #region 룸 취소
     public void LeaveRoom()
     {
+        if (!GuardSession()) return;
+
         if (PhotonNetwork.InRoom) {
             Debug.Log("룸에서 나갑니다...");
             PhotonNetwork.LeaveRoom();
@@ -322,21 +325,12 @@ public class PhotonController : MonoBehaviourPunCallbacks
     #endregion
 
     #region 라운드 진행
-    //내 라운드 계획 송신
-    public void SendMyRoundPlan(OppRoundPlan plan)
-    {
-        if (!PhotonNetwork.InRoom) return;
-        string json = JsonUtility.ToJson(plan);
-        object[] content = { json };
-        PhotonNetwork.RaiseEvent((byte)PhotonEventCode.SendRoundPlan, content,
-            new RaiseEventOptions { Receivers = ReceiverGroup.Others },
-            SendOptions.SendReliable);
-    }
-
     //대전 셋팅 준비완료 알림 (Manual = 0, Timeout = 1)
     public void NotifyPlayerReady(int trnIndex, int readyType)
     {
+        if (!GuardSession()) return;
         if (!PhotonNetwork.InRoom) return;
+
         object[] content = { trnIndex, readyType };
         PhotonNetwork.RaiseEvent(
             (byte)PhotonEventCode.PlayerReady,
@@ -349,6 +343,7 @@ public class PhotonController : MonoBehaviourPunCallbacks
     //해당 라운드 종료 알림
     public void NotifyRoundFinished(int trnIndex, int roundIndex)
     {
+        if (!GuardSession()) return;
         if (!PhotonNetwork.InRoom) return;
 
         object[] content = { trnIndex, roundIndex };
@@ -360,6 +355,12 @@ public class PhotonController : MonoBehaviourPunCallbacks
         );
     }
     #endregion
+
+    //Photon 서버 접근 전 구글 로그인 세션 유효성 검증 (내부 공통)
+    private bool GuardSession()
+    {
+        return BackendManager.Instance.EnsureSessionValidForPhoton();
+    }
 
     // ==================================================== 구현 중 =========================================================== //
     // ==================================================== 구현 중 =========================================================== //

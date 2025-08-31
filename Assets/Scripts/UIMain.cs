@@ -19,7 +19,7 @@ public class UIMain : MonoBehaviour
         await loginPopup.ConnectNetwork();
 
         //3. 자동 로그인 시도
-        if (await loginPopup.AttemptAutoLogin()) UIManager.Instance.ShowPopup<UILobbyPopup>("UILobbyPopup");
+        if (await loginPopup.AttemptAutoLogin()) { }
         else UIManager.Instance.ShowPopup<UILoginPopup>("UILoginPopup");
     }
 }

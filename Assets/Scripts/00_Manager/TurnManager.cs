@@ -15,12 +15,10 @@ public class TurnManager : Singleton<TurnManager>
     private bool oppReady = false;  //상대 준비 상태
     private bool roundsStarted = false;  //중복 트리거 방지
     private UIBattleProgress progressUI;
-    private OppRoundPlan? cachedOppPlan;  //수신한 상대의 라운드 계획 캐싱 - 스킬 효과 반영에 사용
     
     public int TurnIndex => trnIndex;
     public bool IsPvP => ControllerRegister.Get<PhotonController>().IsPvPMatch == true;  //PvP 여부
     public bool IsLocalReady => myReady;  //외부(UI)에서 내 준비 상태 조회용
-    public void SetOpponentRoundPlan(OppRoundPlan plan) => cachedOppPlan = plan;
 
     protected override void Awake()
     {
@@ -262,10 +260,6 @@ public class TurnManager : Singleton<TurnManager>
         if (IsPvP)
         {
             progressUI.DisplayMyRoundCards(setting);
-
-            // ===== TODO(PvP): facedown(뒷면) 플레이스홀더가 필요하면!cachedOppPlan.HasValue일 때 채우기. ===== //
-            // ===== TODO(PvP / 전투): 실제 스킬 효과 적용은 라운드 실행 단계에서 cachedOppPlan을 CombatManager에 enqueue 하는 식으로 붙이면 됨. ===== //
-            if (cachedOppPlan.HasValue) progressUI.DisplayOpponentRoundCards(cachedOppPlan.Value);
 
             if (iAmFirst) StartRound();
             else Debug.Log("[Turn] 상대가 선공이므로 대기");

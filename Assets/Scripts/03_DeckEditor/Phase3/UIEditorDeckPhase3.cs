@@ -149,6 +149,9 @@ public class UIEditorDeckPhase3 : UIPopupBase
         DeckPack deckPack = GridManager.Instance.CreateDeckPack(currentDeckName);
         BackendManager.Instance.SaveDeck(deckPack, isNewSave);  //서버 저장
 
+        //세션이 만료된 경우 바로 return
+        if (BackendManager.Instance.IsSuppressAutoLogin()) return;
+
         //UIEditorDeckPhase1에 DeckPack 전달
         var phase1Popup = UIManager.Instance.GetPopup<UIEditorDeckPhase1>("UIEditorDeckPhase1");
         phase1Popup.OnClickSave(deckPack);

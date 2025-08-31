@@ -20,18 +20,20 @@ public class UIEditorDeckPhase1 : UIPopupBase
         btn_back.onClick.AddListener(OnClickBack);
     }
 
-    private void Start()
-    {
-        LoadSavedDecks();  //최초 저장된 덱들을 모두 생성
-    }
-
     private void OnClickBack()
     {
         UIManager.Instance.ShowPopup<UILobbyPopup>("UILobbyPopup");
     }
 
-    private void LoadSavedDecks()
+    public void LoadSavedDecks()
     {
+        //기존 슬롯 전부 제거 (이벤트 누적 방지)
+        ClearDeckContainerImmediate();
+
+        selectedDeck = null;
+        newDeckSlotObj = null;
+
+        //저장된 덱 슬롯 생성
         foreach (var (guid, pack) in BackendManager.Instance.GetSortedDecks())
         {
             GameObject obj = Instantiate(deckPrefab, deckContainer);
@@ -40,6 +42,7 @@ public class UIEditorDeckPhase1 : UIPopupBase
             deck.OnApplyDeck += OnApplyDeck;
         }
 
+        //새 덱 슬롯 보장 및 표시 상태 반영
         EnsureNewDeckSlot();
         ActiveNewDeckSlot();
     }
@@ -130,6 +133,22 @@ public class UIEditorDeckPhase1 : UIPopupBase
     {
         if (newDeckSlotObj != null)
             newDeckSlotObj.SetActive(isEditMode);
+    }
+
+    /// <summary>
+    /// 기존 덱 전부 제거 (이벤트 누적 방지)
+    /// </summary>
+    private void ClearDeckContainerImmediate()
+    {
+        for (int i = deckContainer.childCount - 1; i >= 0; --i)
+        {
+            var child = deckContainer.GetChild(i) as RectTransform;
+            if (!child) continue;
+
+            //Destroy()가 프레임 끝에 호출되므로 deckContainer의 계층에서 분리시켜서 해결
+            child.SetParent(null, false);
+            Destroy(child.gameObject);
+        }
     }
 
     protected override void ResetUI() { }
