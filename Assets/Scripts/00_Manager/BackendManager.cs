@@ -527,5 +527,5 @@ public class BackendManager : Singleton<BackendManager>
     // ====================================== 구현 중 =========================================== //
     // ====================================== 구현 중 =========================================== //
 
-    public const string WEB_CLIENT_ID = "694865506286-g0cf87m84k50f8shbmg33o9mn833nhh8.apps.googleusercontent.com";
+
 }

@@ -78,56 +78,56 @@ public class UILoginPopup : UIPopupBase
         return false;
     }
 
-//    private void TryLogin(string type, bool isAuto)
-//    {
-//        if (!allowLoginButtons)
-//        {
-//            try { LoadingManager.Instance.Hide(); } catch { }
-//            ToastManager.Instance.Show("네트워크 연결 후 다시 시도하세요.", ToastAnchor.Top);
-//            return;
-//        }
+    private void TryLogin(string type, bool isAuto)
+    {
+        if (!allowLoginButtons)
+        {
+            try { LoadingManager.Instance.Hide(); } catch { }
+            ToastManager.Instance.Show("네트워크 연결 후 다시 시도하세요.", ToastAnchor.Top);
+            return;
+        }
 
-//        HideLoginButtons();
-//        string loginText = (isAuto ? "자동 " : "") + (type == "guest" ? "게스트" : "구글") + " 로그인 중...";
-//        LoadingManager.Instance.Show(loginText);
+        HideLoginButtons();
+        string loginText = (isAuto ? "자동 " : "") + (type == "guest" ? "게스트" : "구글") + " 로그인 중...";
+        LoadingManager.Instance.Show(loginText);
 
-//        BackendManager.Instance.OnLoginCompleteCallback = () =>
-//        {
-//            BackendManager.Instance.SetLoginType(type);
-//            BackendManager.Instance.SetAutoGoogleLogin(type == "google" && !isAuto);
-//            HandleLoginSuccess();
-//        };
+        BackendManager.Instance.OnLoginCompleteCallback = () =>
+        {
+            BackendManager.Instance.SetLoginType(type);
+            BackendManager.Instance.SetAutoGoogleLogin(type == "google" && !isAuto);
+            HandleLoginSuccess();
+        };
 
-//        if (type == "guest")
-//        {
-//            BackendManager.Instance.LoginGuest(err =>
-//            {
-//                LoadingManager.Instance.Hide();
-//                Debug.Log($"{loginText} 실패: {err}");
-//                ShowLoginButtons();
-//            });
-//        }
-//        else if (type == "google")
-//        {
-//#if UNITY_ANDROID
-//            TheBackend.ToolKit.GoogleLogin.Android.GoogleLogin((isSuccess, errMsg, token) =>
-//            {
-//                if (!isSuccess)
-//                {
-//                    LoadingManager.Instance.Hide();
-//                    Debug.Log($"구글 로그인 실패: {errMsg}");
-//                    ShowLoginButtons();
-//                    return;
-//                }
-//                BackendManager.Instance.LoginGoogle(true, errMsg, token);
-//            });
-//#else
-//        LoadingManager.Instance.Hide();
-//        Debug.Log("구글 로그인은 Android 환경에서만 지원됩니다.");
-//        ShowLoginButtons();
-//#endif
-//        }
-//    }
+        if (type == "guest")
+        {
+            BackendManager.Instance.LoginGuest(err =>
+            {
+                LoadingManager.Instance.Hide();
+                Debug.Log($"{loginText} 실패: {err}");
+                ShowLoginButtons();
+            });
+        }
+        else if (type == "google")
+        {
+#if UNITY_ANDROID
+            TheBackend.ToolKit.GoogleLogin.Android.GoogleLogin((isSuccess, errMsg, token) =>
+            {
+                if (!isSuccess)
+                {
+                    LoadingManager.Instance.Hide();
+                    Debug.Log($"구글 로그인 실패: {errMsg}");
+                    ShowLoginButtons();
+                    return;
+                }
+                BackendManager.Instance.LoginGoogle(true, errMsg, token);
+            });
+#else
+        LoadingManager.Instance.Hide();
+        Debug.Log("구글 로그인은 Android 환경에서만 지원됩니다.");
+        ShowLoginButtons();
+#endif
+        }
+    }
 
     public void OnClickLogout()
     {
@@ -174,72 +174,5 @@ public class UILoginPopup : UIPopupBase
     // ====================================== 구현 중 =========================================== //
     // ====================================== 구현 중 =========================================== //
 
-    private void TryLogin(string type, bool isAuto)
-    {
-//        if (!allowLoginButtons)
-//        {
-//            try { LoadingManager.Instance.Hide(); } catch { }
-//            ToastManager.Instance.Show("네트워크 연결 후 다시 시도하세요.", ToastAnchor.Top);
-//            return;
-//        }
 
-//        HideLoginButtons();
-//        string loginText = (isAuto ? "자동 " : "") + (type == "guest" ? "게스트" : "구글") + " 로그인 중...";
-//        LoadingManager.Instance.Show(loginText);
-
-//        BackendManager.Instance.OnLoginCompleteCallback = () =>
-//        {
-//            BackendManager.Instance.SetLoginType(type);
-//            BackendManager.Instance.SetAutoGoogleLogin(type == "google" && !isAuto);
-//            HandleLoginSuccess();
-//        };
-
-//        if (type == "guest")
-//        {
-//            BackendManager.Instance.LoginGuest(err =>
-//            {
-//                LoadingManager.Instance.Hide();
-//                Debug.Log($"{loginText} 실패: {err}");
-//                ShowLoginButtons();
-//            });
-//        }
-//        else if (type == "google")
-//        {
-//#if UNITY_ANDROID
-//            // [CHANGED] GPGS 설정
-//            var config = new PlayGamesClientConfiguration.Builder()
-//                .RequestEmail()
-//                .RequestIdToken(BackendManager.WEB_CLIENT_ID) // [ADDED] 뒤끝 검증용 Web Client ID
-//                .Build();
-//            PlayGamesPlatform.InitializeInstance(config);
-//            PlayGamesPlatform.Activate();
-
-//            Social.localUser.Authenticate(success =>
-//            {
-//                if (!success)
-//                {
-//                    LoadingManager.Instance.Hide();
-//                    Debug.Log("구글 로그인 실패");
-//                    ShowLoginButtons();
-//                    return;
-//                }
-
-//                string idToken = PlayGamesPlatform.Instance.GetIdToken();
-//                if (string.IsNullOrEmpty(idToken))
-//                {
-//                    LoadingManager.Instance.Hide();
-//                    ToastManager.Instance.Show("구글 토큰 획득 실패", ToastAnchor.Top);
-//                    ShowLoginButtons();
-//                    return;
-//                }
-
-//                BackendManager.Instance.LoginGoogle(true, null, idToken);
-//            });
-//#else
-//            LoadingManager.Instance.Hide();
-//            Debug.Log("구글 로그인은 Android 환경에서만 지원됩니다.");
-//            ShowLoginButtons();
-//#endif
-//        }
-    }
 }

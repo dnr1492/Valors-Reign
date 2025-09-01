@@ -4,7 +4,6 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using static EnumClass;
-using Cysharp.Threading.Tasks;
 
 public class UILobbyPopup : UIPopupBase
 {
@@ -52,27 +51,27 @@ public class UILobbyPopup : UIPopupBase
         popup.SetEditMode(true);
     }
 
-//    private void OnClickUpgradeToGoogle()
-//    {
-//#if UNITY_ANDROID
-//        LoadingManager.Instance.Show("구글 계정 연동 중...");
-//        TheBackend.ToolKit.GoogleLogin.Android.GoogleLogin((ok, msg, token) =>
-//        {
-//            if (!ok)
-//            {
-//                LoadingManager.Instance.Hide();
-//                ToastManager.Instance.Show("구글 로그인 실패", ToastAnchor.Top);
-//                return;
-//            }
+    private void OnClickUpgradeToGoogle()
+    {
+#if UNITY_ANDROID
+        LoadingManager.Instance.Show("구글 계정 연동 중...");
+        TheBackend.ToolKit.GoogleLogin.Android.GoogleLogin((ok, msg, token) =>
+        {
+            if (!ok)
+            {
+                LoadingManager.Instance.Hide();
+                ToastManager.Instance.Show("구글 로그인 실패", ToastAnchor.Top);
+                return;
+            }
 
-//            bool done = BackendManager.Instance.TryUpgradeGuestToGoogle(token);
-//            LoadingManager.Instance.Hide();
-//            if (done) Init();
-//        });
-//#else
-//    ToastManager.Instance.Show("Android에서만 지원됩니다.", ToastAnchor.Top);
-//#endif
-//    }
+            bool done = BackendManager.Instance.TryUpgradeGuestToGoogle(token);
+            LoadingManager.Instance.Hide();
+            if (done) Init();
+        });
+#else
+    ToastManager.Instance.Show("Android에서만 지원됩니다.", ToastAnchor.Top);
+#endif
+    }
 
     protected override void ResetUI() { }
 
@@ -80,40 +79,5 @@ public class UILobbyPopup : UIPopupBase
     // ====================================== 구현 중 =========================================== //
     // ====================================== 구현 중 =========================================== //
 
-    private void OnClickUpgradeToGoogle()
-    {
-//#if UNITY_ANDROID
-//        LoadingManager.Instance.Show("구글 계정 연동 중...");
-//        var config = new PlayGamesClientConfiguration.Builder()
-//            .RequestEmail()
-//            .RequestIdToken(BackendManager.WEB_CLIENT_ID)
-//            .Build();
-//        PlayGamesPlatform.InitializeInstance(config);
-//        PlayGamesPlatform.Activate();
 
-//        Social.localUser.Authenticate(success =>
-//        {
-//            if (!success)
-//            {
-//                LoadingManager.Instance.Hide();
-//                ToastManager.Instance.Show("구글 로그인 실패", ToastAnchor.Top);
-//                return;
-//            }
-
-//            string idToken = PlayGamesPlatform.Instance.GetIdToken();
-//            if (string.IsNullOrEmpty(idToken))
-//            {
-//                LoadingManager.Instance.Hide();
-//                ToastManager.Instance.Show("구글 토큰 획득 실패", ToastAnchor.Top);
-//                return;
-//            }
-
-//            bool done = BackendManager.Instance.TryUpgradeGuestToGoogle(idToken);
-//            LoadingManager.Instance.Hide();
-//            if (done) Init();
-//        });
-//#else
-//    ToastManager.Instance.Show("Android에서만 지원됩니다.", ToastAnchor.Top);
-//#endif
-    }
 }

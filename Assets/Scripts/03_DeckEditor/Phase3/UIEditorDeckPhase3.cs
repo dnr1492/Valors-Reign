@@ -4,7 +4,6 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using static EnumClass;
-using Cysharp.Threading.Tasks;
 
 public class UIEditorDeckPhase3 : UIPopupBase
 {
